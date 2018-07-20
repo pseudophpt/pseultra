@@ -11,8 +11,8 @@
 
 #define MAGIC 0x95DACFDC
 
-uint64_t checksum_helper (uint64_t op1, uint64_t op2, uint64_t op3);
 void checksum (uint32_t *bcode);
+static inline uint64_t checksum_helper (uint64_t op1, uint64_t op2, uint64_t op3);
 
 int main (int argc, char *argv[]) {
     FILE* rom_file;
@@ -31,6 +31,27 @@ int main (int argc, char *argv[]) {
 
     checksum(&rom_buffer[0x10]); 
 } 
+
+/*
+ * Helper function commonly called during checksum
+ */
+static inline uint64_t checksum_helper (uint64_t op1, uint64_t op2, uint64_t op3) {
+    int high_mult;
+    int low_mult;
+
+    if (op2 == 0) {
+        op2 = op3;
+    }
+
+    low_mult = (op1 * op2) & 0x00000000FFFFFFFF; 
+    high_mult = ((op1 * op2) & 0xFFFFFFFF00000000) >> 32; 
+
+    if (high_mult - low_mult == 0) {
+        return low_mult;
+    }
+
+    else return high_mult - low_mult;
+}
 
 /*
  * Decompiled checksum function 
@@ -171,25 +192,4 @@ void checksum (uint32_t *bcode) {
 
     printf("checksum: \n");
     printf("0x%llx\n", checksum);
-}
-
-/*
- * Helper function commonly called during checksum
- */
-uint64_t checksum_helper (uint64_t op1, uint64_t op2, uint64_t op3) {
-    int high_mult;
-    int low_mult;
-
-    if (op2 == 0) {
-        op2 = op3;
-    }
-
-    low_mult = (op1 * op2) & 0x00000000FFFFFFFF; 
-    high_mult = ((op1 * op2) & 0xFFFFFFFF00000000) >> 32; 
-
-    if (high_mult - low_mult == 0) {
-        return low_mult;
-    }
-
-    else return high_mult - low_mult;
 }
