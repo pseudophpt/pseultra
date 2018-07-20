@@ -230,21 +230,13 @@ void find_collision (uint32_t *bcode, uint64_t desired_checksum, uint16_t starth
     
         uint32_t *frame_word_ptr = &frame[0];
         uint32_t frame_word;
-        
+
+        //First calculate sframe 2 and 3, they are independent and allow for faster checking
         for (uint32_t frame_number = 0; frame_number != 0x10; frame_number ++) {
             // Updates
             frame_word = *frame_word_ptr;
     
-            // Calculations
-            sframe[0] += ((frame_word << (0x20 - frame_word & 0x1f)) | frame_word >> (frame_word & 0x1f));
-    
-            if (frame_word < sframe[0]) {
-                sframe[1] += frame_word;
-            }
-            else {
-                sframe[1] = checksum_helper(sframe[1], frame_word, 0);
-            }
-    
+            // Calculations   
             if (((frame_word & 0x02) >> 1) == (frame_word & 0x01)) {
                 sframe[2] += frame_word;
             }
@@ -261,19 +253,37 @@ void find_collision (uint32_t *bcode, uint64_t desired_checksum, uint16_t starth
     
             frame_word_ptr ++;
         }
-    
-        // combine sframe into checksum
-        uint64_t checksum = sframe[2] ^ sframe[3]; 
-        checksum |= checksum_helper(sframe[0], sframe[1], 0x10) << 32;
-        checksum &= 0x0000ffffffffffff;
 
-        if (checksum == desired_checksum) {
-            printf("COLLISION FOUND! Please notify developers.\n");
-            printf("Starthword: %x\n", starthword);
-            printf("Word: %llx\n", word);
+        
+        // If high part of checksum matches continue to calculate sframe 1 and 0
+        if ((sframe[2] ^ sframe[3]) == (desired_checksum & 0xffffffff)) {
+            uint32_t *frame_word_ptr = &frame[0];
+            
+            for (uint32_t frame_number = 0; frame_number != 0x10; frame_number ++) {
+                frame_word = *frame_word_ptr;
+                
+                sframe[0] += ((frame_word << (0x20 - frame_word & 0x1f)) | frame_word >> (frame_word & 0x1f));
+      
+                if (frame_word < sframe[0]) {
+                    sframe[1] += frame_word;
+                }
+                else {
+                    sframe[1] = checksum_helper(sframe[1], frame_word, 0);
+                }
 
-            return word;
+                frame_word_ptr ++;
+            }
+            
+            // Now check if it matches the checksum
+            if ((checksum_helper(sframe[0], sframe[1], 0x10) & 0xffff) == (desired_checksum >> 32)) {
+                printf("COLLISION FOUND! Please notify developers.\n");
+                printf("Starthword: %x\n", starthword);
+                printf("Word: %llx\n", word);
+                
+                return word;
+            }
         }
+
         
         // End at 0xFFFFFFFF
         if (word == 0xFFFFFFFF) break;
