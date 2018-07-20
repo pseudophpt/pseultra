@@ -15,6 +15,12 @@ void checksum (uint32_t *bcode);
 static inline uint64_t checksum_helper (uint64_t op1, uint64_t op2, uint64_t op3);
 
 int main (int argc, char *argv[]) {
+    // If arguments not adequate
+    if (argc != 4) {
+        printf("Usage: bootcsumr <rom file> <checksum to search for> <starting hword>\n"); 
+        return 0;
+    }
+    
     FILE* rom_file;
 
     uint32_t rom_buffer[0x1000 / sizeof(uint32_t)];
