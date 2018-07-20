@@ -30,7 +30,7 @@ int main (int argc, char *argv[]) {
     }
 
     uint64_t checksum = strtol(argv[2], NULL, 0);
-    uint32_t starthword = strtol(argv[3], NULL, 0);
+    uint16_t starthword = strtol(argv[3], NULL, 0);
 
     find_collision(&rom_buffer[0x10], checksum, starthword);
 } 
