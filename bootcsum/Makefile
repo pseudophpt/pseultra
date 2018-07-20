@@ -18,7 +18,7 @@ OBJCOPY = $(TOOLCHAIN)/objcopy
 INCLUDE = ../headers
 
 # Tool flags
-CC_FLAGS = -O3 -I$(INCLUDE) # Includes
+CC_FLAGS = -Ofast -I$(INCLUDE) # Includes
 
 AS_FLAGS = -I$(INCLUDE) # Includes
 
