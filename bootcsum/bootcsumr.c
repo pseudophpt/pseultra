@@ -263,7 +263,7 @@ void find_collision (uint32_t *bcode, uint64_t desired_checksum, uint16_t starth
 
         if (checksum == desired_checksum) {
             printf("COLLISION FOUND! Please notify developers.\n");
-            printf("Starthword: %llx\n", starthword);
+            printf("Starthword: %x\n", starthword);
             printf("Word: %llx\n", word);
 
             return word;
