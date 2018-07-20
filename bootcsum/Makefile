@@ -1,6 +1,6 @@
 #
-# pseultra/boot/Makefile
-# Bootcode makefile
+# pseultra/bootcsum/Makefile
+# Boot checksum calculator makefile
 # 
 # (C) pseudophpt 2018
 #
