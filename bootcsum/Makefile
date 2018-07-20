@@ -28,10 +28,15 @@ OBJCOPY_FLAGS =
 
 # Files
 APP = bootcsum
+APPR = bootcsumr
 
 APP_SRC = bootcsum.c
+APPR_SRC  = bootcsumr.c
 
-all: $(APP)
+all: $(APP) $(APPR)
 
 $(APP): $(APP_SRC)
+	$(CC) $(CC_FLAGS) -o $@ $<
+
+$(APPR): $(APPR_SRC)
 	$(CC) $(CC_FLAGS) -o $@ $<
