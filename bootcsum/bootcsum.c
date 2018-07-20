@@ -8,9 +8,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-//#include "rom.h"
 
-#define MAGIC 0xD55AA7DC
+#define MAGIC 0x95DACFDC
 
 uint64_t checksum_helper (uint64_t op1, uint64_t op2, uint64_t op3);
 void checksum (uint32_t *bcode);
@@ -46,9 +45,12 @@ void checksum (uint32_t *bcode) {
     uint32_t frame [16];
     uint32_t sframe [4];
 
+    // Calculate magic number
+    uint32_t magic = MAGIC ^ bcode_inst;
+
     // Generate frame. This is done earlier in IPC2
     for (int i = 0; i < 16; i ++) {
-        frame[i] = MAGIC;
+        frame[i] = magic;
     };
 
     // First part of checksum, calculates frame
