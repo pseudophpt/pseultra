@@ -61,6 +61,11 @@ li $t1, 0x00aaaaae
 sw $t1, 0($t0)
 
 # Restore registers
+li $t0, 0x80000300
+sw $s4, 0x00($t0)
+sw $s3, 0x04($t0)
+sw $s5, 0x0c($t0)
+sw $s7, 0x14($t0)
 
 # Jump to ROM
 li $t0, 0x10000000 | KSEG1
