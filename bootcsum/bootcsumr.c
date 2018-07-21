@@ -224,9 +224,10 @@ void find_collision (uint32_t *bcode, uint64_t desired_checksum, uint16_t starth
         // Second part, calculates sframe
         
         // Every value in sframe is initialized to frame[0]
-        for (int i = 0; i < 4; i ++) {
-            sframe[i] = frame[0];
-        }
+        sframe[0] = frame[0];
+        sframe[1] = frame[0];
+        sframe[2] = frame[0];
+        sframe[3] = frame[0];
     
         uint32_t *frame_word_ptr = &frame[0];
         uint32_t frame_word;
@@ -283,10 +284,9 @@ void find_collision (uint32_t *bcode, uint64_t desired_checksum, uint16_t starth
                 return word;
             }
         }
-
         
         // End at 0xFFFFFFFF
-        if (word == 0xFFFFFFFF) break;
+        if (word == 0xFFFFFF) break;
     }
 
 }
