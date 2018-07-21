@@ -19,6 +19,8 @@ mtc0 $zero, Compare # Clear cycle timer compare
 # DMA first megabyte of ROM to 0x400
 li $t1, 0x10000000 | KSEG1
 lw $t0, 8($t1) # Load the boot address from the cartridge header.
+li $t2, 0xFFFFFF
+and $t0, $t0, $t2 # Mask the DRAM address to 24-bit, as per the DMA spec.
 li $t1, PI_DRAM_ADDR_REG | KSEG1
 sw $t0, 0($t1)
 
