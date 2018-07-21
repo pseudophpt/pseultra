@@ -18,9 +18,6 @@ SECTIONS {
 
     .text : {
         boot.o (.text)
-    }
-
-    .data : {
         boot.o (.data)
     }
 

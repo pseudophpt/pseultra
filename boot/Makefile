@@ -42,7 +42,7 @@ clean:
 	rm $(BOOTOBJECT)
 
 $(BOOTFILE): $(BOOTELF)
-	$(OBJCOPY) $(OBJCOPY_FLAGS) -O binary $< $@
+	$(OBJCOPY) $(OBJCOPY_FLAGS) --only-section=.text -O binary $< $@
 
 $(BOOTELF): $(BOOTOBJECT)
 	$(LD) $(LD_FLAGS) -T link.ld
