@@ -8,7 +8,7 @@
 
 ### Prerequisites
 
-To use `pseultra`, you need a native C toolchain, as well as a toolchain for compiling for the MIPS VR4200 architecture. 
+To use `pseultra`, you need a native C toolchain, as well as a toolchain for compiling for the MIPS VR4300 architecture. 
 
 ### Installing
 
