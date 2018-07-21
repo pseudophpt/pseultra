@@ -214,3 +214,11 @@
 
 #define PIF_RAM_START 0x1FC007C0
 #define PIF_RAM_END 0x1FC007FC
+
+/*
+ * Cartridge domains
+ */
+
+#define CART_DOM2_ADDR1 0x05000000
+#define CART_DOM1_ADDR1 0x06000000
+#define CART_DOM1_ADDR2 0x10000000
