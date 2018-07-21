@@ -18,15 +18,15 @@ mtc0 $zero, Compare # Clear cycle timer compare
 
 # DMA first megabyte of ROM to 0x400
 li $t1, PI_DRAM_ADDR_REG | KSEG1
-ori $t0, $zero, 0x400
+ori $t0, $zero, 0x400 # 0x400 in RAM
 sw $t0, 0($t1)
 
 li $t1, PI_CART_ADDR_REG | KSEG1
-li $t0, 0x10001000
+li $t0, 0x10001000 # 0x1000 in ROM
 sw $t0, 0($t1)
 
 li $t1, PI_WR_LEN_REG | KSEG1
-li $t0, 0xFFFFFF
+li $t0, 0xFFFFF # One megabyte
 sw $t0, 0($t1)
 
 # Unmask RCP interrupts
