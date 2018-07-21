@@ -17,8 +17,9 @@ mtc0 $zero, Count # Clear cycle count
 mtc0 $zero, Compare # Clear cycle timer compare
 
 # DMA first megabyte of ROM to 0x400
+li $t1, 0x10000000 | KSEG1
+lw $t0, 8($t1) # Load the boot address from the cartridge header.
 li $t1, PI_DRAM_ADDR_REG | KSEG1
-ori $t0, $zero, 0x400 # 0x400 in RAM
 sw $t0, 0($t1)
 
 li $t1, PI_CART_ADDR_REG | KSEG1
@@ -60,5 +61,6 @@ sw $t1, 0($t0)
 # Restore registers
 
 # Jump to ROM
-li $t0, 0x400 | KSEG1
+li $t0, 0x10000000 | KSEG1
+lw $t0, 8($t0)
 jr $t0
