@@ -22,7 +22,7 @@ ori $t0, $zero, 0x400
 sw $t0, 0($t1)
 
 li $t1, PI_CART_ADDR_REG | KSEG1
-ori $t0, $zero, 0x1000
+li $t0, 0x10001000
 sw $t0, 0($t1)
 
 li $t1, PI_WR_LEN_REG | KSEG1
