@@ -89,6 +89,20 @@ jr $t0
 
 .Stage2Start:
 
+# Clear RSP DMEM and IMEM
+li $t0, SP_DMEM # DMEM
+li $t1, SP_IMEM # IMEM
+li $t2, 0 # Counter
+li $t3, 0x400 # Word limit
+
+.ClearSPMEM:
+sw $zero, 0($t0)
+sw $zero, 0($t1)
+addiu $t0, 4
+addiu $t1, 4
+addiu $t3, 1
+beq $t2, $t3, .ClearSPMEM
+
 # Jump to boot segment
 li $t0, CART_DOM1_ADDR2 | KSEG0
 lw $t0, 8($t0) # Relative offset
