@@ -89,7 +89,7 @@ void find_collision (uint32_t *bcode, uint64_t desired_checksum, uint16_t starth
     };
 
     // Calculate pre-frame
-    for (; loop_count < 0x3ee;) {
+    for (;;) {
         /* Loop start, 11E8 - 11FC */
         prev_inst = bcode_inst;
         bcode_inst = *bcode_inst_ptr;
@@ -124,7 +124,7 @@ void find_collision (uint32_t *bcode, uint64_t desired_checksum, uint16_t starth
 
         preframe[8] = checksum_helper(preframe[8], (bcode_inst << (0x20 - (prev_inst >> 27))) | (bcode_inst >> (prev_inst >> 27)), loop_count);
         
-        if (loop_count == 0x3F0) break;
+        if (loop_count == 0x3ef) break;
 
         uint32_t tmp1 = checksum_helper(preframe[15], (bcode_inst >> (0x20 - (prev_inst >> 27))) | (bcode_inst << (prev_inst >> 27)), loop_count);
         preframe[15] = checksum_helper(
@@ -161,65 +161,68 @@ void find_collision (uint32_t *bcode, uint64_t desired_checksum, uint16_t starth
         bcode_inst_ptr = &bcode[0x3ee];
         bcode_inst = bcode[0x3ed];
 
-        // Now let's see
-        for (;;) {
-            /* Loop start, 11E8 - 11FC */
-            prev_inst = bcode_inst;
-            bcode_inst = *bcode_inst_ptr;
-            loop_count ++;
-            bcode_inst_ptr ++;
-            next_inst = *(bcode_inst_ptr);
+        // Calculate frame
+        // Frame calculations for 0x3ee
+        prev_inst = bcode_inst;
+        bcode_inst = *bcode_inst_ptr;
+        loop_count ++;
+        bcode_inst_ptr ++;
+        next_inst = *(bcode_inst_ptr);
     
-            /*  Main processing */
-            frame[0] += checksum_helper(0x3EF - loop_count, bcode_inst, loop_count);
+        uint32_t tmp1 = checksum_helper(frame[15], (bcode_inst >> (0x20 - (prev_inst >> 27))) | (bcode_inst << (prev_inst >> 27)), loop_count);
+        frame[15] = checksum_helper(
+            tmp1,
+            (next_inst << (bcode_inst >> 27)) | (next_inst >> (0x20 - (bcode_inst >> 27))),
+            loop_count
+        );
     
-            frame[1] = checksum_helper(frame[1], bcode_inst, loop_count);
-            
-            frame[2] ^= bcode_inst;
-            
-            frame[3] += checksum_helper(bcode_inst + 5, 0x6c078965, loop_count);
-            
-            if (prev_inst < bcode_inst) {
-                    frame[9] = checksum_helper(frame[9], bcode_inst, loop_count);
-            }
-            else frame[9] += bcode_inst;
-            
-            frame[4] += ((bcode_inst << (0x20 - (prev_inst & 0x1f))) | (bcode_inst >> (prev_inst & 0x1f)));
-            
-            frame[7] = checksum_helper(frame[7], ((bcode_inst >> (0x20 - (prev_inst & 0x1f))) | (bcode_inst << (prev_inst & 0x1f))), loop_count);
-            
-            if (bcode_inst < frame[6]) {
-                frame[6] = (bcode_inst + loop_count) ^ (frame[3] + frame[6]);
-            }
-            else frame[6] = (frame[4] + bcode_inst) ^ frame[6];
+        uint32_t tmp2 = ((bcode_inst << (0x20 - (prev_inst & 0x1f))) | (bcode_inst >> (prev_inst & 0x1f)));
+        uint32_t tmp3 = checksum_helper(frame[14], tmp2, loop_count); // v0 at 1384
+        uint32_t tmp4 = checksum_helper(tmp3, (next_inst >> (bcode_inst & 0x1f)) | (next_inst << (0x20 - (bcode_inst & 0x1f))), loop_count); // v0 at 13a4
     
-            frame[5] += (bcode_inst >> (0x20 - (prev_inst >> 27))) | (bcode_inst << (prev_inst >> 27));
+        frame[14] = tmp4;
     
-            frame[8] = checksum_helper(frame[8], (bcode_inst << (0x20 - (prev_inst >> 27))) | (bcode_inst >> (prev_inst >> 27)), loop_count);
-            
-            if (loop_count == 0x3F0) break;
+        frame[13] += ((bcode_inst >> (bcode_inst & 0x1f)) | (bcode_inst << (0x20 - (bcode_inst & 0x1f)))) + ((next_inst >> (next_inst & 0x1f)) | (next_inst << (0x20 - (next_inst & 0x1f)))); 
     
-            uint32_t tmp1 = checksum_helper(frame[15], (bcode_inst >> (0x20 - (prev_inst >> 27))) | (bcode_inst << (prev_inst >> 27)), loop_count);
-            frame[15] = checksum_helper(
-                tmp1,
-                (next_inst << (bcode_inst >> 27)) | (next_inst >> (0x20 - (bcode_inst >> 27))),
-                loop_count
-            );
+        frame[10] = checksum_helper(frame[10] + bcode_inst, next_inst, loop_count);
     
-            uint32_t tmp2 = ((bcode_inst << (0x20 - (prev_inst & 0x1f))) | (bcode_inst >> (prev_inst & 0x1f)));
-            uint32_t tmp3 = checksum_helper(frame[14], tmp2, loop_count); // v0 at 1384
-            uint32_t tmp4 = checksum_helper(tmp3, (next_inst >> (bcode_inst & 0x1f)) | (next_inst << (0x20 - (bcode_inst & 0x1f))), loop_count); // v0 at 13a4
+        frame[11] = checksum_helper(frame[11] ^ bcode_inst, next_inst, loop_count);
     
-            frame[14] = tmp4;
+        frame[12] += (frame[8] ^ bcode_inst);
+ 
+        prev_inst = bcode_inst;
+        bcode_inst = *bcode_inst_ptr;
+        loop_count ++;
+        bcode_inst_ptr ++;
+        next_inst = *(bcode_inst_ptr);
+        
+        // Calculations for 0x3ef
+        frame[0] += checksum_helper(0x3EF - loop_count, bcode_inst, loop_count);
     
-            frame[13] += ((bcode_inst >> (bcode_inst & 0x1f)) | (bcode_inst << (0x20 - (bcode_inst & 0x1f)))) + ((next_inst >> (next_inst & 0x1f)) | (next_inst << (0x20 - (next_inst & 0x1f)))); 
-    
-            frame[10] = checksum_helper(frame[10] + bcode_inst, next_inst, loop_count);
-    
-            frame[11] = checksum_helper(frame[11] ^ bcode_inst, next_inst, loop_count);
-    
-            frame[12] += (frame[8] ^ bcode_inst);
+        frame[1] = checksum_helper(frame[1], bcode_inst, loop_count);
+        
+        frame[2] ^= bcode_inst;
+        
+        frame[3] += checksum_helper(bcode_inst + 5, 0x6c078965, loop_count);
+        
+        if (prev_inst < bcode_inst) {
+                frame[9] = checksum_helper(frame[9], bcode_inst, loop_count);
         }
+        else frame[9] += bcode_inst;
+        
+        frame[4] += ((bcode_inst << (0x20 - (prev_inst & 0x1f))) | (bcode_inst >> (prev_inst & 0x1f)));
+        
+        frame[7] = checksum_helper(frame[7], ((bcode_inst >> (0x20 - (prev_inst & 0x1f))) | (bcode_inst << (prev_inst & 0x1f))), loop_count);
+        
+        if (bcode_inst < frame[6]) {
+            frame[6] = (bcode_inst + loop_count) ^ (frame[3] + frame[6]);
+        }
+        else frame[6] = (frame[4] + bcode_inst) ^ frame[6];
+    
+        frame[5] += (bcode_inst >> (0x20 - (prev_inst >> 27))) | (bcode_inst << (prev_inst >> 27));
+    
+        frame[8] = checksum_helper(frame[8], (bcode_inst << (0x20 - (prev_inst >> 27))) | (bcode_inst >> (prev_inst >> 27)), loop_count);
+        
 
         // Second part, calculates sframe
         

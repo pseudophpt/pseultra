@@ -18,7 +18,7 @@ int main (int argc, char *argv[]) {
     // If arguments not adequate
     if (argc != 2) {
         printf("Usage: bootcsum <rom file>\n"); 
-        return 0;
+        return -1;
     }
     
     FILE* rom_file;
@@ -93,7 +93,7 @@ void checksum (uint32_t *bcode) {
         frame[0] += checksum_helper(0x3EF - loop_count, bcode_inst, loop_count);
 
         frame[1] = checksum_helper(frame[1], bcode_inst, loop_count);
-        
+       
         frame[2] ^= bcode_inst;
         
         frame[3] += checksum_helper(bcode_inst + 5, 0x6c078965, loop_count);
