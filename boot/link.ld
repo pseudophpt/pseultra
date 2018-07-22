@@ -14,9 +14,7 @@ OUTPUT(
 )
 
 SECTIONS {
-    . = 0xA4000000; /* SP_DMEM in KSEG1 */    
-
-    .text : {
+    .text 0xA4000000 : {
         boot.o (.text)
         boot.o (.data)
     }
