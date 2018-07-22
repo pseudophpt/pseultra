@@ -8,13 +8,16 @@
 
 ### Prerequisites
 
-To use `pseultra`, you need a native C toolchain, as well as a toolchain for compiling for the MIPS VR4300 architecture. 
+To use `pseultra`, you need a native C toolchain, as well as a toolchain for compiling for the MIPS VR4300 architecture 
 
 ### Installing
 
 To install `pseultra`, just `make` inside the root directory, or to install individual tools, `make` inside their respective directories
 
+## Versioning
+
+`pseultra` uses SemVer as a versioning system
+
 ## License
 
 This project is licensed under the BSD-3-Clause License - see the LICENSE.md file for details
-
