@@ -107,7 +107,7 @@ sw $zero, 0($t1)
 addiu $t0, 4
 addiu $t1, 4
 addiu $t2, 1
-beq $t2, $t3, .ClearSPMEM
+bne $t2, $t3, .ClearSPMEM
 
 # Jump to boot segment
 li $t0, CART_DOM1_ADDR2 | KSEG0
