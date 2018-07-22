@@ -26,7 +26,7 @@ lw $t2, 0x14($t4) # Length of boot segment
 addiu $t2, -1
 
 li $t1, PI_DRAM_ADDR_REG | KSEG1
-ori $t0, $zero, 0x1000
+li $t0, CART_DOM1_ADDR2 | 0x1000
 sw $t0, 0($t1) # Load at 0x1000
 
 li $t1, PI_CART_ADDR_REG | KSEG1
