@@ -5,8 +5,19 @@
 # (C) pseudophpt 2018
 #
 
-# Native toolchain
+ifdef SystemRoot
+# Windows
+TOOLCHAIN := C:\gcc\bin
+# FIXPATH = $(subst /,\,$1)
+RM = del /Q
+else
+# Linux
 TOOLCHAIN := /usr/bin
+# FIXPATH = $1
+RM = rm -f
+endif
+
+# Native toolchain
 
 # Tools
 CC = $(TOOLCHAIN)/gcc
@@ -40,3 +51,11 @@ $(APP): $(APP_SRC)
 
 $(APPR): $(APPR_SRC)
 	$(CC) $(CC_FLAGS) -o $@ $<
+
+#
+# Clean project target.
+#
+.PHONY: clean
+clean:
+	@echo "Cleaning bootcsum..."
+	@$(RM) bootcsum bootcsumr bootcsum.exe bootcsumr.exe
