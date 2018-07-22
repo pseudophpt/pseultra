@@ -16,7 +16,7 @@ static inline uint64_t checksum_helper (uint64_t op1, uint64_t op2, uint64_t op3
 
 int main (int argc, char *argv[]) {
     // If arguments not adequate
-    if (argc != 2) {
+    if (argc < 2) {
         printf("Usage: bootcsum <rom file>\n"); 
         return -1;
     }
