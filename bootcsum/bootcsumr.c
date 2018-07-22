@@ -11,7 +11,7 @@
 
 #define MAGIC 0x95DACFDC
 
-void checksum (uint32_t *bcode);
+void find_collision (uint32_t *bcode, uint64_t desired_checksum, uint16_t starthword);
 static inline uint64_t checksum_helper (uint64_t op1, uint64_t op2, uint64_t op3);
 
 int main (int argc, char *argv[]) {
@@ -39,6 +39,8 @@ int main (int argc, char *argv[]) {
     uint16_t starthword = strtol(argv[3], NULL, 0);
 
     find_collision(&rom_buffer[0x10], checksum, starthword);
+
+    return 0;
 } 
 
 /*
@@ -156,18 +158,12 @@ void find_collision (uint32_t *bcode, uint64_t desired_checksum, uint16_t starth
         // Write word to end of bcode
         bcode[0x3ef] = word;
 
-        // Restore variables
-        loop_count = 0x3ee;
-        bcode_inst_ptr = &bcode[0x3ee];
-        bcode_inst = bcode[0x3ed];
-
         // Calculate frame
         // Frame calculations for 0x3ee
-        prev_inst = bcode_inst;
-        bcode_inst = *bcode_inst_ptr;
-        loop_count ++;
-        bcode_inst_ptr ++;
-        next_inst = *(bcode_inst_ptr);
+        loop_count = 0x3ef;
+        bcode_inst = bcode[0x3ee];
+        prev_inst = bcode[0x3ed];
+        next_inst = word;
     
         uint32_t tmp1 = checksum_helper(frame[15], (bcode_inst >> (0x20 - (prev_inst >> 27))) | (bcode_inst << (prev_inst >> 27)), loop_count);
         frame[15] = checksum_helper(
@@ -189,12 +185,10 @@ void find_collision (uint32_t *bcode, uint64_t desired_checksum, uint16_t starth
         frame[11] = checksum_helper(frame[11] ^ bcode_inst, next_inst, loop_count);
     
         frame[12] += (frame[8] ^ bcode_inst);
- 
+    
         prev_inst = bcode_inst;
-        bcode_inst = *bcode_inst_ptr;
-        loop_count ++;
-        bcode_inst_ptr ++;
-        next_inst = *(bcode_inst_ptr);
+        bcode_inst = next_inst;
+        loop_count = 0x3f0;
         
         // Calculations for 0x3ef
         frame[0] += checksum_helper(0x3EF - loop_count, bcode_inst, loop_count);
@@ -217,7 +211,7 @@ void find_collision (uint32_t *bcode, uint64_t desired_checksum, uint16_t starth
         if (bcode_inst < frame[6]) {
             frame[6] = (bcode_inst + loop_count) ^ (frame[3] + frame[6]);
         }
-        else frame[6] = (frame[4] + bcode_inst) ^ frame[6];
+        else frame[6] ^= (frame[4] + bcode_inst);
     
         frame[5] += (bcode_inst >> (0x20 - (prev_inst >> 27))) | (bcode_inst << (prev_inst >> 27));
     
@@ -283,13 +277,13 @@ void find_collision (uint32_t *bcode, uint64_t desired_checksum, uint16_t starth
                 printf("COLLISION FOUND! Please notify developers.\n");
                 printf("Starthword: %x\n", starthword);
                 printf("Word: %llx\n", word);
-                
-                return word;
+            
+                return;
             }
         }
         
         // End at 0xFFFFFFFF
-        if (word == 0xFFFFFF) break;
+        if (word == 0xFFFFFFFF) break;
     }
 
 }
