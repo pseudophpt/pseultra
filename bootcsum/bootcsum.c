@@ -186,16 +186,5 @@ void checksum (uint32_t *bcode) {
     checksum |= checksum_helper(sframe[0], sframe[1], 0x10) << 32;
     checksum &= 0x0000ffffffffffff;
 
-    printf("frame: \n");
-    for (int i = 0; i < 16; i ++) {
-        printf("%#010x\n", frame[i]);
-    }
-
-    printf("sframe: \n");
-    for (int i = 0; i < 4; i ++) {
-        printf("%#010x\n", sframe[i]);
-    }
-
-    printf("checksum: \n");
     printf("0x%llx\n", checksum);
 }
