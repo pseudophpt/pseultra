@@ -2,7 +2,7 @@
 # pseultra/bootcsum/Makefile
 # Boot checksum calculator makefile
 # 
-# (C) pseudophpt 2018
+# (C) pseudophpt, fraser 2018
 #
 
 ifdef SystemRoot
