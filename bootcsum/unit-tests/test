@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Check each bootcode example
+if bootcsum/bootcsum bootcsum/unit-tests/test_bootcode1 0xb4aa64f445dc
+then
+    echo "Passed bootcode bootcsum/unit-tests/ 1"
+else
+    exit -1
+fi
+if bootcsum/bootcsum bootcsum/unit-tests/test_bootcode2 0x52e8842c5b97
+then
+    echo "Passed bootcode bootcsum/unit-tests/ 2"
+else
+    exit -1
+fi
+if bootcsum/bootcsum bootcsum/unit-tests/test_bootcode3 0xbd45fa7c7b2e
+then
+    echo "Passed bootcode bootcsum/unit-tests/ 3"
+else
+    exit -1
+fi
+if bootcsum/bootcsum bootcsum/unit-tests/test_bootcode4 0xb24277a7ad3e
+then
+    echo "Passed bootcode bootcsum/unit-tests/ 4"
+else
+    exit -1
+fi
+
+exit 0

@@ -1,0 +1,4 @@
+language: c
+script:
+    make
+    bootcsum/unit-tests/test
