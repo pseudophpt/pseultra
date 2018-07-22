@@ -106,7 +106,7 @@ sw $zero, 0($t0)
 sw $zero, 0($t1)
 addiu $t0, 4
 addiu $t1, 4
-addiu $t3, 1
+addiu $t2, 1
 beq $t2, $t3, .ClearSPMEM
 
 # Jump to boot segment
