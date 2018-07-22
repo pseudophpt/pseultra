@@ -11,13 +11,13 @@
 
 #define MAGIC 0x95DACFDC
 
-void checksum (uint32_t *bcode);
+uint64_t calculate_checksum (uint32_t *bcode);
 static inline uint64_t checksum_helper (uint64_t op1, uint64_t op2, uint64_t op3);
 
 int main (int argc, char *argv[]) {
     // If arguments not adequate
     if (argc < 2) {
-        printf("Usage: bootcsum <rom file>\n"); 
+        printf("Usage: bootcsum <rom file> [<expected checksum>]\n"); 
         return -1;
     }
     
@@ -35,7 +35,30 @@ int main (int argc, char *argv[]) {
         rom_buffer[i]  = be;
     }
 
-    checksum(&rom_buffer[0x10]); 
+    // Verification or calculation
+    if (argc == 2) {
+        // Calculation
+        uint64_t checksum = calculate_checksum(&rom_buffer[0x10]);
+
+        printf("0x%llx\n", checksum);
+        return 0;
+    }
+    
+    if (argc == 3) {
+        // Verification
+        uint64_t expected_checksum = strtol(argv[2], NULL, 0);
+        uint64_t checksum = calculate_checksum(&rom_buffer[0x10]); 
+       
+        if (checksum == expected_checksum) {
+            printf("Correct\n");
+            return 0;
+        }
+        else {
+            printf("Incorrect:\n");
+            printf("Expected 0x%llx, got 0x%llx\n", expected_checksum, checksum);
+            return -1;
+        }
+    }
 } 
 
 /*
@@ -62,7 +85,7 @@ static inline uint64_t checksum_helper (uint64_t op1, uint64_t op2, uint64_t op3
 /*
  * Decompiled checksum function 
  */ 
-void checksum (uint32_t *bcode) {
+uint64_t calculate_checksum (uint32_t *bcode) {
     uint32_t *bcode_inst_ptr = bcode;
     uint32_t loop_count = 0;
     uint32_t bcode_inst = *bcode_inst_ptr;
@@ -186,5 +209,5 @@ void checksum (uint32_t *bcode) {
     checksum |= checksum_helper(sframe[0], sframe[1], 0x10) << 32;
     checksum &= 0x0000ffffffffffff;
 
-    printf("0x%llx\n", checksum);
+    return checksum;
 }
