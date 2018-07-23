@@ -30,6 +30,7 @@ typedef struct segment_t {
 void process_specfile (FILE *file);
 void calculate_rom_layout ();
 void generate_linker_script(FILE *lscript);
+void make_rom (char *rom_name, char *bootcode);
 
 section create_section (char *filename);
 segment create_segment (char *name);
