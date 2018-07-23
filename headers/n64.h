@@ -14,6 +14,8 @@
  * ROM Header Format
  */
 
+#define PI_VALUES 0x80371240
+
 typedef struct __attribute__((__packed__)) rom_header_t {
     uint32_t pi_regs;
     uint32_t clock_rate;
