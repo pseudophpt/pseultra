@@ -111,9 +111,7 @@ bne $t2, $t3, .ClearSPMEM
 
 # Jump to boot segment
 li $t0, CART_DOM1_ADDR2 | KSEG0
-lw $t0, 8($t0) # Relative offset
-li $t1, KSEG0 | 0x1000
-addu $t0, $t1 # Add KSEG0
+lw $t0, 8($t0) # Offset
 jr $t0
 
 Stage2End:
