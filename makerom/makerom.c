@@ -45,8 +45,8 @@ int main (int argc, char *argv[]) {
     fclose(lscript);
 
     // Link
-    char *link_command = malloc(sizeof(char) * strlen(argv[2]) + 10);
-    sprintf(link_command, "%s -T link.ld", argv[2]);
+    char *link_command = malloc(sizeof(char) * strlen(argv[2]) + 15);
+    sprintf(link_command, "%s -T link.ld -G0", argv[2]);
     system(link_command);
 }
 
@@ -163,6 +163,16 @@ void generate_linker_script (FILE *lscript) {
 
    }
 
+    // Discard symbols
+    fprintf(lscript, "\t/DISCARD/ : {\n");
+
+    fprintf(lscript, "\t\t* (.MIPS.abiflags)\n");
+    fprintf(lscript, "\t\t* (.pdr)\n");
+    fprintf(lscript, "\t\t* (.comment)\n");
+    fprintf(lscript, "\t\t* (.reginfo)\n");
+    fprintf(lscript, "\t\t* (.gnu.attributes)\n");
+
+    fprintf(lscript, "\t}\n");
     fprintf(lscript, "}\n");
 }
 
