@@ -117,3 +117,5 @@ addu $t0, $t1 # Add KSEG0
 jr $t0
 
 Stage2End:
+
+.org 0x1000
