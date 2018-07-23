@@ -18,8 +18,8 @@ int main (int argc, char *argv[]) {
     FILE* file;
     FILE *lscript;
 
-    if (argc != 3) {
-        printf("Usage: makerom <spec file> <output>\n");
+    if (argc != 4) {
+        printf("Usage: makerom <spec file> <ld path> <output>\n");
         return 0;
     }
 
@@ -29,6 +29,9 @@ int main (int argc, char *argv[]) {
     // Process it
     process_specfile(file);
     
+    // Close it
+    fclose(file);
+
     // Generate rom layout
     calculate_rom_layout();
 
@@ -37,6 +40,14 @@ int main (int argc, char *argv[]) {
 
     // Generate it
     generate_linker_script(lscript);
+
+    // Close it
+    fclose(lscript);
+
+    // Link
+    char *link_command = malloc(sizeof(char) * strlen(argv[2]) + 10);
+    sprintf(link_command, "%s -T link.ld", argv[2]);
+    system(link_command);
 }
 
 void process_specfile (FILE *file) {
@@ -117,7 +128,7 @@ void generate_linker_script (FILE *lscript) {
         fprintf(lscript, "\t_%sSegmentRomEnd = 0x%x;\n\n", seg.name, seg.rom_end);
     
         // Text and data section
-        fprintf(lscript, "\t_%sSegmentTextStart = .;\n\n", seg.name);
+        fprintf(lscript, "\t_%sSegmentTextStart = ABSOLUTE(.);\n\n", seg.name);
 
         fprintf(lscript, "\t.%s.text : {\n", seg.name);
 
@@ -125,15 +136,16 @@ void generate_linker_script (FILE *lscript) {
         for (int j = 0; j < seg.section_count; j ++) {
             section sec = seg.sections[j];
 
-            fprintf(lscript, "\t\t%s (.text, .data)\n", sec.filename);
+            fprintf(lscript, "\t\t%s (.text)\n", sec.filename);
+            fprintf(lscript, "\t\t%s (.data)\n", sec.filename);
         }
 
         fprintf(lscript, "\t}\n\n");
 
-        fprintf(lscript, "\t_%sSegmentTextEnd = .;\n\n", seg.name);
+        fprintf(lscript, "\t_%sSegmentTextEnd = ABSOLUTE(.);\n\n", seg.name);
 
         // BSS section 
-        fprintf(lscript, "\t_%sSegmentBssStart = .;\n\n", seg.name);
+        fprintf(lscript, "\t_%sSegmentBssStart = ABSOLUTE(.);\n\n", seg.name);
 
         fprintf(lscript, "\t.%s.bss : {\n", seg.name);
 
@@ -141,12 +153,13 @@ void generate_linker_script (FILE *lscript) {
         for (int j = 0; j < seg.section_count; j ++) {
             section sec = seg.sections[j];
 
-            fprintf(lscript, "\t\t%s (.bss, COMMON)\n", sec.filename);
+            fprintf(lscript, "\t\t%s (.bss)\n", sec.filename);
+            fprintf(lscript, "\t\t%s (COMMON)\n", sec.filename);
         }
 
         fprintf(lscript, "\t}\n\n");
 
-        fprintf(lscript, "\t_%sSegmentBssEnd = .;\n\n", seg.name);
+        fprintf(lscript, "\t_%sSegmentBssEnd = ABSOLUTE(.);\n\n", seg.name);
 
    }
 
