@@ -3,6 +3,7 @@
 
 - `boot`: Custom IPL2 bootcode that can be implemented in replacement of Nintendo's original bootcode
 - `bootcsum`: Tools for calculating and finding collisions for the checksum used on the IPL3 bootcode
+- `makerom`: Tool to create an N64 rom file given object files
 
 ## Getting started
 

@@ -2,3 +2,4 @@ language: c
 script:
  - make -C bootcsum
  - bootcsum/unit-tests/test
+ - make -C makerom

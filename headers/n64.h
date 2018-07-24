@@ -5,37 +5,32 @@
  * (C) pseudophpt 2018
  */
 
-/*
- * Coprocessor 0 (COP0) Registers
+#ifndef N64_H_GUARD
+#define N64_H_GUARD
+
+#include <stdint.h>
+
+/* 
+ * ROM Header Format
  */
 
-#define Index, 0
-#define Random, 1
-#define EntryLo0, 2
-#define EntryLo1, 3
-#define Context, 4
-#define PageMask, 5
-#define Wired,	6
-// 7 reserved
-#define BadVAddr, 8
-#define Count, 9
-#define EntryHi, 10
-#define Compare, 11
-#define Status, 12
-#define Cause, 13
-#define EPC, 14
-#define PRId, 15
-#define Config, 16
-#define LLAddr, 17
-#define WatchLo, 18
-#define WatchHi, 19
-#define XContext, 20
-// 21 - 26 reserved
-#define CacheErr, 27
-#define TagLo, 28
-#define TagHi, 29
-#define ErrorEPC, 30
-// 31 Reserved
+#define PI_VALUES 0x80371240
+
+typedef struct __attribute__((__packed__)) rom_header_t {
+    uint32_t pi_regs;
+    uint32_t clock_rate;
+    uint32_t boot_address;
+    uint32_t release;
+    uint32_t rom_start;
+    uint32_t rom_length;
+    uint32_t padding [2];
+    char image_name [0x14];
+    uint8_t padding2 [7];
+    uint8_t manufacturer_id;
+    uint16_t cart_id;
+    uint8_t country;
+    uint8_t padding3;
+} rom_header;
 
 /*
  * Memory segments
@@ -222,3 +217,5 @@
 #define CART_DOM2_ADDR1 0x05000000
 #define CART_DOM1_ADDR1 0x06000000
 #define CART_DOM1_ADDR2 0x10000000
+
+#endif
