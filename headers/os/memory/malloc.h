@@ -5,8 +5,8 @@
  * (C) pseudophpt 2018 
  */
 
-#ifndef MALLOC_H_GUARD
-#define MALLOC_H_GUARD
+#ifndef OS_MEMORY_MALLOC_H_GUARD
+#define OS_MEMORY_MALLOC_H_GUARD
 
 // Memory allocation linked list
 struct HeapLink_t {
