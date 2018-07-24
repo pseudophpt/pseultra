@@ -1,6 +1,6 @@
 /*
- * pseultra/boot/boot.s
- * Bootcode
+ * pseultra/os/memory/malloc.c
+ * Memory allocation routines
  * 
  * (C) pseudophpt 2018 
  */
