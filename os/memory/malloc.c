@@ -10,7 +10,7 @@
 /* Initializes heap */
 void osInitHeap (void *heap, int heap_size) {
 	// Beginning of heap is a heap link
-	HeapLink *initial_header = (HeapLink *)heap;
+	OSHeapLink *initial_header = (OSHeapLink *)heap;
 
 	// Heap link has no previous or next links
 	initial_header->prev = NULL;
@@ -24,8 +24,8 @@ void osInitHeap (void *heap, int heap_size) {
 /* Allocates memory from the heap */
 void *osMalloc (int size, void *heap) {
 	// Beginning of heap is a heap link
-	HeapLink *initial_header = (HeapLink *)heap;
-	HeapLink *current_header = initial_header;
+	OSHeapLink *initial_header = (OSHeapLink *)heap;
+	OSHeapLink *current_header = initial_header;
 
 	int size_with_head = size + HEAP_HEAD_SIZE;
 
@@ -34,7 +34,7 @@ void *osMalloc (int size, void *heap) {
 		// Found open area
 		if (size_with_head <= current_header->size && current_header->flags == ALLOC_FREE) {
 			// New header
-			HeapLink *new_header = (HeapLink *)(((u32)current_header) + size_with_head);
+			OSHeapLink *new_header = (OSHeapLink *)(((u32)current_header) + size_with_head);
 
 			// Fill with correct information
 			new_header->prev = current_header;
@@ -65,7 +65,7 @@ void *osMalloc (int size, void *heap) {
 }
 
 void osFree (void *region) {
-	HeapLink *region_header = ((HeapLink *)region) - 1;
+	OSHeapLink *region_header = ((OSHeapLink *)region) - 1;
 
 	// Regions before and ahead exist and are both free
 	if ((region_header->prev != NULL && region_header->prev->flags == ALLOC_FREE)
