@@ -52,5 +52,5 @@ $(APP): $(APP_SRC)
 #
 .PHONY: clean
 clean:
-	@echo "Cleaning bootcsum..."
-	@$(RM) bootcsum bootcsumr bootcsum.exe bootcsumr.exe
+	@echo "Cleaning makerom..."
+	@$(RM) makerom makerom.exe
