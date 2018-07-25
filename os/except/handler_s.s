@@ -7,9 +7,14 @@
 
 .include "n64.s.h"
 
+.global __osHandlerStart
+.global __osHandlerEnd
+.global __osHandleException
+
 __osHandlerStart:
 
-li $k0, __osHandleException
+lui $k0, %hi(__osHandleException)
+addiu $k0, %lo(__osHandleException)
 jr $k0
 
 __osHandlerEnd:

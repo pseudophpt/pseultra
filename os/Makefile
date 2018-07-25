@@ -21,7 +21,7 @@ INCLUDE = ../headers
 # Tool flags
 CC_FLAGS = -I$(INCLUDE) -G0 # Includes, no .s* 
 
-AS_FLAGS = -32 -EB -I$(INCLUDE) # Includes # Big endian
+AS_FLAGS = -G0 -32 -EB -I$(INCLUDE) # Includes # Big endian
 
 LD_FLAGS = -G0 # No .s*
 

@@ -10,16 +10,18 @@
 void osCopyMemory (void *dest, void *src, int size) {
     while (size > 0) {
         // Must do byte write
-        if ((((u32)src & 2) == 1) || ((size & 2) == 1)) {
+        if ((((u32)src % 2) == 1) || ((size % 2) == 1)) {
             *(u8 *)dest = *(u8 *)src;
             src = (void *)((u8 *)src + 1);
+            dest = (void *)((u8 *)dest + 1);
             size --;
             continue;
         }
         // Must do hword write
-        else if ((((u32)src & 4) == 2) || ((size & 4) == 2)) {
+        else if ((((u32)src % 4) == 2) || ((size % 4) == 2)) {
             *(u16 *)dest = *(u16 *)src;
             src = (void *)((u16 *)src + 1);
+            dest = (void *)((u16 *)dest + 1);
             size -= 2;
             continue;
         }
@@ -27,6 +29,7 @@ void osCopyMemory (void *dest, void *src, int size) {
         else {
             *(u32 *)dest = *(u32 *)src;
             src = (void *)((u32 *)src + 1);
+            dest = (void *)((u32 *)dest + 1);
             size -= 4;
             continue;
         }
