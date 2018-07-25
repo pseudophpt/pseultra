@@ -23,6 +23,9 @@ typedef signed long s32;
 // Null
 #define NULL ((void *) 0)
 
+// Default stack size
+#define OS_STACK_SIZE 0x1000
+
 #include <os/memory.h>
 #include <os/except.h>
 
