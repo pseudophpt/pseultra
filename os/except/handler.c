@@ -10,7 +10,7 @@
 extern u32 __osHandlerStart;
 extern u32 __osHandlerEnd;
 
-void osInitExceptions (void) {
+void __osInitExceptions (void) {
     // Install exception handler for the three non-NMI exceptions
     int x = __osHandlerStart;
 

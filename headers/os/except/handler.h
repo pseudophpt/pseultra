@@ -8,7 +8,4 @@
 #ifndef OS_EXCEPT_HANDLER_H_GUARD
 #define OS_EXCEPT_HANDLER_H_GUARD
 
-// Functions
-void osInitExceptions (void); 
-
 #endif
