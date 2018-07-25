@@ -22,5 +22,6 @@ typedef signed long s32;
 #define NULL ((void *) 0)
 
 #include <os/memory.h>
+#include <os/except.h>
 
 #endif

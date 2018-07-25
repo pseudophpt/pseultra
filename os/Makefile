@@ -21,7 +21,7 @@ INCLUDE = ../headers
 # Tool flags
 CC_FLAGS = -I$(INCLUDE) -G0 # Includes, no .s* 
 
-AS_FLAGS = -EB -I$(INCLUDE) # Includes # Big endian
+AS_FLAGS = -32 -EB -I$(INCLUDE) # Includes # Big endian
 
 LD_FLAGS = -G0 # No .s*
 
@@ -30,18 +30,24 @@ AR_FLAGS =
 # Files
 ARCHIVE = libpseultra.a
 
-OS_SRCS = $(wildcard memory/*.c)
+OS_SRCS = $(wildcard */*.c)
+OS_ASMS = $(wildcard */*.s)
 
-OS_OBJS = $(patsubst %.c, %.o, $(OS_SRCS))
+OS_OBJS = $(patsubst %.c, %.o, $(OS_SRCS)) $(patsubst %.s, %.o, $(OS_ASMS))
 
 all: $(ARCHIVE)
 
 $(ARCHIVE): $(OS_OBJS)
 	$(AR) rcs $@ $^
 
-$(OS_OBJS): $(OS_SRCS)
-	$(foreach src, $^, \
+$(OS_OBJS): $(OS_SRCS) $(OS_ASMS)
+	$(foreach src, $(OS_SRCS), \
 		$(CC) $(CC_FLAGS) -c \
 		-o $(patsubst %.c, %.o, $(src)) \
 		$(src); \
+	)	
+	$(foreach asm, $(OS_ASMS), \
+		$(AS) $(AS_FLAGS) \
+		-o $(patsubst %.s, %.o, $(asm)) \
+		$(asm); \
 	)

@@ -6,3 +6,4 @@
  */
 
 #include <os/memory/malloc.h>
+#include <os/memory/memcpy.h>
