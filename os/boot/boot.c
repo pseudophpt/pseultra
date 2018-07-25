@@ -1,5 +1,5 @@
 /*
- * pseultra/os/boot/boot_s.s
+ * pseultra/os/boot/boot.c
  * OS boot code
  * 
  * (C) pseudophpt 2018 
