@@ -33,6 +33,15 @@ typedef struct __attribute__((__packed__)) rom_header_t {
 } rom_header;
 
 /*
+ * Interrupt vectors
+ */
+
+#define INT_VEC_NMI 0xBFC00000
+#define INT_VEC_TLB_MISS 0x80000000
+#define INT_VEC_XTLB_MISS 0x80000080
+#define INT_VEC_GENERAL 0x80000180
+
+/*
  * Memory segments
  */
 
