@@ -1,4 +1,4 @@
-# pseultra [![Build Status](https://travis-ci.org/pseudophpt/pseultra.svg?branch=add-os)](https://travis-ci.org/pseudophpt/pseultra) ![Download total](https://img.shields.io/github/downloads/pseudophpt/pseultra/total.svg) ![Contributors](https://img.shields.io/github/contributors/pseudophpt/pseultra.svg) ![License](https://img.shields.io/github/license/pseudophpt/pseultra.svg)
+# pseultra [![Build Status](https://travis-ci.org/pseudophpt/pseultra.svg?branch=master)](https://travis-ci.org/pseudophpt/pseultra) ![Download total](https://img.shields.io/github/downloads/pseudophpt/pseultra/total.svg) ![Contributors](https://img.shields.io/github/contributors/pseudophpt/pseultra.svg) ![License](https://img.shields.io/github/license/pseudophpt/pseultra.svg)
 `pseultra` is a collection of tools used to develop software for the N64 that is simple to use, extensive in nature, and does not infringe the copyright of Nintendo's intellectual property. Currently, pseultra comes with the following tools:
 
 - `boot`: Custom IPL2 bootcode that can be implemented in replacement of Nintendo's original bootcode
