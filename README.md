@@ -19,6 +19,16 @@ To install `pseultra`, just `make` inside the root directory, or to install indi
 
 To test `pseultra`, first make the tool you'd like to test from the root directory using `make -C <tool_name>`, and then test it from the root directory with `<tool_name>/unit-tests/test`
 
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) details on our code of conduct, and the process for submitting pull requests to us.
+
+## Authors
+
+- **pseudophpt**
+
+See also the list of [contributors](https://github.com/pseudophpt/pseultra/graphs/contributors) who participated in this project.
+
 ## Versioning
 
 `pseultra` uses SemVer as a versioning system
@@ -26,3 +36,9 @@ To test `pseultra`, first make the tool you'd like to test from the root directo
 ## License
 
 This project is licensed under the BSD-3-Clause License - see the LICENSE.md file for details
+
+## Acknowledgements
+
+- **Nabile Rahmani** and **fraser** for their help with regards to various PIF ROM related questions
+- **glankk** for helping me with general N64 and `gcc` related questions
+
