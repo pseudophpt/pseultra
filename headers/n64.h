@@ -33,13 +33,58 @@ typedef struct __attribute__((__packed__)) rom_header_t {
 } rom_header;
 
 /*
- * Interrupt vectors
+ * Exception codes
  */
 
-#define INT_VEC_NMI 0xBFC00000
-#define INT_VEC_TLB_MISS 0x80000000
-#define INT_VEC_XTLB_MISS 0x80000080
-#define INT_VEC_GENERAL 0x80000180
+#define EXCEPTION_INT 0
+#define EXCEPTION_MOD 1
+#define EXCEPTION_TLBL 2
+#define EXCEPTION_TLBS 3
+#define EXCEPTION_ADEL 4
+#define EXCEPTION_ADES 5
+#define EXCEPTION_IBE 6
+#define EXCEPTION_DBE 7
+#define EXCEPTION_SYS 8
+#define EXCEPTION_BP 9
+#define EXCEPTION_RI 10
+#define EXCEPTION_CPU 11
+#define EXCEPTION_OV 12
+#define EXCEPTION_TR 13
+
+#define EXCEPTION_FPE 15
+
+#define EXCEPTION_WATCH 23
+
+/*
+ * Exception vectors
+ */
+
+#define EXC_VEC_NMI 0xBFC00000
+#define EXC_VEC_TLB_MISS 0x80000000
+#define EXC_VEC_XTLB_MISS 0x80000080
+#define EXC_VEC_GENERAL 0x80000180
+
+/*
+ * Interrupt causes
+ */
+
+#define INT_CAUSE_SW1 0
+#define INT_CAUSE_SW2 1
+#define INT_CAUSE_RCP 2
+#define INT_CAUSE_CART 3
+#define INT_CAUSE_PRENMI 4
+#define INT_CAUSE_RDBR 5
+#define INT_CAUSE_RDBW 6
+#define INT_CAUSE_TIMER 7
+
+#define INT_CAUSE_BIT_SW1 (2 << (INT_CAUSE_SW1 + 8))
+#define INT_CAUSE_BIT_SW2 (2 << (INT_CAUSE_SW2 + 8))
+#define INT_CAUSE_BIT_RCP (2 << (INT_CAUSE_RCP + 8))
+#define INT_CAUSE_BIT_CART (2 << (INT_CAUSE_CART + 8))
+#define INT_CAUSE_BIT_PRENMI (2 << (INT_CAUSE_PRENMI + 8))
+#define INT_CAUSE_BIT_RDBR (2 << (INT_CAUSE_RDBR + 8))
+#define INT_CAUSE_BIT_RDBW (2 << (INT_CAUSE_RDBW + 8))
+#define INT_CAUSE_BIT_TIMER (2 << (INT_CAUSE_TIMER + 8))
 
 /*
  * Memory segments
