@@ -28,5 +28,6 @@ typedef signed long s32;
 
 #include <os/memory.h>
 #include <os/except.h>
+#include <os/event.h>
 
 #endif
