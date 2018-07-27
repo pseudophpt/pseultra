@@ -38,6 +38,14 @@
 # 31 Reserved
 
 #
+# Instructions
+#
+
+.macro eret
+.word 0x42000018
+.endm
+
+#
 # Memory segments
 #
 
