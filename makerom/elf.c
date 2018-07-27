@@ -12,6 +12,8 @@
 #include <stdio.h>
 
 elf32_shentry get_section (char *buffer, const char *section_name) {  
+    elf32_shentry ret;
+    
     // Header
     elf32_header *header = (elf32_header *)(buffer);
 
@@ -33,6 +35,10 @@ elf32_shentry get_section (char *buffer, const char *section_name) {
             return section_header[i];
         }
     }
+
+    // No matching section
+    ret.size = 0;
+    return ret;
 }
 
 
