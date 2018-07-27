@@ -90,8 +90,9 @@ void calculate_rom_layout () {
         for (int j = 0; j < segments[i].section_count; j ++) {
             elf32_shentry text = get_section (segments[i].sections[j].buffer, ".text");
             elf32_shentry data = get_section (segments[i].sections[j].buffer, ".data");
+            elf32_shentry rodata = get_section (segments[i].sections[j].buffer, ".rodata");
 
-            segment_size += BE_TO_LE32(text.size) + BE_TO_LE32(data.size);
+            segment_size += BE_TO_LE32(text.size) + BE_TO_LE32(data.size) + BE_TO_LE32(rodata.size);
         }
 
         segments[i].rom_start = rom_location_counter;
@@ -146,6 +147,7 @@ void generate_linker_script (FILE *lscript) {
 
             fprintf(lscript, "\t\t%s (.text)\n", sec.filename);
             fprintf(lscript, "\t\t%s (.data)\n", sec.filename);
+            fprintf(lscript, "\t\t%s (.rodata)\n", sec.filename);
         }
 
         fprintf(lscript, "\t}\n\n");
