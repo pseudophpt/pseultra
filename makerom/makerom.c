@@ -146,6 +146,7 @@ void generate_linker_script (FILE *lscript) {
 
             fprintf(lscript, "\t\t%s (.text)\n", sec.filename);
             fprintf(lscript, "\t\t%s (.data)\n", sec.filename);
+            fprintf(lscript, "\t\t%s (.rodata)\n", sec.filename);
         }
 
         fprintf(lscript, "\t}\n\n");
