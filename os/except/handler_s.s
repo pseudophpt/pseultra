@@ -10,6 +10,30 @@
 .global __osHandlerStart
 .global __osHandlerEnd
 .global __osHandleException
+.global __osUnmaskInterrupts
+.global osGetIntMask
+.global osSetIntMask
+.global osClearIntMask
+
+#
+# Unmasks all interrupts
+#
+
+__osUnmaskInterrupts:
+mfc0 $k0, Status
+
+# MIPS Interrupts
+
+ori $k0, 0xff01 # Unmask all interrupts and enable
+
+or $k0, $k1 
+mtc0 $k0, Status
+
+jr $ra # Return
+
+#
+# Called on exception 
+#
 
 __osHandlerStart:
 
@@ -19,25 +43,12 @@ jr $k0
 
 __osHandlerEnd:
 
+#
+# Called on exception by initial vector
+#
+
 __osHandleException:
 
 # I'm going to hold off on writing exception handlers until I get a proper multi-threading implemetation. So for now, it just jumps back to the EPC
 
-mfc0 $k0, EPC
-jr $k0
-
-#addiu $sp, -(0x4 * 4) // Save 4 tx registers
-#sw $t0, 0($sp)
-#sw $t1, 4($sp)
-#sw $t2, 8($sp)
-
-
-
-#lw $t0, ($sp)
-
-#lw $t1, ($sp)
-#lw $t2, ($sp)
-#// Crash
-
-#.lock:
-#b .lock
+eret
