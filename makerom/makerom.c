@@ -199,7 +199,7 @@ void make_rom (char *rom_name, char *bootcode) {
 
     rom_header *rom_head = (rom_header *)bootcode_buffer; 
 
-    rom_head->pi_regs = PI_VALUES;
+    rom_head->pi_regs = LE_TO_BE32(PI_VALUES);
     rom_head->boot_address = rom_elf_header->entry; // Entry point
     rom_head->rom_start = LE_TO_BE32(segments[0].rom_start); // Start of boot segment
     rom_head->rom_length = LE_TO_BE32(segments[0].rom_end - segments[0].rom_start); // Boot segment length
