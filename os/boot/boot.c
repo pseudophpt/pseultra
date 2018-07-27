@@ -20,7 +20,7 @@ void __osBoot () {
 
     main_event.next = NULL;
     main_event.callback = main;
-    main_event.type = OS_EVENT_TYPE_OTHER;
+    main_event.type = OS_EVENT_TYPE_MAIN;
 
     osScheduleEvent(&main_event);
 

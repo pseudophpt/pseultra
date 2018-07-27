@@ -7,16 +7,51 @@
 
 #include <os.h>
 
-// Linked list of events
+extern void __osEnqueueEvent (OSEvent *event, OSEvent *queue);
+extern OSEvent *__osDequeueEvent (void);
+
+// A queue is a linked list of events
+
+// Main queue from which the main game process executes
 OSEvent *__osMainEventQueue = NULL;
 
-// Place event on the main queue
+// Interrupt queues
+OSEvent *__osInterruptEventQueue [INT_RCP_COUNT];
+
+// Schedule event for processing
 void osScheduleEvent (OSEvent *event) {
+    switch (event->type) {
+    case OS_EVENT_TYPE_SP:
+        __osEnqueueEvent(event, __osInterruptEventQueue [INT_RCP_CAUSE_SP]);
+        break;
+    case OS_EVENT_TYPE_DP:
+        __osEnqueueEvent(event, __osInterruptEventQueue [INT_RCP_CAUSE_DP]);
+        break;
+    case OS_EVENT_TYPE_SI:
+        __osEnqueueEvent(event, __osInterruptEventQueue [INT_RCP_CAUSE_SI]);
+        break;
+    case OS_EVENT_TYPE_VI:
+        __osEnqueueEvent(event, __osInterruptEventQueue [INT_RCP_CAUSE_VI]);
+        break;
+    case OS_EVENT_TYPE_PI:
+        __osEnqueueEvent(event, __osInterruptEventQueue [INT_RCP_CAUSE_PI]);
+        break;
+    case OS_EVENT_TYPE_AI:
+        __osEnqueueEvent(event, __osInterruptEventQueue [INT_RCP_CAUSE_AI]);
+        break;
+    case OS_EVENT_TYPE_MAIN:
+        __osEnqueueEvent(event, __osMainEventQueue);
+        break;
+    }
+}
+
+// Put event at end of queue
+void __osEnqueueEvent (OSEvent *event, OSEvent *queue) {
     // Traverse linked list
-    OSEvent *current_event = __osMainEventQueue;
+    OSEvent *current_event = queue;
 
     if (current_event == NULL) {
-        __osMainEventQueue = event;
+        queue = event;
         return;
     }
 

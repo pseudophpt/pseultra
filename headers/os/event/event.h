@@ -20,7 +20,7 @@ typedef struct OSEvent_t {
 #define OS_EVENT_TYPE_VI 3 
 #define OS_EVENT_TYPE_PI 4 
 #define OS_EVENT_TYPE_AI 5 
-#define OS_EVENT_TYPE_OTHER 8 // User scheduled events
+#define OS_EVENT_TYPE_MAIN 8 // User scheduled events
 
 // Functions
 void osScheduleEvent (OSEvent *event);
