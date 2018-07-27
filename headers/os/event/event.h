@@ -14,14 +14,12 @@ typedef struct OSEvent_t {
     u8 type; // Type of event
 } OSEvent;
 
-#define OS_EVENT_TYPE_SW1 0
-#define OS_EVENT_TYPE_SW2 1
-#define OS_EVENT_TYPE_SP 2
-#define OS_EVENT_TYPE_DP 3
-#define OS_EVENT_TYPE_SI 4
-#define OS_EVENT_TYPE_VI 5
-#define OS_EVENT_TYPE_PI 6
-#define OS_EVENT_TYPE_AI 7
+#define OS_EVENT_TYPE_SP 0 
+#define OS_EVENT_TYPE_DP 1
+#define OS_EVENT_TYPE_SI 2 
+#define OS_EVENT_TYPE_VI 3 
+#define OS_EVENT_TYPE_PI 4 
+#define OS_EVENT_TYPE_AI 5 
 #define OS_EVENT_TYPE_OTHER 8 // User scheduled events
 
 // Functions

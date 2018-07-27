@@ -86,6 +86,28 @@ typedef struct __attribute__((__packed__)) rom_header_t {
 #define INT_CAUSE_BIT_RDBW (2 << (INT_CAUSE_RDBW + 8))
 #define INT_CAUSE_BIT_TIMER (2 << (INT_CAUSE_TIMER + 8))
 
+#define INT_COUNT 8
+
+/*
+ * RCP interrupts
+ */
+
+#define INT_RCP_CAUSE_SP 0
+#define INT_RCP_CAUSE_SI 1
+#define INT_RCP_CAUSE_AI 2
+#define INT_RCP_CAUSE_VI 3
+#define INT_RCP_CAUSE_PI 4
+#define INT_RCP_CAUSE_DP 5
+
+#define INT_RCP_CAUSE_BIT_SP (2 << (INT_RCP_CAUSE_SP))
+#define INT_RCP_CAUSE_BIT_SI (2 << (INT_RCP_CAUSE_SI))
+#define INT_RCP_CAUSE_BIT_AI (2 << (INT_RCP_CAUSE_AI))
+#define INT_RCP_CAUSE_BIT_VI (2 << (INT_RCP_CAUSE_VI))
+#define INT_RCP_CAUSE_BIT_PI (2 << (INT_RCP_CAUSE_PI))
+#define INT_RCP_CAUSE_BIT_DP (2 << (INT_RCP_CAUSE_DP))
+
+#define INT_RCP_COUNT 6
+
 /*
  * Memory segments
  */
