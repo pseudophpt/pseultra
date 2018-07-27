@@ -11,9 +11,6 @@
 .global __osHandlerEnd
 .global __osHandleException
 .global __osUnmaskInterrupts
-.global osGetIntMask
-.global osSetIntMask
-.global osClearIntMask
 
 #
 # Unmasks all interrupts
