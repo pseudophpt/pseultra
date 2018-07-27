@@ -12,6 +12,30 @@
 .global __osHandleException
 .global __osUnmaskInterrupts
 
+.extern __osHandleInterrupt
+
+.macro savereg
+
+lui $k0, %hi(__osExceptionRegSave)
+addiu $k0, %lo(__osExceptionRegSave)
+
+.irp reg,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31
+sw $\reg, (\reg * 4)($k0)
+.endr
+
+.endm
+
+.macro loadreg
+
+lui $k0, %hi(__osExceptionRegSave)
+addiu $k0, %lo(__osExceptionRegSave)
+
+.irp reg,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31
+sw $\reg, (\reg * 4)($k0)
+.endr
+
+.endm
+
 #
 # Unmasks all interrupts
 #
@@ -46,6 +70,25 @@ __osHandlerEnd:
 
 __osHandleException:
 
-# I'm going to hold off on writing exception handlers until I get a proper multi-threading implemetation. So for now, it just jumps back to the EPC
+savereg
+
+mfc0 $t0, Cause
+andi $t1, $t0, 0x007c
+
+bnez $t1, .handleException # Interrupt code is 0
+
+.handleInterrupt:
+
+andi $a0, $t0, 0xff00
+jal __osHandleInterrupt
+b .done
+
+.handleException:
+
+.done:
+
+loadreg
 
 eret
+
+.lcomm __osExceptionRegSave, 32

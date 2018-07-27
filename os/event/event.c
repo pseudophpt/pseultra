@@ -7,7 +7,7 @@
 
 #include <os.h>
 
-extern void __osEnqueueEvent (OSEvent *event, OSEvent *queue);
+extern void __osEnqueueEvent (OSEvent *event, OSEvent **queue);
 extern OSEvent *__osDequeueEvent (void);
 
 // A queue is a linked list of events
@@ -22,36 +22,36 @@ OSEvent *__osInterruptEventQueue [INT_RCP_COUNT];
 void osScheduleEvent (OSEvent *event) {
     switch (event->type) {
     case OS_EVENT_TYPE_SP:
-        __osEnqueueEvent(event, __osInterruptEventQueue [INT_RCP_CAUSE_SP]);
+        __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_SP]);
         break;
     case OS_EVENT_TYPE_DP:
-        __osEnqueueEvent(event, __osInterruptEventQueue [INT_RCP_CAUSE_DP]);
+        __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_DP]);
         break;
     case OS_EVENT_TYPE_SI:
-        __osEnqueueEvent(event, __osInterruptEventQueue [INT_RCP_CAUSE_SI]);
+        __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_SI]);
         break;
     case OS_EVENT_TYPE_VI:
-        __osEnqueueEvent(event, __osInterruptEventQueue [INT_RCP_CAUSE_VI]);
+        __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_VI]);
         break;
     case OS_EVENT_TYPE_PI:
-        __osEnqueueEvent(event, __osInterruptEventQueue [INT_RCP_CAUSE_PI]);
+        __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_PI]);
         break;
     case OS_EVENT_TYPE_AI:
-        __osEnqueueEvent(event, __osInterruptEventQueue [INT_RCP_CAUSE_AI]);
+        __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_AI]);
         break;
     case OS_EVENT_TYPE_MAIN:
-        __osEnqueueEvent(event, __osMainEventQueue);
+        __osEnqueueEvent(event, &__osMainEventQueue);
         break;
     }
 }
 
 // Put event at end of queue
-void __osEnqueueEvent (OSEvent *event, OSEvent *queue) {
+void __osEnqueueEvent (OSEvent *event, OSEvent **queue) {
     // Traverse linked list
-    OSEvent *current_event = queue;
+    OSEvent *current_event = *queue;
 
     if (current_event == NULL) {
-        queue = event;
+        *queue = event;
         return;
     }
 

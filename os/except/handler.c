@@ -11,6 +11,13 @@ extern u32 __osHandlerStart;
 extern u32 __osHandlerEnd;
 
 extern void __osUnmaskInterrupts (void);
+extern void __osEnqueueEvent (OSEvent *event, OSEvent **queue);
+
+void __osHandleInterrupt (u32 interrupt);
+void __osHandleRCPInterrupt ();
+
+extern OSEvent *__osMainEventQueue;
+extern OSEvent *__osInterruptEventQueue [INT_RCP_COUNT];
 
 void __osInitExceptions (void) {
     // Install exception handler for the three non-NMI exceptions
@@ -26,4 +33,76 @@ u32 osGetIntMask (void) {
 
 void osSetIntMask (u32 mask) {
     *(u32 *)(KSEG1_ADDR(MI_INTR_MASK_REG)) = mask;
+}
+
+// Handle general interrupt
+void __osHandleInterrupt (u32 interrupt) {
+    if (interrupt & INT_CAUSE_MASK_RCP) {
+        __osHandleRCPInterrupt();
+    }
+}
+
+// Handle RCP interrupt 
+void __osHandleRCPInterrupt () {
+    int interrupt = *(u32 *)(KSEG1_ADDR(MI_INTR_REG));
+
+    // VI interrupt
+    if (interrupt & INT_RCP_CAUSE_BIT_VI) {
+        // Clear interrupt line
+        *(u32 *)(KSEG1_ADDR(VI_CURRENT_REG)) = 0x1;
+
+        // Queue events on SP queue
+        __osEnqueueEvent(__osInterruptEventQueue [INT_RCP_CAUSE_VI], &__osMainEventQueue);
+
+        // Clear SP queue
+        __osInterruptEventQueue [INT_RCP_CAUSE_VI] = NULL;
+    }
+    
+    // SI interrupt
+    if (interrupt & INT_RCP_CAUSE_BIT_SI) {
+        // Clear interrupt line
+        *(u32 *)(KSEG1_ADDR(SI_STATUS_REG)) = 0x0;
+
+        // Queue events on SP queue
+        __osEnqueueEvent(__osInterruptEventQueue [INT_RCP_CAUSE_SI], &__osMainEventQueue);
+
+        // Clear SP queue
+        __osInterruptEventQueue [INT_RCP_CAUSE_SI] = NULL;
+    }
+
+    // AI interrupt
+    if (interrupt & INT_RCP_CAUSE_BIT_AI) {
+        // Clear interrupt line
+        *(u32 *)(KSEG1_ADDR(AI_STATUS_REG)) = 0x0;
+
+        // Queue events on SP queue
+        __osEnqueueEvent(__osInterruptEventQueue [INT_RCP_CAUSE_AI], &__osMainEventQueue);
+
+        // Clear SP queue
+        __osInterruptEventQueue [INT_RCP_CAUSE_AI] = NULL;
+    }
+
+    // PI interrupt
+    if (interrupt & INT_RCP_CAUSE_BIT_PI) {
+        // Clear interrupt line
+        *(u32 *)(KSEG1_ADDR(PI_STATUS_REG)) = 0x2;
+
+        // Queue events on SP queue
+        __osEnqueueEvent(__osInterruptEventQueue [INT_RCP_CAUSE_PI], &__osMainEventQueue);
+
+        // Clear SP queue
+        __osInterruptEventQueue [INT_RCP_CAUSE_PI] = NULL;
+    }
+
+    // SP interrupt
+    if (interrupt & INT_RCP_CAUSE_BIT_SP) {
+        // Clear broke flag to remove interrupt
+        *(u32 *)(KSEG1_ADDR(SP_STATUS_REG)) = 0x4;
+
+        // Queue events on SP queue
+        __osEnqueueEvent(__osInterruptEventQueue [INT_RCP_CAUSE_SP], &__osMainEventQueue);
+
+        // Clear SP queue
+        __osInterruptEventQueue [INT_RCP_CAUSE_SP] = NULL;
+    }
 }
