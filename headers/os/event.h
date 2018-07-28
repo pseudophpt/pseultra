@@ -6,3 +6,4 @@
  */
 
 #include <os/event/event.h>
+#include <os/event/exception.h>

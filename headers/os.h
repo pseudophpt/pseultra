@@ -27,7 +27,6 @@ typedef signed long s32;
 #define OS_STACK_SIZE 0x1000
 
 #include <os/memory.h>
-#include <os/except.h>
 #include <os/event.h>
 
 #endif
