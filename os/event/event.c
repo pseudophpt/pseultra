@@ -7,20 +7,19 @@
 
 #include <os.h>
 
-extern void __osEnqueueEvent (OSEvent *event, OSEvent **queue);
-extern OSEvent *__osDequeueEvent (void);
-
-// A queue is a linked list of events
+void __osEnqueueEvent (OSEvent event, OSEventQueue *queue);
+OSEvent __osDequeueEvent (OSEventQueue *queue);
+void __osCopyEventQueue (OSEventQueue *src, OSEventQueue *dest);
 
 // Main queue from which the main game process executes
-OSEvent *__osMainEventQueue = NULL;
+OSEventQueue __osMainEventQueue;
 
 // Interrupt queues
-OSEvent *__osInterruptEventQueue [INT_RCP_COUNT];
+OSEventQueue __osInterruptEventQueue [INT_RCP_COUNT];
 
 // Schedule event for processing
-void osScheduleEvent (OSEvent *event) {
-    switch (event->type) {
+void osScheduleEvent (OSEvent event) {
+    switch (event.type) {
     case OS_EVENT_TYPE_SP:
         __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_SP]);
         break;
@@ -46,30 +45,41 @@ void osScheduleEvent (OSEvent *event) {
 }
 
 // Put event at end of queue
-void __osEnqueueEvent (OSEvent *event, OSEvent **queue) {
-    // Traverse linked list
-    OSEvent *current_event = *queue;
-
-    if (current_event == NULL) {
-        *queue = event;
+void __osEnqueueEvent (OSEvent event, OSEventQueue *queue) {
+    // Is there space? If not, return
+    if ((queue->end + 1) % OS_EVENT_QUEUE_SIZE == queue->start) {
         return;
     }
 
-    while (current_event->next != NULL) {
-        current_event = current_event->next;
-    }
-
-    // Insert
-    current_event->next = event;
+    // Put new event in queue
+    queue->queue[queue->end] = event;
+    
+    // Update queue end
+    queue->end = (queue->end + 1) % OS_EVENT_QUEUE_SIZE;
 }
 
 // Get event on front of the queue and remove it
-OSEvent *__osDequeueEvent (void) {
-    if (__osMainEventQueue == NULL) {
-        return NULL;
+OSEvent __osDequeueEvent (OSEventQueue *queue) {
+    // Is there an event in the queue?
+    if (queue->end == queue->start) {
+        OSEvent no_event;
+        no_event.type = OS_EVENT_TYPE_NONE;
+
+        return no_event;
     }
 
-    OSEvent *front_event = __osMainEventQueue;
-    __osMainEventQueue = __osMainEventQueue->next;
-    return front_event;
+    // Take event from front
+    OSEvent event = queue->queue[queue->start];
+
+    // Increment start
+    queue->start = (queue->start + 1) % OS_EVENT_QUEUE_SIZE;
+
+    return event;
+}
+
+// Copy one queue to the end of another
+void __osCopyEventQueue (OSEventQueue *src, OSEventQueue *dest) {
+    while (src->start != src->end) {
+        __osEnqueueEvent(__osDequeueEvent(src), dest);
+    }
 }

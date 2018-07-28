@@ -7,8 +7,10 @@
 
 #include <os.h>
 
+extern OSEventQueue __osMainEventQueue;
+
 extern void __osInitExceptions (void);
-extern OSEvent *__osDequeueEvent (void);
+extern OSEvent __osDequeueEvent (OSEventQueue *queue);
 extern void main (void);
 
 void __osBoot () {
@@ -18,18 +20,25 @@ void __osBoot () {
     // Add main process to event queue
     OSEvent main_event;
 
-    main_event.next = NULL;
     main_event.callback = main;
     main_event.type = OS_EVENT_TYPE_MAIN;
 
-    osScheduleEvent(&main_event);
+    osScheduleEvent(main_event);
 
     // Main event loop 
     while (1) {
-        OSEvent *event;
-        while ((event = __osDequeueEvent()) != NULL) {
+/*        OSEvent event = __osDequeueEvent(&__osMainEventQueue);
+        while (event.type == OS_EVENT_TYPE_NONE) {
             // Execute callback
-            (*(event->callback))();
+            (*(event.callback))();
+        
+            // Get another event
+            event = __osDequeueEvent(&__osMainEventQueue);
+        }*/
+        OSEvent event = __osDequeueEvent(&__osMainEventQueue);
+
+        if (event.type != OS_EVENT_TYPE_NONE) {
+            (*(event.callback))();
         }
     }
 }

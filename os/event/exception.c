@@ -11,13 +11,14 @@ extern u32 __osHandlerStart;
 extern u32 __osHandlerEnd;
 
 extern void __osUnmaskInterrupts (void);
-extern void __osEnqueueEvent (OSEvent *event, OSEvent **queue);
+extern void __osEnqueueEvent (OSEvent event, OSEventQueue *queue);
+extern void __osCopyEventQueue (OSEventQueue *src, OSEventQueue *dest);
 
 void __osHandleInterrupt (u32 interrupt);
 void __osHandleRCPInterrupt ();
 
-extern OSEvent *__osMainEventQueue;
-extern OSEvent *__osInterruptEventQueue [INT_RCP_COUNT];
+extern OSEventQueue __osMainEventQueue;
+extern OSEventQueue __osInterruptEventQueue [INT_RCP_COUNT];
 
 void __osInitExceptions (void) {
     // Install exception handler for the three non-NMI exceptions
@@ -51,11 +52,8 @@ void __osHandleRCPInterrupt () {
         // Clear interrupt line
         *(u32 *)(KSEG1_ADDR(VI_CURRENT_REG)) = 0x1;
 
-        // Queue events on SP queue
-        __osEnqueueEvent(__osInterruptEventQueue [INT_RCP_CAUSE_VI], &__osMainEventQueue);
-
-        // Clear SP queue
-        __osInterruptEventQueue [INT_RCP_CAUSE_VI] = NULL;
+        // Queue events on VI queue
+        __osCopyEventQueue(&__osInterruptEventQueue[INT_RCP_CAUSE_VI], &__osMainEventQueue);
     }
     
     // SI interrupt
@@ -63,11 +61,8 @@ void __osHandleRCPInterrupt () {
         // Clear interrupt line
         *(u32 *)(KSEG1_ADDR(SI_STATUS_REG)) = 0x0;
 
-        // Queue events on SP queue
-        __osEnqueueEvent(__osInterruptEventQueue [INT_RCP_CAUSE_SI], &__osMainEventQueue);
-
-        // Clear SP queue
-        __osInterruptEventQueue [INT_RCP_CAUSE_SI] = NULL;
+        // Queue events on SI queue
+        __osCopyEventQueue(&__osInterruptEventQueue[INT_RCP_CAUSE_SI], &__osMainEventQueue);
     }
 
     // AI interrupt
@@ -75,11 +70,8 @@ void __osHandleRCPInterrupt () {
         // Clear interrupt line
         *(u32 *)(KSEG1_ADDR(AI_STATUS_REG)) = 0x0;
 
-        // Queue events on SP queue
-        __osEnqueueEvent(__osInterruptEventQueue [INT_RCP_CAUSE_AI], &__osMainEventQueue);
-
-        // Clear SP queue
-        __osInterruptEventQueue [INT_RCP_CAUSE_AI] = NULL;
+        // Queue events on AI queue
+        __osCopyEventQueue(&__osInterruptEventQueue[INT_RCP_CAUSE_AI], &__osMainEventQueue);
     }
 
     // PI interrupt
@@ -87,11 +79,8 @@ void __osHandleRCPInterrupt () {
         // Clear interrupt line
         *(u32 *)(KSEG1_ADDR(PI_STATUS_REG)) = 0x2;
 
-        // Queue events on SP queue
-        __osEnqueueEvent(__osInterruptEventQueue [INT_RCP_CAUSE_PI], &__osMainEventQueue);
-
-        // Clear SP queue
-        __osInterruptEventQueue [INT_RCP_CAUSE_PI] = NULL;
+        // Queue events on PI queue
+        __osCopyEventQueue(&__osInterruptEventQueue[INT_RCP_CAUSE_PI], &__osMainEventQueue);
     }
 
     // SP interrupt
@@ -100,9 +89,6 @@ void __osHandleRCPInterrupt () {
         *(u32 *)(KSEG1_ADDR(SP_STATUS_REG)) = 0x4;
 
         // Queue events on SP queue
-        __osEnqueueEvent(__osInterruptEventQueue [INT_RCP_CAUSE_SP], &__osMainEventQueue);
-
-        // Clear SP queue
-        __osInterruptEventQueue [INT_RCP_CAUSE_SP] = NULL;
+        __osCopyEventQueue(&__osInterruptEventQueue[INT_RCP_CAUSE_SP], &__osMainEventQueue);
     }
 }
