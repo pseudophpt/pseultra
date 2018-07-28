@@ -91,4 +91,4 @@ loadreg
 
 eret
 
-.lcomm __osExceptionRegSave, 32
+.lcomm __osExceptionRegSave, 32 * 4
