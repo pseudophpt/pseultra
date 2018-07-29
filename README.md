@@ -5,6 +5,8 @@
 - `bootcsum`: Tools for calculating and finding collisions for the checksum used on the IPL3 bootcode
 - `makerom`: Tool to create an N64 rom file given object files
 
+In addition to the aforementioned tools, `pseultra` provides a library `libpseultra` which allows for flexible development of N64 games. 
+
 ## Getting started
 
 ### Prerequisites
