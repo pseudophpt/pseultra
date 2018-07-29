@@ -37,26 +37,6 @@ sw $t3, 0($t1)
 li $t1, PI_WR_LEN_REG | KSEG1
 sw $t2, 0($t1)
 
-# Unmask RCP interrupts
-li $t1, MI_INTR_MASK_REG | KSEG1
-ori $t0, $zero, 0x555
-sw $t0, 0($t1)
-
-# Clear each RCP interrupt cause bit
-li $t0, AI_STATUS_REG | KSEG1
-sw $zero, 0($t0)
-
-li $t0, SI_STATUS_REG | KSEG1
-sw $zero, 0($t0)
-
-li $t0, PI_STATUS_REG | KSEG1
-ori $t1, $zero, 0x02
-sw $t1, 0($t0)
-
-li $t0, MI_INIT_MODE_REG | KSEG1
-ori $t1, $zero, 0x800
-sw $t1, 0($t0)
-
 # Initialize RSP
 li $t0, SP_PC_REG | KSEG1
 sw $zero, 0($t0)
@@ -108,6 +88,26 @@ addiu $t0, 4
 addiu $t1, 4
 addiu $t2, 1
 bne $t2, $t3, .ClearSPMEM
+
+# Unmask RCP interrupts
+li $t1, MI_INTR_MASK_REG | KSEG1
+ori $t0, $zero, 0x555
+sw $t0, 0($t1)
+
+# Clear each RCP interrupt cause bit
+li $t0, AI_STATUS_REG | KSEG1
+sw $zero, 0($t0)
+
+li $t0, SI_STATUS_REG | KSEG1
+sw $zero, 0($t0)
+
+li $t0, PI_STATUS_REG | KSEG1
+ori $t1, $zero, 0x02
+sw $t1, 0($t0)
+
+li $t0, MI_INIT_MODE_REG | KSEG1
+ori $t1, $zero, 0x800
+sw $t1, 0($t0)
 
 # Jump to boot segment
 li $t0, CART_DOM1_ADDR2 | KSEG0
