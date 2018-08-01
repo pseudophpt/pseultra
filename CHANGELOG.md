@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased]
+## [Unreleased](https://github.com/pseudophpt/pseultra/compare/master...develop)
 
-## [1.0b] - 2018-08-01
+## 1.0b - 2018-08-01
 
 ### Added
 - Tools for calculating and colliding the checksum used in the n64 PIF ROM code to verify bootcode
