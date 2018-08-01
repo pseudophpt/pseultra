@@ -11,11 +11,11 @@ In addition to the aforementioned tools, `pseultra` provides a library `libpseul
 
 ### Prerequisites
 
-To use `pseultra`, you need a native C toolchain, as well as a toolchain for compiling for the MIPS VR4300 architecture 
+To use `pseultra`, you need `scons`, a native C toolchain, as well as a toolchain for compiling for the MIPS VR4300 architecture 
 
 ### Installing
 
-To install `pseultra`, just `make` inside the root directory, or to install individual tools, `make` inside their respective directories
+To install `pseultra`, just `scons` then `sudo scons install` for each tool you'd like to make.
 
 ## Testing
 

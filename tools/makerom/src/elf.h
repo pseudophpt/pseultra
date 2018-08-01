@@ -5,8 +5,8 @@
  * (C) pseudophpt 2018
  */
 
-#ifndef ELF_H_GUARD
-#define ELF_H_GUARD
+#ifndef MAKEROM_ELF_H_GUARD
+#define MAKEROM_ELF_H_GUARD
 
 #include <stdint.h>
 
@@ -47,5 +47,7 @@ typedef struct __attribute__((__packed__)) elf32_shentry_t {
     uint32_t addralign; // Address alignment in bytes
     uint32_t entsize; // Entry size for those with fixed entries
 } elf32_shentry;
+
+elf32_shentry get_section (char *buffer, const char *section_name); 
 
 #endif

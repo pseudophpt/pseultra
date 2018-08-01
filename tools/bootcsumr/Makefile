@@ -19,7 +19,7 @@ SRC_FILES = $(SRC_FILES_C) $(SRC_FILES_S)
 
 OBJ_FILES = $(patsubst src/%.c, obj/%.o, $(SRC_FILES_C)) $(patsubst src/%.s, obj/%.o, $(SRC_FILES_S))
 
-APP := bin/makerom
+APP := bin/bootcsumr
 
 .PHONY: all clean install
 

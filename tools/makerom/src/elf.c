@@ -5,7 +5,6 @@
  * (C) pseudophpt 2018
  */
 
-#include <elf.h>
 #include "elf.h"
 #include <string.h>
 #include <util.h>

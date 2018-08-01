@@ -6,21 +6,21 @@
  */
 
 INPUT(
-    "boot.o"
+    "src/boot.o"
 )
 
 OUTPUT(
-    "boot.elf"
+    "src/boot.elf"
 )
 
 SECTIONS {
     .text 0xA4000000 : {
-        boot.o (.text)
-        boot.o (.data)
+        src/boot.o (.text)
+        src/boot.o (.data)
     }
 
     .bss : {
-        boot.o (.bss)
-        boot.o (COMMON)
+        src/boot.o (.bss)
+        src/boot.o (COMMON)
     }
 }

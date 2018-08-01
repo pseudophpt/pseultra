@@ -47,7 +47,7 @@ int main (int argc, char *argv[]) {
     fclose(lscript);
 
     // Link
-    char *link_command = malloc(sizeof(char) * strlen(argv[2]) + 15);
+    char *link_command = malloc(sizeof(char) * strlen(argv[2]) + 20);
     sprintf(link_command, "%s -T link.ld -G0", argv[2]);
     system(link_command);
 
@@ -209,6 +209,8 @@ void make_rom (char *rom_name, char *bootcode) {
     // Write the bootcode to the file
     fwrite (bootcode_buffer, 0x1000, 1, rom);
 
+
+
     // Write each segment to the file
     for (int i = 0; i < segment_count; i ++) {
         // Text section name
@@ -236,10 +238,7 @@ section create_section (char *filename) {
     section rsec;
 
     // Allocate memory for name
-    rsec.filename = malloc(strlen(filename));
-
-    // Copy it over
-    strcpy(rsec.filename, filename);
+    rsec.filename = strdup(filename); 
 
     // Open file
     rsec.buffer = open_file(filename);
@@ -252,10 +251,7 @@ segment create_segment (char *name) {
     segment rseg;
 
     // Allocate memory for name
-    rseg.name = malloc(strlen(name));
-
-    // Copy it over
-    strcpy(rseg.name, name);
+    rseg.name = strdup(name); 
 
     // Fill in rest of parameters
     rseg.sections = malloc(0);
