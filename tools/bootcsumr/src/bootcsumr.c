@@ -1,5 +1,5 @@
 /*
- * pseultra/bootcsum/bootcsumr.c
+ * pseultra/tools/bootcsum/src/bootcsumr.c
  * PIFrom ipl2 checksum reverser
  *
  * (C) pseudophpt 2018

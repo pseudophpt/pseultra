@@ -1,5 +1,5 @@
 /*
- * pseultra/os/memory/malloc.c
+ * pseultra/n64/os/src/memory/malloc.c
  * Memory allocation routines
  * 
  * (C) pseudophpt 2018 

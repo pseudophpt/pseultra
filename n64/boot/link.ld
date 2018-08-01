@@ -1,5 +1,5 @@
 /*
- * pseultra/boot/link.ld
+ * pseultra/n64/boot/link.ld
  * Bootcode linker script
  * 
  * (C) pseudophpt 2018

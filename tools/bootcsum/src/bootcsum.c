@@ -1,5 +1,5 @@
 /*
- * pseultra/bootcsum/bootcsum.c
+ * pseultra/tools/bootcsum/src/bootcsum.c
  * PIFrom ipl2 checksum function decomp
  *
  * (C) pseudophpt 2018

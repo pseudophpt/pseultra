@@ -1,3 +1,11 @@
+/*
+ * pseultra/include/util.h
+ * Utility functions
+ * 
+ * (C) pseudophpt 2018
+ */
+
+
 #ifndef UTIL_H_GUARD
 #define UTIL_H_GUARD
 

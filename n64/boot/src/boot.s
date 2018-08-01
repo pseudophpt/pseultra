@@ -1,5 +1,5 @@
 #
-# pseultra/boot/boot.s
+# pseultra/n64/boot/src/boot.s
 # Bootcode
 # 
 # (C) pseudophpt, Nabile Rahmani 2018

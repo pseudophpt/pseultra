@@ -1,3 +1,10 @@
+#
+# pseultra/n64/boot/SConstruct
+# Build file for boot
+# 
+# (C) pseudophpt 2018
+#
+
 import os
 
 AddOption(

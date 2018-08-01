@@ -1,5 +1,5 @@
 /*
- * pseultra/os/event/event.c
+ * pseultra/n64/os/src/event/event.c
  * Event related code
  * 
  * (C) pseudophpt 2018 

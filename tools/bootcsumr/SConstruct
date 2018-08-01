@@ -1,3 +1,10 @@
+#
+# pseultra/tools/bootcsumr/SConstruct
+# Build file for bootcsumr
+# 
+# (C) pseudophpt 2018
+#
+
 AddOption(
     '--prefix', 
     dest = 'prefix',

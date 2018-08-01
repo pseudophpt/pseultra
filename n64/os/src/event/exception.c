@@ -1,5 +1,5 @@
 /*
- * pseultra/os/event/exception.c
+ * pseultra/n64/os/src/event/exception.c
  * Exception handler
  * 
  * (C) pseudophpt 2018 

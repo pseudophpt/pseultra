@@ -1,5 +1,5 @@
 /*
- * pseultra/headers/os/memory.h
+ * pseultra/n64/os/include/os/memory.h
  * OS Memory Header
  * 
  * (C) pseudophpt 2018 

@@ -1,5 +1,5 @@
 /*
- * pseultra/headers/n64.h
+ * pseultra/include/n64.h
  * N64 definitions for C
  * 
  * (C) pseudophpt 2018

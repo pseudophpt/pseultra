@@ -1,5 +1,5 @@
 /*
- * pseultra/makerom/elf.c
+ * pseultra/tools/makerom/src/elf.c
  * ELF interface for makerom
  *
  * (C) pseudophpt 2018

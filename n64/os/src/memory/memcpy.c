@@ -1,5 +1,5 @@
 /*
- * pseultra/os/memory/memcpy.c
+ * pseultra/n64/os/src/memory/memcpy.c
  * Memory copying function
  * 
  * (C) pseudophpt 2018 

@@ -1,5 +1,5 @@
 #
-# pseultra/os/event/exception_s.s
+# pseultra/n64/os/src/event/exception_s.s
 # Exception handler
 # 
 # (C) pseudophpt 2018 

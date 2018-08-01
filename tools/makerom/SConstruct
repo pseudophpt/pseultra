@@ -1,3 +1,10 @@
+#
+# pseultra/tools/makerom/SConstruct
+# Build file for makerom 
+# 
+# (C) pseudophpt 2018
+#
+
 AddOption(
     '--prefix', 
     dest = 'prefix',

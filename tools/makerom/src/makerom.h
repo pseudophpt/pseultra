@@ -1,6 +1,5 @@
 /*
-/*
- * pseultra/makerom/makerom.h
+ * pseultra/tools/makerom/src/makerom.h
  * Makerom header file
  *
  * (C) pseudophpt 2018

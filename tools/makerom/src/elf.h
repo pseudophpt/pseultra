@@ -1,5 +1,5 @@
 /*
- * pseultra/headers/elf.h
+ * pseultra/tools/makerom/src/elf.h
  * ELF header
  *
  * (C) pseudophpt 2018

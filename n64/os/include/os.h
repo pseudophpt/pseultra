@@ -1,5 +1,5 @@
 /*
- * pseultra/headers/os.h
+ * pseultra/n64/os/include/os.h
  * OS Header
  * 
  * (C) pseudophpt 2018 

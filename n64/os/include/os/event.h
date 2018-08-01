@@ -1,5 +1,5 @@
 /*
- * pseultra/headers/os/event.h
+ * pseultra/n64/os/include/os/event.h
  * OS Event Header
  * 
  * (C) pseudophpt 2018 

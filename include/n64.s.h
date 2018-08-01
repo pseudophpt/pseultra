@@ -1,5 +1,5 @@
 #
-# pseultra/headers/n64.s.h
+# pseultra/include/n64.s.h
 # N64 definitions for assembler
 # 
 # (C) pseudophpt 2018

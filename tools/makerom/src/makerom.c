@@ -1,5 +1,5 @@
 /*
- * pseultra/makerom/makerom.c
+ * pseultra/tools/makerom/src/makerom.c
  * ROM creator tool
  *
  * (C) pseudophpt 2018
