@@ -1,0 +1,43 @@
+#
+# pseultra/tools/bootcsum/SConstruct
+# Build file for bootcsum 
+# 
+# (C) pseudophpt 2018
+#
+
+AddOption(
+    '--prefix', 
+    dest = 'prefix',
+    type = 'string',
+    nargs = 1,
+    action = 'store',
+    metavar = 'DIR',
+    help = 'installation prefix'
+)
+env = Environment(PREFIX = GetOption('prefix'))
+
+env.Append(CPPPATH = ['#/include', '#/../../include'])
+
+bootcsum = env.Program(
+    target = 'bin/bootcsum',
+    source = ['#/src/bootcsum.c']
+)
+
+prefix = env.GetOption('prefix')
+
+if prefix is None:
+    prefix = '/opt/pseultra'
+
+prefix_bin = prefix + '/bin'
+prefix_include = prefix + '/include'
+prefix_lib = prefix + '/lib'
+
+env.Install(prefix_bin, [bootcsum])
+env.Install(prefix_include, [])
+env.Install(prefix_lib, [])
+
+install_bin = env.Alias('install-bin', prefix_bin)
+install_lib = env.Alias('install-lib', prefix_lib)
+install_include = env.Alias('install-include', prefix_include)
+
+env.Alias('install', [install_bin, install_lib, install_include])

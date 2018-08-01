@@ -5,15 +5,17 @@
 - `bootcsum`: Tools for calculating and finding collisions for the checksum used on the IPL3 bootcode
 - `makerom`: Tool to create an N64 rom file given object files
 
+In addition to the aforementioned tools, `pseultra` provides a library `libpseultra` which allows for flexible development of N64 games. 
+
 ## Getting started
 
 ### Prerequisites
 
-To use `pseultra`, you need a native C toolchain, as well as a toolchain for compiling for the MIPS VR4300 architecture 
+To use `pseultra`, you need `scons`, a native C toolchain, as well as a toolchain for compiling for the MIPS VR4300 architecture 
 
 ### Installing
 
-To install `pseultra`, just `make` inside the root directory, or to install individual tools, `make` inside their respective directories
+To install `pseultra`, just `scons` then `sudo scons install` for each tool you'd like to make.
 
 ## Testing
 
