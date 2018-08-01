@@ -33,11 +33,7 @@ See also the list of [contributors](https://github.com/pseudophpt/pseultra/graph
 
 ## Versioning
 
-`pseultra` uses the following version specification:
-
-`<major>.<minor>-<year>.<month>.<day>`
-
-Major releases are for large changes, additions, or removals of functionality. Minor releases are for bug fixes, code organization, and removal of deprecated functionality.
+`pseultra` uses SemVer for versioning
 
 ## License
 
