@@ -4,6 +4,7 @@
 
 ### Added
 - C Preprocessing for assembly
+- Documentation using `doxygen`
 
 ### Changed
 - SemVer for versioning
