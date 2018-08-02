@@ -2,6 +2,12 @@
 
 ## [Unreleased](https://github.com/pseudophpt/pseultra/compare/master...develop)
 
+### Added
+- C Preprocessing for assembly
+
+### Changed
+- SemVer for versioning
+
 ## 1.0.0 - 2018-08-01
 
 ### Added
