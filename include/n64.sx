@@ -1,0 +1,10 @@
+/*
+ * pseultra/include/n64.sx
+ * N64 definitions for assembler
+ * 
+ * (C) pseudophpt 2018
+ */
+
+#define __asm__
+
+#include <n64.h>

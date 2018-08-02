@@ -8,13 +8,15 @@
 #ifndef N64_H_GUARD
 #define N64_H_GUARD
 
-#include <stdint.h>
-
 /* 
  * ROM Header Format
  */
 
+#ifndef __asm__
+
 #define PI_VALUES 0x80371240
+
+#include <stdint.h>
 
 typedef struct __attribute__((__packed__)) rom_header_t {
     uint32_t pi_regs;
@@ -31,6 +33,8 @@ typedef struct __attribute__((__packed__)) rom_header_t {
     uint8_t country;
     uint8_t padding3;
 } rom_header;
+
+#endif 
 
 /*
  * Exception codes

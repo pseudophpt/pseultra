@@ -1,11 +1,12 @@
-#
-# pseultra/n64/os/src/event/exception_s.s
-# Exception handler
-# 
-# (C) pseudophpt 2018 
-#
+/*
+ * pseultra/n64/os/src/event/exception_s.sx
+ * Exception handler
+ * 
+ * (C) pseudophpt 2018 
+ */
 
-.include "n64.s.h"
+#include <n64.sx>
+#include <mips.sx>
 
 .global __osHandlerStart
 .global __osHandlerEnd
@@ -36,25 +37,25 @@ lw $\reg, (\reg * 4)($k0)
 
 .endm
 
-#
-# Unmasks all interrupts
-#
+//
+// Unmasks all interrupts
+//
 
 __osUnmaskInterrupts:
 mfc0 $k0, Status
 
-# MIPS Interrupts
+// MIPS Interrupts
 
-ori $k0, 0xff01 # Unmask all interrupts and enable
+ori $k0, 0xff01 // Unmask all interrupts and enable
 
 or $k0, $k1 
 mtc0 $k0, Status
 
-jr $ra # Return
+jr $ra // Return
 
-#
-# Called on exception 
-#
+//
+// Called on exception 
+//
 
 __osHandlerStart:
 
@@ -64,9 +65,9 @@ jr $k0
 
 __osHandlerEnd:
 
-#
-# Called on exception by initial vector
-#
+//
+// Called on exception by initial vector
+//
 
 __osHandleException:
 
@@ -75,7 +76,7 @@ savereg
 mfc0 $t0, Cause
 andi $t1, $t0, 0x007c
 
-bnez $t1, .handleException # Interrupt code is 0
+bnez $t1, .handleException // Interrupt code is 0
 
 .handleInterrupt:
 

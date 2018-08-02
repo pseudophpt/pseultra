@@ -20,16 +20,16 @@ env.Replace(AS = 'mips64-as')
 env.Replace(STRIP = 'mips64-strip')
 
 env.Replace(CCFLAGS = '-G0 -EB')
-env.Replace(ASFLAGS = '-32 -G0 -EB -Iinclude -I../../include')
+env.Replace(ASFLAGS = '-G0 -EB -Iinclude -I../../include')
 
 pseultra = env.Library(
     target = 'lib/libpseultra.a',
     source = [
         '#/src/event/event.c',
         '#/src/event/exception.c',
-        '#/src/event/exception_s.s',
+        '#/src/event/exception_s.sx',
         '#/src/boot/boot.c',
-        '#/src/boot/boot_s.s',
+        '#/src/boot/boot_s.sx',
         '#/src/memory/malloc.c',
         '#/src/memory/memcpy.c',
     ] 

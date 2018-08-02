@@ -28,9 +28,9 @@ env.Replace(STRIP = 'mips64-strip')
 env.Replace(OBJCOPY = 'mips64-objcopy')
 
 env.Replace(CCFLAGS = '-G0 -EB')
-env.Replace(ASFLAGS = '-32 -G0 -EB -Iinclude -I../../include')
+env.Replace(ASFLAGS = '-G0 -EB -Iinclude -I../../include')
 
-env.Object(target = '#/src/boot.o', source = '#/src/boot.s')
+env.Object(target = '#/src/boot.o', source = '#/src/boot.sx')
 env.Command(target = '#/src/boot.elf', source = '#/src/boot.o', action = '$LD -T link.ld')
 boot = env.Command(target = '#/lib/boot', source = '#/src/boot.elf', action = '$OBJCOPY --only-section=.text -O binary $SOURCE $TARGET')
 
