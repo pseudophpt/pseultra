@@ -1,0 +1,34 @@
+Import('mips_env')
+
+path = Dir('.').abspath
+
+mips_env.Append(CPPPATH = [path + '/include', path + '/../../include'])
+
+pseultra = mips_env.Library(
+    target = path + '/lib/libpseultra.a',
+    source = [
+        path + '/src/event/event.c',
+        path + '/src/event/exception.c',
+        path + '/src/event/exception_s.sx',
+        path + '/src/boot/boot.c',
+        path + '/src/boot/boot_s.sx',
+        path + '/src/memory/malloc.c',
+        path + '/src/memory/memcpy.c',
+    ] 
+)
+
+prefix = mips_env.GetOption('prefix')
+
+prefix_bin = prefix + '/bin'
+prefix_include = prefix + '/include'
+prefix_lib = prefix + '/lib'
+
+mips_env.Install(prefix_bin, [])
+mips_env.Install(prefix_include, [path + '/include/os.h', path + '/include/os'])
+mips_env.Install(prefix_lib, [pseultra])
+
+install_bin = mips_env.Alias('install-bin', prefix_bin)
+install_lib = mips_env.Alias('install-lib', prefix_lib)
+install_include = mips_env.Alias('install-include', prefix_include)
+
+mips_env.Alias('install', [install_bin, install_lib, install_include])

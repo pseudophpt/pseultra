@@ -1,5 +1,7 @@
-import os
+env = Environment()
+Export('env')
 
+<<<<<<< HEAD
 AddOption(
     '--prefix', 
     dest = 'prefix',
@@ -55,3 +57,8 @@ install_include = env.Alias('install-include', prefix_include)
 install_reqs = [install_bin, install_lib, install_include]
 
 env.Alias('install', [install_bin, install_lib, install_include])
+=======
+SConscript('../../SConsopt')
+SConscript('../SConsmips')
+SConscript('./SConscript')
+>>>>>>> develop

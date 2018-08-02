@@ -1,0 +1,15 @@
+native_env = Environment()
+
+import os
+
+native_env.Replace(CC = 'gcc')
+native_env.Replace(LD = 'ld')
+native_env.Replace(AS = 'as')
+native_env.Replace(STRIP = 'strip')
+native_env.Replace(OBJDUMP = 'objdump')
+native_env.Replace(OBJCOPY = 'objcopy')
+native_env.Replace(AR = 'ar')
+
+native_env.Replace(ENV = os.environ)
+
+Export('native_env')

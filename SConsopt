@@ -1,0 +1,30 @@
+AddOption(
+    '--prefix', 
+    dest = 'prefix',
+    type = 'string',
+    nargs = 1,
+    default = '/opt/pseultra/',
+    action = 'store',
+    metavar = 'DIR',
+    help = 'installation prefix'
+)
+
+AddOption(
+    '--cc-prefix', 
+    dest = 'cc_prefix',
+    type = 'string',
+    nargs = 1,
+    default = 'mips64',
+    action = 'store',
+    metavar = 'CC_PREFIX',
+    help = 'MIPS cross compiler prefix'
+)
+
+AddOption(
+    '--doc', 
+    dest = 'gen_doc',
+    default = False,
+    action = 'store',
+    help = 'generate documentation'
+)
+
