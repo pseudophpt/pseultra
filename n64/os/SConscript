@@ -18,10 +18,12 @@ pseultra = mips_env.Library(
 )
 
 prefix = mips_env.GetOption('prefix')
+print mips_env.GetOption('gen_doc')
 
 prefix_bin = prefix + '/bin'
 prefix_include = prefix + '/include'
 prefix_lib = prefix + '/lib'
+prefix_doc = prefix + '/doc'
 
 mips_env.Install(prefix_bin, [])
 mips_env.Install(prefix_include, [path + '/include/os.h', path + '/include/os'])
