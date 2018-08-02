@@ -23,8 +23,7 @@ AddOption(
 AddOption(
     '--doc', 
     dest = 'gen_doc',
-    default = False,
-    action = 'store',
+    action = 'store_true',
     help = 'generate documentation'
 )
 

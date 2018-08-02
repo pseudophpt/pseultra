@@ -4,6 +4,16 @@ path = Dir('.').abspath
 
 mips_env.Append(CPPPATH = [path + '/include', path + '/../../include'])
 
+gen_doc = mips_env.GetOption('gen_doc')
+
+# If generating documents
+if gen_doc:
+    doc = mips_env.Command(
+        target = path + '/doc',
+        source = [],
+        action = 'doxygen doxygen.conf'
+    )
+
 pseultra = mips_env.Library(
     target = path + '/lib/libpseultra.a',
     source = [
@@ -17,20 +27,28 @@ pseultra = mips_env.Library(
     ] 
 )
 
+
+
 prefix = mips_env.GetOption('prefix')
-print mips_env.GetOption('gen_doc')
 
 prefix_bin = prefix + '/bin'
 prefix_include = prefix + '/include'
 prefix_lib = prefix + '/lib'
-prefix_doc = prefix + '/doc'
+prefix_doc = prefix + '/doc/os'
 
 mips_env.Install(prefix_bin, [])
 mips_env.Install(prefix_include, [path + '/include/os.h', path + '/include/os'])
 mips_env.Install(prefix_lib, [pseultra])
+mips_env.Install(prefix_doc, [path + '/doc/html', path + '/doc/latex'])
 
 install_bin = mips_env.Alias('install-bin', prefix_bin)
 install_lib = mips_env.Alias('install-lib', prefix_lib)
 install_include = mips_env.Alias('install-include', prefix_include)
+install_doc = mips_env.Alias('install-doc', prefix_doc)
 
-mips_env.Alias('install', [install_bin, install_lib, install_include])
+installs = [install_bin, install_lib, install_include]
+
+if gen_doc:
+    installs += install_doc
+
+mips_env.Alias('install', installs)
