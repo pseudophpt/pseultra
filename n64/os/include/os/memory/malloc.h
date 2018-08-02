@@ -5,23 +5,37 @@
  * (C) pseudophpt 2018 
  */
 
+/**
+ * @file include/os/memory/malloc.h
+ * @brief Memory allocation header 
+ * @date 1 Aug 2018
+ * @author pseudophpt
+ *
+ * This file provides definitions for structs, constants, and functions related to memory allocation 
+ */
+
 #ifndef OS_MEMORY_MALLOC_H_GUARD
 #define OS_MEMORY_MALLOC_H_GUARD
 
-// Memory allocation linked list
-struct OSHeapLink_t {
+/** @brief Struct describing one contiguous block of memory on a heap*/
+typedef struct OSHeapLink_t {
+    /** @brief Pointer to previous node */
 	struct OSHeapLink_t *prev;
+    /** @brief Pointer to next node */
 	struct OSHeapLink_t *next;
-	u8 flags; // 0 for used, 1 for FREE
+    /** @brief Flags about the memory block */
+	u8 flags;
+    /** @brief Size of the memory block */
 	u32 size;
-};
+} OSHeapLink;
 
-typedef struct OSHeapLink_t OSHeapLink;
+/** @brief Size of one block header */
+#define OS_HEAP_HEAD_SIZE sizeof(OSHeapLink)
 
-#define HEAP_HEAD_SIZE sizeof(OSHeapLink)
-
-#define ALLOC_USED 0
-#define ALLOC_FREE 1
+/** @brief Flag describing a used block */
+#define OS_ALLOC_USED 0
+/** @brief Flag describing a free block */
+#define OS_ALLOC_FREE 1
 
 // Functions
 void osInitHeap (void *heap, int heap_size);

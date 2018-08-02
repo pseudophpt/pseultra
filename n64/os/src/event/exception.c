@@ -5,6 +5,15 @@
  * (C) pseudophpt 2018 
  */
 
+/**
+ * @file src/event/exception.c
+ * @brief Exception handling routines
+ * @date 1 Aug 2018
+ * @author pseudophpt
+ *
+ * This file provides routines for the handling of exceptions.
+ */
+
 #include <os.h>
 
 extern u32 __osHandlerStart;
@@ -20,6 +29,14 @@ void __osHandleRCPInterrupt ();
 extern OSEventQueue __osMainEventQueue;
 extern OSEventQueue __osInterruptEventQueue [INT_RCP_COUNT];
 
+/**
+ * @internal
+ * @brief Initializes exception handlers
+ * @date 1 Aug 2018
+ * @author pseudophpt
+ *
+ * This function copies the general event handler into the three exception vectors for non-NMI exceptions, which are: TLB miss, XTLB miss, and General Exception. Additionally, it unmasks all interrupts.
+ */
 void __osInitExceptions (void) {
     // Install exception handler for the three non-NMI exceptions
     osCopyMemory((void *)EXC_VEC_TLB_MISS, (void *)&__osHandlerStart, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
@@ -28,22 +45,55 @@ void __osInitExceptions (void) {
     __osUnmaskInterrupts();
 }
 
+/**
+ * @brief Returns RCP interrupt mask
+ * @return RCP interrupt mask
+ * @date 1 Aug 2018
+ * @author pseudophpt
+ *
+ * This function returns the interrupt mask associated with masking the 6 RCP interrupts.
+ */
 u32 osGetIntMask (void) {
     return *(u32 *)(KSEG1_ADDR(MI_INTR_MASK_REG));
 }
 
+/**
+ * @brief Sets RCP interrupt mask
+ * @param[in] mask RCP interrupt mask
+ * @date 1 Aug 2018
+ * @author pseudophpt
+ *
+ * This function sets the interrupt mask associated with masking the 6 RCP interrupts.
+ */
 void osSetIntMask (u32 mask) {
     *(u32 *)(KSEG1_ADDR(MI_INTR_MASK_REG)) = mask;
 }
 
-// Handle general interrupt
+/**
+ * @internal
+ * @brief Handles a general MIPS interrupt 
+ * @param[in] interrupt Coprocessor 0 Cause register at the time of interrupt, masked for only the interrupt bit.
+ * @date 1 Aug 2018
+ * @author pseudophpt
+ * @todo Add handling for timer and the 2 software interrupts
+ *
+ * This function handles a general interrupt given the Coprocessor 0 Cause register at the time of interrupt, masked for only the interrupt bit. It should only be called within an exception handler where the cause has been determined to be an interrupt
+ */
 void __osHandleInterrupt (u32 interrupt) {
     if (interrupt & INT_CAUSE_MASK_RCP) {
         __osHandleRCPInterrupt();
     }
 }
 
-// Handle RCP interrupt 
+/**
+ * @internal
+ * @brief Handles an RCP interrupt 
+ * @date 1 Aug 2018
+ * @author pseudophpt
+ * @todo Add parameter for interrupt register
+ *
+ * This function handles an RCP interrupt by copying the corresponding event queue to the main event queue, and disabling the interrupt line for each cause. 
+ */
 void __osHandleRCPInterrupt () {
     int interrupt = *(u32 *)(KSEG1_ADDR(MI_INTR_REG));
 

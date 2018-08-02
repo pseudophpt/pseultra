@@ -52,4 +52,6 @@ install_bin = env.Alias('install-bin', prefix_bin)
 install_lib = env.Alias('install-lib', prefix_lib)
 install_include = env.Alias('install-include', prefix_include)
 
+install_reqs = [install_bin, install_lib, install_include]
+
 env.Alias('install', [install_bin, install_lib, install_include])
