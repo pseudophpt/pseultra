@@ -1,0 +1,20 @@
+mips_env = Environment()
+
+import os
+
+cc_prefix = mips_env.GetOption('cc_prefix')
+
+mips_env.Replace(CC = cc_prefix + '-gcc')
+mips_env.Replace(LD = cc_prefix + '-ld')
+mips_env.Replace(AS = cc_prefix + '-as')
+mips_env.Replace(STRIP = cc_prefix + '-strip')
+mips_env.Replace(OBJDUMP = cc_prefix + '-objdump')
+mips_env.Replace(OBJCOPY = cc_prefix + '-objcopy')
+mips_env.Replace(AR = cc_prefix + '-ar')
+
+mips_env.Replace(CCFLAGS = '-G0 -EB')
+mips_env.Replace(ASFLAGS = '-G0 -EB -Iinclude -I../../include')
+
+mips_env.Replace(ENV = os.environ)
+
+Export('mips_env')

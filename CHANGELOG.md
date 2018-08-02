@@ -7,6 +7,7 @@
 
 ### Changed
 - SemVer for versioning
+- SConstruct files are now more flexible to allow building from any directory
 
 ## 1.0.0 - 2018-08-01
 
