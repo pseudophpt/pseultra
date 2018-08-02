@@ -4,6 +4,8 @@
 
 ### Added
 - C Preprocessing for assembly
+- SConstruct files are now more flexible to allow building from any directory
+- Documentation using `doxygen`
 
 ### Changed
 - SemVer for versioning

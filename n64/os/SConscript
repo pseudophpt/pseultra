@@ -4,17 +4,38 @@ path = Dir('.').abspath
 
 mips_env.Append(CPPPATH = [path + '/include', path + '/../../include'])
 
+gen_doc = mips_env.GetOption('gen_doc')
+gen_priv_doc = mips_env.GetOption('gen_priv_doc')
+
+sources = [
+    path + '/src/event/event.c',
+    path + '/src/event/exception.c',
+    path + '/src/event/exception_s.sx',
+    path + '/src/boot/boot.c',
+    path + '/src/boot/boot_s.sx',
+    path + '/src/memory/malloc.c',
+    path + '/src/memory/memcpy.c',
+    path + '/include/os/event/event.h',
+    path + '/include/os/event/exception.h',
+    path + '/include/os/memory/malloc.h',
+    path + '/include/os/memory/memcpy.h',
+]
+
+# If generating documents
+if gen_priv_doc:
+    conf = path + '/Doxyfile'
+else:
+    conf = path + '/Doxyfile.priv'
+
+doc = mips_env.Command(
+    target = path + '/doc/last_updated',
+    source = sources,# + [path + '/Doxyfile', path + '/Doxyfile.priv', path +'/README.md'],
+    action = ['doxygen ' + conf, 'date > $TARGET']
+)
+
 pseultra = mips_env.Library(
     target = path + '/lib/libpseultra.a',
-    source = [
-        path + '/src/event/event.c',
-        path + '/src/event/exception.c',
-        path + '/src/event/exception_s.sx',
-        path + '/src/boot/boot.c',
-        path + '/src/boot/boot_s.sx',
-        path + '/src/memory/malloc.c',
-        path + '/src/memory/memcpy.c',
-    ] 
+    source = sources
 )
 
 prefix = mips_env.GetOption('prefix')
@@ -22,13 +43,18 @@ prefix = mips_env.GetOption('prefix')
 prefix_bin = prefix + '/bin'
 prefix_include = prefix + '/include'
 prefix_lib = prefix + '/lib'
+prefix_doc = prefix + '/doc/os'
 
 mips_env.Install(prefix_bin, [])
 mips_env.Install(prefix_include, [path + '/include/os.h', path + '/include/os'])
 mips_env.Install(prefix_lib, [pseultra])
+mips_env.Install(prefix_doc, [path + '/doc/html', path + '/doc/latex'])
 
 install_bin = mips_env.Alias('install-bin', prefix_bin)
 install_lib = mips_env.Alias('install-lib', prefix_lib)
 install_include = mips_env.Alias('install-include', prefix_include)
+install_doc = mips_env.Alias('install-doc', prefix_doc)
 
-mips_env.Alias('install', [install_bin, install_lib, install_include])
+installs = [install_bin, install_lib, install_include, install_doc]
+
+mips_env.Alias('install', installs)
