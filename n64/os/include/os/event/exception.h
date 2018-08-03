@@ -56,6 +56,12 @@ void osSetIntMask(u32 mask);
  */
 
 #ifdef __asm__
+.extern __osInitExceptions
+#else
+void __osInitExceptions ();
+#endif
+
+#ifdef __asm__
 .extern __osHandleInterrupt
 #else
 void __osHandleInterrupt (u32 interrupt);

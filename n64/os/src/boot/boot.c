@@ -16,10 +16,6 @@
 
 #include <os_priv.h>
 
-extern OSEventQueue __osMainEventQueue;
-
-extern void __osInitExceptions (void);
-extern OSEvent __osDequeueEvent (OSEventQueue *queue);
 extern void main (void);
 
 /**
