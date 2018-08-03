@@ -7,7 +7,6 @@
 
 #include <os_priv.sx>
 
-.extern __osBoot
 .global _boot
 
 // Boot process
