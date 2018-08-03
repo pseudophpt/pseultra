@@ -1,45 +1,4 @@
-#
-# pseultra/tools/makerom/SConstruct
-# Build file for makerom 
-# 
-# (C) pseudophpt 2018
-#
+SConscript('../SConsnative')
 
-AddOption(
-    '--prefix', 
-    dest = 'prefix',
-    type = 'string',
-    nargs = 1,
-    action = 'store',
-    metavar = 'DIR',
-    help = 'installation prefix'
-)
-
-env = Environment(PREFIX = GetOption('prefix'))
-
-env.Append(CPPPATH = ['#/include', '#/../../include'])
-env.Append(CCFLAGS = '-g')
-
-makerom = env.Program(
-    target = 'bin/makerom',
-    source = ['#/src/elf.c', '#/src/makerom.c']
-)
-
-prefix = env.GetOption('prefix')
-
-if prefix is None:
-    prefix = '/opt/pseultra'
-
-prefix_bin = prefix + '/bin'
-prefix_include = prefix + '/include'
-prefix_lib = prefix + '/lib'
-
-env.Install(prefix_bin, [makerom])
-env.Install(prefix_include, [])
-env.Install(prefix_lib, [])
-
-install_bin = env.Alias('install-bin', prefix_bin)
-install_lib = env.Alias('install-lib', prefix_lib)
-install_include = env.Alias('install-include', prefix_include)
-
-env.Alias('install', [install_bin, install_lib, install_include])
+SConscript('../../SConsopt')
+SConscript('./SConscript')

@@ -15,11 +15,11 @@ To use `pseultra`, you need `scons`, a native C toolchain, as well as a toolchai
 
 ### Installing
 
-To install `pseultra`, just `scons` then `sudo scons install` for each tool you'd like to make.
+To install `pseultra`, just `scons` then `sudo scons install` in the root directory, or in the directory of any individual part you'd like to compile 
 
 ## Testing
 
-To test `pseultra`, first make the tool you'd like to test from the root directory using `make -C <tool_name>`, and then test it from the root directory with `<tool_name>/unit-tests/test`
+Testing is not currently available
 
 ## Contributing
 
@@ -33,11 +33,7 @@ See also the list of [contributors](https://github.com/pseudophpt/pseultra/graph
 
 ## Versioning
 
-`pseultra` uses the following version specification:
-
-`<major>.<minor>-<year>.<month>.<day>`
-
-Major releases are for large changes, additions, or removals of functionality. Minor releases are for bug fixes, code organization, and removal of deprecated functionality.
+`pseultra` uses SemVer for versioning
 
 ## License
 

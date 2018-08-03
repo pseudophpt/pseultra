@@ -1,0 +1,33 @@
+#
+# pseultra/n64/boot/SConscript
+# Build file for boot
+# 
+# (C) pseudophpt 2018
+#
+
+Import('mips_env')
+
+path = Dir('.').abspath
+mips_env['BUILD_ROOT'] = path
+
+mips_env.Append(CPPPATH = [path + '/include', path + '/../../include'])
+
+mips_env.Object(target = path + '/src/boot.o', source = path + '/src/boot.sx')
+mips_env.Command(target = path + '/src/boot.elf', source = path + '/src/boot.o', action = '$LD -T ' + path + '/link.ld -o $TARGET $SOURCE')
+boot = mips_env.Command(target = path + '/lib/boot', source = path + '/src/boot.elf', action = '$OBJCOPY --only-section=.text -O binary $SOURCE $TARGET')
+
+prefix = mips_env.GetOption('prefix')
+
+prefix_bin = prefix + '/bin'
+prefix_include = prefix + '/include'
+prefix_lib = prefix + '/lib'
+
+mips_env.Install(prefix_bin, [])
+mips_env.Install(prefix_include, [])
+mips_env.Install(prefix_lib, [boot])
+
+install_bin = mips_env.Alias('install-bin', prefix_bin)
+install_lib = mips_env.Alias('install-lib', prefix_lib)
+install_include = mips_env.Alias('install-include', prefix_include)
+
+mips_env.Alias('install', [install_bin, install_lib, install_include])

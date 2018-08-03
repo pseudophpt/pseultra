@@ -1,54 +1,6 @@
-#
-# pseultra/n64/boot/SConstruct
-# Build file for boot
-# 
-# (C) pseudophpt 2018
-#
+env = Environment()
+Export('env')
 
-import os
-
-AddOption(
-    '--prefix', 
-    dest = 'prefix',
-    type = 'string',
-    nargs = 1,
-    action = 'store',
-    metavar = 'DIR',
-    help = 'installation prefix'
-)
-
-env = Environment(PREFIX = GetOption('prefix'), ENV = os.environ)
-
-env.Append(CPPPATH = ['#/include', '#/../../include'])
-
-env.Replace(CC = 'mips64-gcc')
-env.Replace(LD = 'mips64-ld')
-env.Replace(AS = 'mips64-as')
-env.Replace(STRIP = 'mips64-strip')
-env.Replace(OBJCOPY = 'mips64-objcopy')
-
-env.Replace(CCFLAGS = '-G0 -EB')
-env.Replace(ASFLAGS = '-32 -G0 -EB -Iinclude -I../../include')
-
-env.Object(target = '#/src/boot.o', source = '#/src/boot.s')
-env.Command(target = '#/src/boot.elf', source = '#/src/boot.o', action = '$LD -T link.ld')
-boot = env.Command(target = '#/lib/boot', source = '#/src/boot.elf', action = '$OBJCOPY --only-section=.text -O binary $SOURCE $TARGET')
-
-prefix = env.GetOption('prefix')
-
-if prefix is None:
-    prefix = '/opt/pseultra'
-
-prefix_bin = prefix + '/bin'
-prefix_include = prefix + '/include'
-prefix_lib = prefix + '/lib'
-
-env.Install(prefix_bin, [])
-env.Install(prefix_include, [])
-env.Install(prefix_lib, [boot])
-
-install_bin = env.Alias('install-bin', prefix_bin)
-install_lib = env.Alias('install-lib', prefix_lib)
-install_include = env.Alias('install-include', prefix_include)
-
-env.Alias('install', [install_bin, install_lib, install_include])
+SConscript('../../SConsopt')
+SConscript('../SConsmips')
+SConscript('./SConscript')

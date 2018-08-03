@@ -1,0 +1,7 @@
+# Set up toolchain for native compiling
+SConscript('./SConsnative')
+
+# Call build scripts
+SConscript('./makerom/SConscript')
+SConscript('./bootcsum/SConscript')
+SConscript('./bootcsumr/SConscript')
