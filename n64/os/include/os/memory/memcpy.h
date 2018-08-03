@@ -18,6 +18,10 @@
 #define OS_MEMORY_MEMCPY_H_GUARD
 
 // Functions
+#ifdef __asm__
+.extern osCopyMemory
+#else
 void osCopyMemory (void *dest, void *src, int size);
+#endif
 
 #endif

@@ -5,15 +5,13 @@
  * (C) pseudophpt 2018 
  */
 
-#include <n64.sx>
+#include <os_priv.sx>
 #include <mips.sx>
 
 .global __osHandlerStart
 .global __osHandlerEnd
 .global __osHandleException
 .global __osUnmaskInterrupts
-
-.extern __osHandleInterrupt
 
 .macro savereg
 

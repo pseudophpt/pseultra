@@ -17,6 +17,15 @@
 #ifndef OS_MEMORY_MALLOC_H_GUARD
 #define OS_MEMORY_MALLOC_H_GUARD
 
+/** @brief Size of one block header */
+#define OS_HEAP_HEAD_SIZE sizeof(OSHeapLink)
+/** @brief Flag describing a used block */
+#define OS_ALLOC_USED 0
+/** @brief Flag describing a free block */
+#define OS_ALLOC_FREE 1
+
+#ifndef __asm__
+
 /** @brief Struct describing one contiguous block of memory on a heap*/
 typedef struct OSHeapLink_t {
     /** @brief Pointer to previous node */
@@ -29,17 +38,25 @@ typedef struct OSHeapLink_t {
 	u32 size;
 } OSHeapLink;
 
-/** @brief Size of one block header */
-#define OS_HEAP_HEAD_SIZE sizeof(OSHeapLink)
-
-/** @brief Flag describing a used block */
-#define OS_ALLOC_USED 0
-/** @brief Flag describing a free block */
-#define OS_ALLOC_FREE 1
+#endif
 
 // Functions
+#ifdef __asm__
+.extern osInitHeap
+#else
 void osInitHeap (void *heap, int heap_size);
+#endif
+
+#ifdef __asm__
+.extern osMalloc
+#else
 void *osMalloc (int size, void *heap);
+#endif
+
+#ifdef __asm__
+.extern osFree
+#else
 void osFree (void *region);
+#endif
 
 #endif

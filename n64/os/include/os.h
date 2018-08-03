@@ -19,6 +19,8 @@
 
 #include <n64.h>
 
+#ifndef __asm__
+
 /** @brief Unsigned 8 bit type */
 typedef unsigned char u8;
 /** @brief Signed 8 bit type */
@@ -33,6 +35,8 @@ typedef signed short s16;
 typedef unsigned long u32;
 /** @brief Signed 32 bit type */
 typedef signed long s32;
+
+#endif
 
 /** @brief Void pointer to 0 */
 #define NULL ((void *) 0)

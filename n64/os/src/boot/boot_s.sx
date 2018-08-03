@@ -5,7 +5,7 @@
  * (C) pseudophpt 2018 
  */
 
-#include <n64.sx>
+#include <os_priv.sx>
 
 .extern __osBoot
 .global _boot
