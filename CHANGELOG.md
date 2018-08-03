@@ -4,12 +4,14 @@
 
 ### Added
 - C Preprocessing for assembly
-- SConstruct files are now more flexible to allow building from any directory
 - Documentation using `doxygen`
 
 ### Changed
 - SemVer for versioning
 - SConstruct files are now more flexible to allow building from any directory
+
+### Fixed
+- Destination pointer is now checked for alignment in osCopyMemory()
 
 ## 1.0.0 - 2018-08-01
 
