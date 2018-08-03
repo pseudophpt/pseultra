@@ -39,6 +39,12 @@
 void osCopyMemory (void *dest, void *src, int size);
 #endif
 
+#ifdef __asm__
+.extern osZeroMemory
+#else
+void osZeroMemory (void *dest, int size);
+#endif
+
 /*
  * Public variables
  */

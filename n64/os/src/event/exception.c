@@ -25,7 +25,8 @@
  * This function copies the general event handler into the three exception vectors for non-NMI exceptions, which are: TLB miss, XTLB miss, and General Exception. Additionally, it unmasks all interrupts.
  */
 void 
-__osInitExceptions (void)
+__osInitExceptions 
+()
 {
     // Install exception handler for the three non-NMI exceptions
     osCopyMemory((void *)EXC_VEC_TLB_MISS, (void *)&__osHandlerStart, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
