@@ -27,8 +27,9 @@
  * This function copies the region whose size is defined in the size parameter from the region at src to dest.
  *
  */
-
-void osCopyMemory (void *dest, void *src, int size) {
+void
+osCopyMemory
+(void *dest, void *src, int size) {
     while (size > 0) {
         // Must do byte write
         if ((((u32)src % 2) == 1) || (((u32)dest % 2) == 1) || ((size % 2) == 1)) {

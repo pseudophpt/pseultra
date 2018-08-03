@@ -30,7 +30,9 @@
  * @see osMalloc
  * @see osFree
  */
-void osInitHeap (void *heap, int heap_size) {
+void
+osInitHeap
+(void *heap, int heap_size) {
     // Beginning of heap is a heap link
     OSHeapLink *initial_header = (OSHeapLink *)heap;
 
@@ -58,7 +60,9 @@ void osInitHeap (void *heap, int heap_size) {
  * @see osInitHeap
  * @see osFree
  */
-void *osMalloc (int size, void *heap) {
+void
+*osMalloc
+(int size, void *heap) {
     // Beginning of heap is a heap link
     OSHeapLink *initial_header = (OSHeapLink *)heap;
     OSHeapLink *current_header = initial_header;
@@ -114,7 +118,9 @@ void *osMalloc (int size, void *heap) {
  * @see osInitHeap
  * @see osMalloc
  */
-void osFree (void *region) {
+void
+osFree
+(void *region) {
     OSHeapLink *region_header = ((OSHeapLink *)region) - 1;
 
     // Regions before and ahead exist and are both free

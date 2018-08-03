@@ -28,7 +28,9 @@ extern void main (void);
  *
  * @see __osInitExceptions()
  */
-void __osBoot () {
+void 
+__osBoot
+() {
     // Initialize exceptions
     __osInitExceptions();
 

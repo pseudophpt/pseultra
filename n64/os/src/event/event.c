@@ -32,8 +32,9 @@ OSEventQueue __osInterruptEventQueue [INT_RCP_COUNT];
  * This function schedules an event for processing by placing it on the queue which corresponds to the OSEvent type value. If one of the RCP interrupt types are specified, they are placed on the corresponding queue to be copied to the main queue when that interrupt fires. If the main type is specified, the event is immediately schedules on the main event queue.
  *
  */
-
-void osScheduleEvent (OSEvent event) {
+void 
+osScheduleEvent 
+(OSEvent event) {
     switch (event.type) {
     case OS_EVENT_TYPE_SP:
         __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_SP]);
@@ -71,7 +72,9 @@ void osScheduleEvent (OSEvent event) {
  *
  * @see __osDequeueEvent
  */
-void __osEnqueueEvent (OSEvent event, OSEventQueue *queue) {
+void 
+__osEnqueueEvent 
+(OSEvent event, OSEventQueue *queue) {
     // Is there space? If not, return
     if ((queue->end + 1) % OS_EVENT_QUEUE_SIZE == queue->start) {
         return;
@@ -96,7 +99,9 @@ void __osEnqueueEvent (OSEvent event, OSEventQueue *queue) {
  *
  * @see __osEnqueueEvent
  */
-OSEvent __osDequeueEvent (OSEventQueue *queue) {
+OSEvent 
+__osDequeueEvent
+(OSEventQueue *queue) {
     // Is there an event in the queue?
     if (queue->end == queue->start) {
         OSEvent no_event;
@@ -124,7 +129,9 @@ OSEvent __osDequeueEvent (OSEventQueue *queue) {
  *
  * This function removes the events from a source queue, specified in the src parameter, and places them at the end of the destination queue.  
  */
-void __osCopyEventQueue (OSEventQueue *src, OSEventQueue *dest) {
+void 
+__osCopyEventQueue
+(OSEventQueue *src, OSEventQueue *dest) {
     while (src->start != src->end) {
         __osEnqueueEvent(__osDequeueEvent(src), dest);
     }
