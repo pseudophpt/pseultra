@@ -14,7 +14,7 @@
  * This file provides routines for managing the dynamic allocation of memory, such as allocation, deallocation, and initialization of the heap. These routines use a linked list to manage a heap of memory. 
  */
 
-#include <os.h>
+#include <os_priv.h>
 
 /**
  * @brief Initializes the specified heap

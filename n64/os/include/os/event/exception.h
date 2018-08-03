@@ -17,7 +17,22 @@
 #ifndef OS_EVENT_EXCEPTION_H_GUARD
 #define OS_EVENT_EXCEPTION_H_GUARD
 
+// Functions
 u32 osGetIntMask (void);
 void osSetIntMask(u32 mask);
+
+// Variables
+
+#ifdef __os_internal__
+// Internal functions
+void __osHandleInterrupt (u32 interrupt);
+void __osHandleRCPInterrupt ();
+void __osHandleException();
+void __osUnmaskInterrupts();
+
+// Internal variables
+extern u32 __osHandlerStart;
+extern u32 __osHandlerEnd;
+#endif
 
 #endif

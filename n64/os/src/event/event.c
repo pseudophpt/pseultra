@@ -15,11 +15,7 @@
  * This file provides routines for the creation and scheduling of events 
  */
 
-#include <os.h>
-
-void __osEnqueueEvent (OSEvent event, OSEventQueue *queue);
-OSEvent __osDequeueEvent (OSEventQueue *queue);
-void __osCopyEventQueue (OSEventQueue *src, OSEventQueue *dest);
+#include <os_priv.h>
 
 /** @internal @brief Queue of events from which the main loop executes */
 OSEventQueue __osMainEventQueue;

@@ -14,20 +14,7 @@
  * This file provides routines for the handling of exceptions.
  */
 
-#include <os.h>
-
-extern u32 __osHandlerStart;
-extern u32 __osHandlerEnd;
-
-extern void __osUnmaskInterrupts (void);
-extern void __osEnqueueEvent (OSEvent event, OSEventQueue *queue);
-extern void __osCopyEventQueue (OSEventQueue *src, OSEventQueue *dest);
-
-void __osHandleInterrupt (u32 interrupt);
-void __osHandleRCPInterrupt ();
-
-extern OSEventQueue __osMainEventQueue;
-extern OSEventQueue __osInterruptEventQueue [INT_RCP_COUNT];
+#include <os_priv.h>
 
 /**
  * @internal

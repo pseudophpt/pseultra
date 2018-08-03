@@ -57,4 +57,18 @@ typedef struct OSEventQueue_t {
 // Functions
 void osScheduleEvent (OSEvent event);
 
+// Variables
+
+// Internal functions
+#ifdef __os_internal__
+
+void __osEnqueueEvent (OSEvent event, OSEventQueue *queue);
+OSEvent __osDequeueEvent (OSEventQueue *queue);
+void __osCopyEventQueue (OSEventQueue *src, OSEventQueue *dest);
+
+// Internal variables
+extern OSEventQueue __osMainEventQueue;
+extern OSEventQueue __osInterruptEventQueue [];
+#endif
+
 #endif

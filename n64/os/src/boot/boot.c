@@ -14,7 +14,7 @@
  * This file provides routines for the boot process
  */
 
-#include <os.h>
+#include <os_priv.h>
 
 extern OSEventQueue __osMainEventQueue;
 

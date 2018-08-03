@@ -14,7 +14,7 @@
  * This file provides routines a routine to copy memory from source to destination.
  */
 
-#include <os.h>
+#include <os_priv.h>
 
 /**
  * @brief Copy memory from a source to destination
