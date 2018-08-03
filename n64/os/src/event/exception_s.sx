@@ -6,7 +6,6 @@
  */
 
 #include <os_priv.sx>
-#include <mips.sx>
 
 .global __osHandlerStart
 .global __osHandlerEnd
