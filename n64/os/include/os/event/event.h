@@ -17,6 +17,10 @@
 #ifndef OS_EVENT_EVENT_H_GUARD
 #define OS_EVENT_EVENT_H_GUARD
 
+/*
+ * Macros
+ */
+
 /** @brief Type for an event which is added to the main queue on an SP interrupt */
 #define OS_EVENT_TYPE_SP 0 
 /** @brief Type for an event which is added to the main queue on a DP interrupt */
@@ -35,6 +39,10 @@
 #define OS_EVENT_TYPE_NONE 255 // No event (used if no event could be dequeued)
 /** @brief Size for OS defined event queues */
 #define OS_EVENT_QUEUE_SIZE 32
+
+/*
+ * Structs
+ */
 
 #ifndef __asm__
 
@@ -58,17 +66,25 @@ typedef struct OSEventQueue_t {
 
 #endif
 
-// Functions
+/*
+ * Public functions
+ */
+
 #ifdef __asm__
 .extern osScheduleEvent
 #else
 void osScheduleEvent (OSEvent event);
 #endif
 
-// Variables
+/*
+ * Public variables
+ */
 
-// Internal functions
 #ifdef __os_internal__
+
+/*
+ * Internal functions
+ */
 
 #ifdef __asm__
 .extern __osEnqueueEvent
@@ -88,7 +104,10 @@ OSEvent __osDequeueEvent (OSEventQueue *queue);
 void __osCopyEventQueue (OSEventQueue *src, OSEventQueue *dest);
 #endif
 
-// Internal variables
+/*
+ * Internal variables
+ */
+
 #ifdef __asm__
 .extern __osMainEventQueue
 #else

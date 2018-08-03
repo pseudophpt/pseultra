@@ -17,12 +17,20 @@
 #ifndef OS_MEMORY_MALLOC_H_GUARD
 #define OS_MEMORY_MALLOC_H_GUARD
 
+/*
+ * Macros
+ */
+
 /** @brief Size of one block header */
 #define OS_HEAP_HEAD_SIZE sizeof(OSHeapLink)
 /** @brief Flag describing a used block */
 #define OS_ALLOC_USED 0
 /** @brief Flag describing a free block */
 #define OS_ALLOC_FREE 1
+
+/*
+ * Structs
+ */
 
 #ifndef __asm__
 
@@ -40,7 +48,10 @@ typedef struct OSHeapLink_t {
 
 #endif
 
-// Functions
+/*
+ * Public functions
+ */
+
 #ifdef __asm__
 .extern osInitHeap
 #else
@@ -57,6 +68,22 @@ void *osMalloc (int size, void *heap);
 .extern osFree
 #else
 void osFree (void *region);
+#endif
+
+/*
+ * Public variables
+ */
+
+#ifdef __os_internal__
+
+/*
+ * Internal functions
+ */
+
+/*
+ * Internal variables
+ */
+
 #endif
 
 #endif

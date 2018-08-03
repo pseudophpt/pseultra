@@ -17,7 +17,22 @@
 #ifndef OS_EVENT_EXCEPTION_H_GUARD
 #define OS_EVENT_EXCEPTION_H_GUARD
 
-// Functions
+/*
+ * Macros
+ */
+
+/*
+ * Structs
+ */
+
+#ifndef __asm__
+
+#endif
+
+/*
+ * Public functions
+ */
+
 #ifdef __asm__
 .extern osGetIntMask
 #else
@@ -30,10 +45,15 @@ u32 osGetIntMask (void);
 void osSetIntMask(u32 mask);
 #endif
 
-// Variables
+/*
+ * Public variables
+ */
 
 #ifdef __os_internal__
-// Internal functions
+
+/*
+ * Internal functions
+ */
 
 #ifdef __asm__
 .extern __osHandleInterrupt
@@ -59,7 +79,10 @@ void __osHandleException();
 void __osUnmaskInterrupts();
 #endif
 
-// Internal variables
+/*
+ * Internal variables
+ */
+
 #ifdef __asm__
 .extern __osHandlerStart
 #else
