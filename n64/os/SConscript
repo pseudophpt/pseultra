@@ -4,7 +4,6 @@ path = Dir('.').abspath
 
 mips_env.Append(CPPPATH = [path + '/include', path + '/../../include'])
 
-gen_doc = mips_env.GetOption('gen_doc')
 gen_priv_doc = mips_env.GetOption('gen_priv_doc')
 
 sources = [
