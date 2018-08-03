@@ -9,6 +9,7 @@
 ### Changed
 - SemVer for versioning
 - SConstruct files are now more flexible to allow building from any directory
+- Stack size is now 16kb
 
 ### Fixed
 - Destination pointer is now checked for alignment in osCopyMemory()

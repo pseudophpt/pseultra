@@ -36,8 +36,8 @@ typedef signed long s32;
 
 /** @brief Void pointer to 0 */
 #define NULL ((void *) 0)
-/** @brief Default OS stack size @todo Increase this stack size */
-#define OS_STACK_SIZE 0x1000
+/** @brief Default OS stack size */
+#define OS_STACK_SIZE 0x4000
 
 #include <os/memory.h>
 #include <os/event.h>
