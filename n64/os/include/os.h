@@ -46,5 +46,6 @@ typedef signed long s32;
 #include <os/memory.h>
 #include <os/event.h>
 #include <os/boot.h>
+#include <os/interfaces.h>
 
 #endif

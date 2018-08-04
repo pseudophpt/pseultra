@@ -14,10 +14,13 @@ sources = [
     path + '/src/boot/boot_s.sx',
     path + '/src/memory/malloc.c',
     path + '/src/memory/memcpy.c',
+    path + '/src/interfaces/pi.c',
     path + '/include/os/event/event.h',
     path + '/include/os/event/exception.h',
     path + '/include/os/memory/malloc.h',
     path + '/include/os/memory/memcpy.h',
+    path + '/include/os/boot/boot.h',
+    path + '/include/os/interfaces/pi.h',
 ]
 
 # If generating documents
@@ -45,7 +48,7 @@ prefix_lib = prefix + '/lib'
 prefix_doc = prefix + '/doc/os'
 
 mips_env.Install(prefix_bin, [])
-mips_env.Install(prefix_include, [path + '/include/os.h', path + '/include/os'])
+mips_env.Install(prefix_include, [path + '/include/os_priv.h', path + '/include/os.h', path + '/include/os'])
 mips_env.Install(prefix_lib, [pseultra])
 mips_env.Install(prefix_doc, [path + '/doc/html', path + '/doc/latex'])
 
