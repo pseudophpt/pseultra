@@ -5,6 +5,9 @@
 ### Added
 - Memory zeroing functionality (see osZeroMemory())
 
+### Removed
+-  Documentation build from `scons` (users may do it manually now by running `doxygen`)
+
 ## [1.0.1](https://github.com/pseudophpt/pseultra/compare/v1.0.0...v1.0.1) - 2018-08-02
 
 ### Added

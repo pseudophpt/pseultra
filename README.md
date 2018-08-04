@@ -15,7 +15,9 @@ To use `pseultra`, you need `scons`, a native C toolchain, as well as a toolchai
 
 ### Installing
 
-To install `pseultra`, just `scons` then `sudo scons install` in the root directory, or in the directory of any individual part you'd like to compile 
+To install `pseultra`, just `scons` then `sudo scons install` in the root directory, or in the directory of any individual part you'd like to compile.
+
+To build the documentation, run `doxygen` in the root directory, or optionally, `doxygen Doxyfile.priv` to include documentation on internal functions.
 
 ## Testing
 

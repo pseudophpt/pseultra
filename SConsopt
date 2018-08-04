@@ -19,11 +19,3 @@ AddOption(
     metavar = 'CC_PREFIX',
     help = 'MIPS cross compiler prefix'
 )
-
-AddOption(
-    '--internal-doc', 
-    dest = 'gen_priv_doc',
-    action = 'store_true',
-    help = 'include internal documentation'
-)
-
