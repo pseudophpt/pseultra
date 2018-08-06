@@ -35,14 +35,14 @@ void
 osPiSyncDma
 (void *src, void *dest, int size) {
     // Source and destination
-    *(u32 *)PI_DRAM_ADDR_REG = (u32)dest;
-    *(u32 *)PI_CART_ADDR_REG = (u32)src;
+    *(u32 *)N64_PI_DRAM_ADDR_REG = (u32)dest;
+    *(u32 *)N64_PI_CART_ADDR_REG = (u32)src;
 
     // Write
-    *(u32 *)PI_WR_LEN_REG = size - 1;
+    *(u32 *)N64_PI_WR_LEN_REG = size - 1;
 
     // Poll status register
-    while (*(u32 *)PI_STATUS_REG && 0x01);
+    while (*(u32 *)N64_PI_STATUS_REG && 0x01);
 }
 
 /**
@@ -64,9 +64,9 @@ void
 osPiAsyncDma
 (void *src, void *dest, int size) {
     // Source and destination
-    *(u32 *)PI_DRAM_ADDR_REG = (u32)dest;
-    *(u32 *)PI_CART_ADDR_REG = (u32)src;
+    *(u32 *)N64_PI_DRAM_ADDR_REG = (u32)dest;
+    *(u32 *)N64_PI_CART_ADDR_REG = (u32)src;
 
     // Write
-    *(u32 *)PI_WR_LEN_REG = size - 1;
+    *(u32 *)N64_PI_WR_LEN_REG = size - 1;
 }

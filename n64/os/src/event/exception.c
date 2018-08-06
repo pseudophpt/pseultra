@@ -29,9 +29,9 @@ __osInitExceptions
 ()
 {
     // Install exception handler for the three non-NMI exceptions
-    osCopyMemory((void *)EXC_VEC_TLB_MISS, (void *)&__osHandlerStart, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
-    osCopyMemory((void *)EXC_VEC_XTLB_MISS, (void *)&__osHandlerStart, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
-    osCopyMemory((void *)EXC_VEC_GENERAL, (void *)&__osHandlerStart, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
+    osCopyMemory((void *)N64_EXC_VEC_TLB_MISS, (void *)&__osHandlerStart, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
+    osCopyMemory((void *)N64_EXC_VEC_XTLB_MISS, (void *)&__osHandlerStart, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
+    osCopyMemory((void *)N64_EXC_VEC_GENERAL, (void *)&__osHandlerStart, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
     __osUnmaskInterrupts();
 }
 
@@ -46,7 +46,7 @@ __osInitExceptions
 u32 
 osGetIntMask 
 (void) {
-    return *(u32 *)(KSEG1_ADDR(MI_INTR_MASK_REG));
+    return *(u32 *)(N64_KSEG1_ADDR(N64_MI_INTR_MASK_REG));
 }
 
 /**
@@ -60,7 +60,7 @@ osGetIntMask
 void 
 osSetIntMask 
 (u32 mask) {
-    *(u32 *)(KSEG1_ADDR(MI_INTR_MASK_REG)) = mask;
+    *(u32 *)(N64_KSEG1_ADDR(N64_MI_INTR_MASK_REG)) = mask;
 }
 
 /**
@@ -76,7 +76,8 @@ osSetIntMask
 void 
 __osHandleInterrupt 
 (u32 interrupt) {
-    if (interrupt & INT_CAUSE_MASK_RCP) {
+    // If RCP interrupt
+    if (interrupt & N64_COP0_CAUSE_IP2) {
         __osHandleRCPInterrupt();
     }
 }
@@ -93,50 +94,59 @@ __osHandleInterrupt
 void 
 __osHandleRCPInterrupt 
 () {
-    int interrupt = *(u32 *)(KSEG1_ADDR(MI_INTR_REG));
+    int interrupt = *(u32 *)(N64_KSEG1_ADDR(N64_MI_INTR_REG));
 
     // VI interrupt
-    if (interrupt & INT_RCP_CAUSE_BIT_VI) {
+    if (interrupt & N64_MI_INTR_REG_VI_INTR) {
         // Clear interrupt line
-        *(u32 *)(KSEG1_ADDR(VI_CURRENT_REG)) = 0x1;
+        *(u32 *)(N64_KSEG1_ADDR(N64_VI_CURRENT_REG)) = 0x1;
 
         // Queue events on VI queue
-        __osCopyEventQueue(&__osInterruptEventQueue[INT_RCP_CAUSE_VI], &__osMainEventQueue);
+        __osCopyEventQueue(&__osViEventQueue, &__osMainEventQueue);
     }
     
     // SI interrupt
-    if (interrupt & INT_RCP_CAUSE_BIT_SI) {
+    if (interrupt & N64_MI_INTR_REG_SI_INTR) {
         // Clear interrupt line
-        *(u32 *)(KSEG1_ADDR(SI_STATUS_REG)) = 0x0;
+        *(u32 *)(N64_KSEG1_ADDR(N64_SI_STATUS_REG)) = 0x0;
 
         // Queue events on SI queue
-        __osCopyEventQueue(&__osInterruptEventQueue[INT_RCP_CAUSE_SI], &__osMainEventQueue);
+        __osCopyEventQueue(&__osSiEventQueue, &__osMainEventQueue);
     }
 
     // AI interrupt
-    if (interrupt & INT_RCP_CAUSE_BIT_AI) {
+    if (interrupt & N64_MI_INTR_REG_AI_INTR) {
         // Clear interrupt line
-        *(u32 *)(KSEG1_ADDR(AI_STATUS_REG)) = 0x0;
+        *(u32 *)(N64_KSEG1_ADDR(N64_AI_STATUS_REG)) = 0x0;
 
         // Queue events on AI queue
-        __osCopyEventQueue(&__osInterruptEventQueue[INT_RCP_CAUSE_AI], &__osMainEventQueue);
+        __osCopyEventQueue(&__osAiEventQueue, &__osMainEventQueue);
     }
 
     // PI interrupt
-    if (interrupt & INT_RCP_CAUSE_BIT_PI) {
+    if (interrupt & N64_MI_INTR_REG_PI_INTR) {
         // Clear interrupt line
-        *(u32 *)(KSEG1_ADDR(PI_STATUS_REG)) = 0x2;
+        *(u32 *)(N64_KSEG1_ADDR(N64_PI_STATUS_REG)) = 0x2;
 
         // Queue events on PI queue
-        __osCopyEventQueue(&__osInterruptEventQueue[INT_RCP_CAUSE_PI], &__osMainEventQueue);
+        __osCopyEventQueue(&__osPiEventQueue, &__osMainEventQueue);
+    }
+
+    // DP interrupt
+    if (interrupt & N64_MI_INTR_REG_DP_INTR) {
+        // Clear broke flag to remove interrupt
+        *(u32 *)(N64_KSEG1_ADDR(N64_MI_INIT_MODE_REG)) = 0x800;
+
+        // Queue events on SP queue
+        __osCopyEventQueue(&__osDpEventQueue, &__osMainEventQueue);
     }
 
     // SP interrupt
-    if (interrupt & INT_RCP_CAUSE_BIT_SP) {
+    if (interrupt & N64_MI_INTR_REG_SP_INTR) {
         // Clear broke flag to remove interrupt
-        *(u32 *)(KSEG1_ADDR(SP_STATUS_REG)) = 0x4;
+        *(u32 *)(N64_KSEG1_ADDR(N64_SP_STATUS_REG)) = N64_SP_STATUS_REG_CLEAR_INTR;
 
         // Queue events on SP queue
-        __osCopyEventQueue(&__osInterruptEventQueue[INT_RCP_CAUSE_SP], &__osMainEventQueue);
+        __osCopyEventQueue(&__osSpEventQueue, &__osMainEventQueue);
     }
 }

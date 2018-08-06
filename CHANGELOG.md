@@ -4,6 +4,11 @@
 
 ### Added
 - Memory zeroing functionality (see osZeroMemory())
+- Interrupt handling for RCP DP interrupts
+- PI functionality
+
+### Changed
+- Improve documentation on N64 constants and prepend N64_
 
 ### Removed
 -  Documentation build from `scons` (users may do it manually now by running `doxygen`)

@@ -115,9 +115,39 @@ extern OSEventQueue __osMainEventQueue;
 #endif
 
 #ifdef __asm__
-.extern __osInterruptEventQueue
+.extern __osSpEventQueue
 #else
-extern OSEventQueue __osInterruptEventQueue [];
+extern OSEventQueue __osSpEventQueue;
+#endif
+
+#ifdef __asm__
+.extern __osDpEventQueue
+#else
+extern OSEventQueue __osDpEventQueue;
+#endif
+
+#ifdef __asm__
+.extern __osSiEventQueue
+#else
+extern OSEventQueue __osSiEventQueue;
+#endif
+
+#ifdef __asm__
+.extern __osViEventQueue
+#else
+extern OSEventQueue __osViEventQueue;
+#endif
+
+#ifdef __asm__
+.extern __osAiEventQueue
+#else
+extern OSEventQueue __osAiEventQueue;
+#endif
+
+#ifdef __asm__
+.extern __osPiEventQueue
+#else
+extern OSEventQueue __osPiEventQueue;
 #endif
 
 #endif

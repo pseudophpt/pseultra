@@ -19,9 +19,18 @@
 
 /** @internal @brief Queue of events from which the main loop executes */
 OSEventQueue __osMainEventQueue;
-
-/** @internal @brief Queues of events to be added to the main event queue when a certain interrupt occurs */
-OSEventQueue __osInterruptEventQueue [INT_RCP_COUNT];
+/** @internal @brief Queues of events to be added to the main event queue when an SP interrupt occurs */
+OSEventQueue __osSpEventQueue;
+/** @internal @brief Queues of events to be added to the main event queue when a DP interrupt occurs */
+OSEventQueue __osDpEventQueue;
+/** @internal @brief Queues of events to be added to the main event queue when a SI interrupt occurs */
+OSEventQueue __osSiEventQueue;
+/** @internal @brief Queues of events to be added to the main event queue when a VI interrupt occurs */
+OSEventQueue __osViEventQueue;
+/** @internal @brief Queues of events to be added to the main event queue when a PI interrupt occurs */
+OSEventQueue __osPiEventQueue;
+/** @internal @brief Queues of events to be added to the main event queue when an AI interrupt occurs */
+OSEventQueue __osAiEventQueue;
 
 /**
  * @brief Schedules an event for processing
@@ -37,22 +46,22 @@ osScheduleEvent
 (OSEvent event) {
     switch (event.type) {
     case OS_EVENT_TYPE_SP:
-        __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_SP]);
+        __osEnqueueEvent(event, &__osSpEventQueue);
         break;
     case OS_EVENT_TYPE_DP:
-        __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_DP]);
+        __osEnqueueEvent(event, &__osDpEventQueue);
         break;
     case OS_EVENT_TYPE_SI:
-        __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_SI]);
+        __osEnqueueEvent(event, &__osSiEventQueue);
         break;
     case OS_EVENT_TYPE_VI:
-        __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_VI]);
+        __osEnqueueEvent(event, &__osViEventQueue);
         break;
     case OS_EVENT_TYPE_PI:
-        __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_PI]);
+        __osEnqueueEvent(event, &__osPiEventQueue);
         break;
     case OS_EVENT_TYPE_AI:
-        __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_AI]);
+        __osEnqueueEvent(event, &__osAiEventQueue);
         break;
     case OS_EVENT_TYPE_MAIN:
         __osEnqueueEvent(event, &__osMainEventQueue);

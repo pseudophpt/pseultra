@@ -71,13 +71,13 @@ __osHandleException:
 savereg
 
 mfc0 $t0, Cause
-andi $t1, $t0, 0x007c
+andi $t1, $t0, N64_COP0_CAUSE_EXC_CODE // Get exception code
 
-bnez $t1, .handleException // Interrupt code is 0
+bne $t1, N64_COP0_CAUSE_EXC_CODE_INT, .handleException // Branch to handle exception if it's not the interrupt code 
 
 .handleInterrupt:
 
-andi $a0, $t0, 0xff00
+andi $a0, $t0, N64_COP0_CAUSE_IP // Pass interrupt bits
 jal __osHandleInterrupt
 b .done
 
