@@ -13,12 +13,14 @@ sources = [
     path + '/src/memory/malloc.c',
     path + '/src/memory/memcpy.c',
     path + '/src/interfaces/pi.c',
+    path + '/src/interfaces/vi.c',
     path + '/include/os/event/event.h',
     path + '/include/os/event/exception.h',
     path + '/include/os/memory/malloc.h',
     path + '/include/os/memory/memcpy.h',
     path + '/include/os/boot/boot.h',
     path + '/include/os/interfaces/pi.h',
+    path + '/include/os/interfaces/vi.h',
 ]
 
 pseultra = mips_env.Library(

@@ -5,7 +5,8 @@
 ### Added
 - Memory zeroing functionality (see osZeroMemory())
 - Interrupt handling for RCP DP interrupts
-- PI functionality
+- PI functionality (DMA)
+- VI functionality (buffer swapping)
 
 ### Changed
 - Improve documentation on N64 constants and prepend N64_

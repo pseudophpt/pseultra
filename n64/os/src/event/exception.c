@@ -101,6 +101,9 @@ __osHandleRCPInterrupt
         // Clear interrupt line
         *(u32 *)(N64_KSEG1_ADDR(N64_VI_CURRENT_REG)) = 0x1;
 
+        // Update buffers
+        __osViUpdateBuffer();
+
         // Queue events on VI queue
         __osCopyEventQueue(&__osViEventQueue, &__osMainEventQueue);
     }
