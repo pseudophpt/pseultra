@@ -4,6 +4,20 @@ path = Dir('.').abspath
 
 mips_env.Append(CPPPATH = [path + '/include', path + '/../../include'])
 
+includes = [
+    path + '/include/os/boot.h',
+    path + '/include/os/event.h',
+    path + '/include/os/memory.h',
+    path + '/include/os/interfaces.h',
+    path + '/include/os/event/event.h',
+    path + '/include/os/event/exception.h',
+    path + '/include/os/memory/malloc.h',
+    path + '/include/os/memory/memcpy.h',
+    path + '/include/os/boot/boot.h',
+    path + '/include/os/interfaces/pi.h',
+    path + '/include/os/interfaces/vi.h',
+]
+
 sources = [
     path + '/src/event/event.c',
     path + '/src/event/exception.c',
@@ -14,14 +28,7 @@ sources = [
     path + '/src/memory/memcpy.c',
     path + '/src/interfaces/pi.c',
     path + '/src/interfaces/vi.c',
-    path + '/include/os/event/event.h',
-    path + '/include/os/event/exception.h',
-    path + '/include/os/memory/malloc.h',
-    path + '/include/os/memory/memcpy.h',
-    path + '/include/os/boot/boot.h',
-    path + '/include/os/interfaces/pi.h',
-    path + '/include/os/interfaces/vi.h',
-]
+] + includes
 
 pseultra = mips_env.Library(
     target = path + '/lib/libpseultra.a',
@@ -34,13 +41,15 @@ prefix_bin = prefix + '/bin'
 prefix_include = prefix + '/include'
 prefix_lib = prefix + '/lib'
 
+includes += [path + '/include/os.sx', path + '/include/os.h']
+
 mips_env.Install(prefix_bin, [])
-mips_env.Install(prefix_include, [path + '/include/os.sx', path + '/include/os.h', path + '/include/os'])
 mips_env.Install(prefix_lib, [pseultra])
+install_include = [mips_env.Install(prefix_include + '/' + h, h) for h in includes]
 
 install_bin = mips_env.Alias('install-bin', prefix_bin)
 install_lib = mips_env.Alias('install-lib', prefix_lib)
-install_include = mips_env.Alias('install-include', prefix_include)
+install_include = mips_env.Alias('install-include', install_include)
 
 installs = [install_bin, install_lib, install_include]
 
