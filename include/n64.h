@@ -668,7 +668,6 @@ typedef struct __attribute__((__packed__)) rom_header_t {
  * To parse the contents of this register, read a u32 from this macro address and mask the following desired bits:
  * [N64_MI_INTR_REG_SP_INTR |] [N64_MI_INTR_REG_SI_INTR |] [N64_MI_INTR_REG_AI_INTR |] [N64_MI_INTR_REG_VI_INTR |][N64_MI_INTR_REG_PI_INTR |] [N64_MI_INTR_REG_DP_INTR]
  *
- *
  */
 #define N64_MI_INTR_REG 0x04300008 
 /** SP Interrupt bit in N64_MI_INTR_REG */
@@ -733,8 +732,48 @@ typedef struct __attribute__((__packed__)) rom_header_t {
 /** @brief VI base register */
 #define N64_VI_BASE_REG 0x04400000
 
-/** @brief VI status register */
+/** @brief VI status register 
+ *
+ * To set this register, write a u32 to this macro address with the following value:
+ *
+ * N64_VI_STATUS_REG_PIXEL_SIZE_[BLANK/5553/8888] [| N64_VI_STATUS_REG_GAMMA_DITHER_ENABLE] [| N64_VI_STATUS_REG_GAMMA_ENABLE] [| N64_VI_STATUS_REG_DIVOT_ENABLE] [| N64_VI_STATUS_REG_SERRATE] | N64_VI_STATUS_REG_AA_MODE_[AA_RESAMP_FETCH_ALWAYS/AA_MODE_AA_RESAMP/RESAMP/REPLICATE] | N64_VI_STATUS_REG_PIXEL_ADVANCE(<pixel advance>) [| N64_VI_STATUS_REG_DITHER_FILTER_ENABLE]
+ *
+ */
 #define N64_VI_STATUS_REG 0x04400000 
+/** @brief VI status register pixel size bits */
+#define N64_VI_STATUS_REG_PIXEL_SIZE 0x3
+/** @brief VI status register no data transfer */
+#define N64_VI_STATUS_REG_PIXEL_SIZE_BLANK 0x0
+/** @brief VI status register 5/5/5/3 pixel format */
+#define N64_VI_STATUS_REG_PIXEL_SIZE_5553 0x2
+/** @brief VI status register 8/8/8/8 pixel format  */
+#define N64_VI_STATUS_REG_PIXEL_SIZE_8888 0x3
+/** @brief VI status register enable gamma dither bit */
+#define N64_VI_STATUS_REG_GAMMA_DITHER_ENABLE 0x4
+/** @brief VI status register enable gamma boost bit */
+#define N64_VI_STATUS_REG_GAMMA_ENABLE 0x8
+/** @brief VI status register enable divot bit */
+#define N64_VI_STATUS_REG_DIVOT_ENABLE 0x10
+/** @brief VI status register unknown bit */
+#define N64_VI_STATUS_REG_VBUS_CLOCK_ENABLE 0x20
+/** @brief VI status register enable interlace bit */
+#define N64_VI_STATUS_REG_SERRATE 0x40
+/** @brief VI status register antialias mode bits */
+#define N64_VI_STATUS_REG_AA_MODE 0x300
+/** @brief VI status register antialias and resample (always fetch) */
+#define N64_VI_STATUS_REG_AA_MODE_AA_RESAMP_FETCH_ALWAYS 0x300
+/** @brief VI status register antialias and resample (fetch if necessary) */
+#define N64_VI_STATUS_REG_AA_MODE_AA_RESAMP 0x100
+/** @brief VI status register resample only */
+#define N64_VI_STATUS_REG_AA_MODE_RESAMP 0x200
+/** @brief VI status register replicate framebuffer bits */
+#define N64_VI_STATUS_REG_AA_MODE_REPLICATE 0x300
+/** @brief VI status register pixel advance */
+#define N64_VI_STATUS_REG_PIXEL_ADVANCE 0xF000
+/** @brief Convert to VI status register pixel advance */
+#define N64_VI_STATUS_REG_PIXEL_ADVANCE_FMT(x) ((x & 0xf) << 12)
+/** @brief VI status register enable dither filter bit */
+#define N64_VI_STATUS_REG_DITHER_FILTER_ENABLE 0x10000
 
 /** @brief VI origin register */
 #define N64_VI_ORIGIN_REG 0x04400004 
