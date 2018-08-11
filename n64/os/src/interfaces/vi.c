@@ -16,7 +16,9 @@
 
 #include <os_priv.h>
 
+/** @brief Current buffer used to draw to the screen by the VI */
 void *__osViCurrentBuffer;
+/** @brief Buffer to be drawn to the screen by the VI on next interrupt */
 void *__osViSwapBuffer;
 
 /**
