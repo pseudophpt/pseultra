@@ -761,7 +761,7 @@ typedef struct __attribute__((__packed__)) rom_header_t {
 /** @brief VI status register antialias mode bits */
 #define N64_VI_STATUS_REG_AA_MODE 0x300
 /** @brief VI status register antialias and resample (always fetch) */
-#define N64_VI_STATUS_REG_AA_MODE_AA_RESAMP_FETCH_ALWAYS 0x300
+#define N64_VI_STATUS_REG_AA_MODE_AA_RESAMP_FETCH_ALWAYS 0x000
 /** @brief VI status register antialias and resample (fetch if necessary) */
 #define N64_VI_STATUS_REG_AA_MODE_AA_RESAMP 0x100
 /** @brief VI status register resample only */
