@@ -74,6 +74,12 @@ void __osHandleRCPInterrupt ();
 #endif
 
 #ifdef __asm__
+.extern __osHandleTimerInterrupt
+#else
+void __osHandleTimerInterrupt ();
+#endif
+
+#ifdef __asm__
 .extern __osHandleExceptions
 #else
 void __osHandleException();
@@ -83,6 +89,18 @@ void __osHandleException();
 .extern __osUnmaskInterrupts
 #else
 void __osUnmaskInterrupts();
+#endif
+
+#ifdef __asm__
+.extern __osEnableInterrupts
+#else
+void __osEnableInterrupts();
+#endif
+
+#ifdef __asm__
+.extern __osDisableInterrupts
+#else
+void __osDisableInterrupts();
 #endif
 
 /*

@@ -7,6 +7,7 @@
 - Interrupt handling for RCP DP interrupts
 - PI functionality (DMA)
 - VI functionality (buffer swapping)
+- Timer interrupt handler
 
 ### Changed
 - Improve documentation on N64 constants and prepend N64_

@@ -32,7 +32,12 @@ __osInitExceptions
     osCopyMemory((void *)N64_EXC_VEC_TLB_MISS, (void *)&__osHandlerStart, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
     osCopyMemory((void *)N64_EXC_VEC_XTLB_MISS, (void *)&__osHandlerStart, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
     osCopyMemory((void *)N64_EXC_VEC_GENERAL, (void *)&__osHandlerStart, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
+
+    // Unmask all interrupts
     __osUnmaskInterrupts();
+
+    // Enable interrupts
+    __osEnableInterrupts();
 }
 
 /**
