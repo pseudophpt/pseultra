@@ -78,3 +78,65 @@ osViSwapBuffer
 (void *buffer) {
     __osViSwapBuffer = buffer;
 }
+
+/**
+ * @brief Initializes VI registers
+ * @date 10 Aug 2018
+ * @author pseudophpt
+ * @param[in] mode VI mode to set 
+ *
+ * This function initializes VI registers using the options passed via the mode argument 
+ */
+void 
+osViInit
+(OSViMode mode) {
+    // Disable interrupts
+    __osDisableInterrupts();
+    
+    // Get pixel and resolutions values from mode parameter
+    u32 pixel_size, resolution;
+    
+    if ((mode & OS_VI_OPTION_PIXEL) == OS_VI_OPTION_PIXEL_5553) {
+        pixel_size = N64_VI_STATUS_REG_PIXEL_SIZE_5553;
+    }
+    else if ((mode & OS_VI_OPTION_PIXEL) == OS_VI_OPTION_PIXEL_8888) {
+        pixel_size = N64_VI_STATUS_REG_PIXEL_SIZE_8888;
+    }
+    
+    if ((mode & OS_VI_OPTION_RES) == OS_VI_OPTION_RES_LOW) {
+        // 320 width
+        resolution = 0x140;
+    }
+    else if ((mode & OS_VI_OPTION_RES) == OS_VI_OPTION_RES_HIGH) {
+        // 640 width
+        resolution = 0x280;
+    }
+    
+    // Set status register
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_STATUS_REG) = 
+        pixel_size | 
+        N64_VI_STATUS_REG_AA_MODE_AA_RESAMP_FETCH_ALWAYS | 
+        N64_VI_STATUS_REG_PIXEL_ADVANCE_FMT(0x3);
+
+    // Set resolution
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_WIDTH_REG) = resolution;
+
+    // Scale registers
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_X_SCALE_REG) = 0x200; // Scale by 1
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_Y_SCALE_REG) = 0x400; // Scale by 1/2
+
+    // Interrupt at line 2
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_INTR_REG) = 0x2; 
+
+    // Initalize other VI registers (Don't ask me what they mean lmao)
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_BURST_REG) = 0x3E52239;
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_V_BURST_REG) = 0xE0204;
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_H_START_REG) = 0x6C02EC;
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_V_START_REG) = 0x2501FF;
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_H_SYNC_REG) = 0xC15;
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_V_SYNC_REG) = 0x20D;
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_LEAP_REG) = 0xC150C15;
+    
+    // Enable interrupts
+    __osEnableInterrupts();
+}

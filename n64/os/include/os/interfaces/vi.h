@@ -21,12 +21,33 @@
  * Macros
  */
 
+/** @brief VI option for pixel mode @see osViInit */
+#define OS_VI_OPTION_PIXEL 0x1
+/** @brief VI option for 5/5/5/3 pixel mode @see osViInit */
+#define OS_VI_OPTION_PIXEL_5553 0x0
+/** @brief VI option for 8/8/8/8 pixel mode @see osViInit */
+#define OS_VI_OPTION_PIXEL_8888 0x1
+/** @brief VI option for resolution @see osViInit */
+#define OS_VI_OPTION_RES 0x2
+/** @brief VI option for 320x240 resolution @see osViInit */
+#define OS_VI_OPTION_RES_LOW 0x0
+/** @brief VI option for 640x4810 resolution @see osViInit */
+#define OS_VI_OPTION_RES_HIGH 0x2
+/** @brief Macro to construct VI options @see osViInit 
+ *
+ * To use this macro, specify the pixel mode as the first argument (5553 or 8888), and the resolution as the second argument (LOW or HIGH)
+ */
+#define OS_VI_MODE(pixel, res) \
+    (OS_VI_OPTION_PIXEL_##pixel | \
+    OS_VI_OPTION_RES_##res)
+
 /*
  * Structs
  */
 
 #ifndef __asm__
-
+/** @brief OS VI Mode type */
+typedef u8 OSViMode;
 #endif
 
 /*
@@ -43,6 +64,12 @@ void *osViGetSwapBuffer (void);
 .extern osViGetCurrentBuffer
 #else
 void *osViGetCurrentBuffer (void);
+#endif
+
+#ifdef __asm__
+.extern osViInit
+#else
+void osViInit (OSViMode mode);
 #endif
 
 #ifdef __asm__
