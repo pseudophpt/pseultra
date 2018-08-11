@@ -11,6 +11,7 @@
 .global __osHandlerEnd
 .global __osHandleException
 .global __osUnmaskInterrupts
+.global __osHandleTimerInterrupt
 
 .macro savereg
 
@@ -49,6 +50,20 @@ or $k0, $k1
 mtc0 $k0, Status
 
 jr $ra // Return
+
+//
+// Handles timer interrupts
+//
+
+__osHandleTimerInterrupt:
+
+// Clear ip7 bit
+mfc0 $k0, Cause
+li $k1, ~N64_COP0_CAUSE_IP7
+and $k0, $k1
+mtc0 $k0, Cause 
+
+jr $ra
 
 //
 // Called on exception 

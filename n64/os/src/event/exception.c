@@ -80,6 +80,11 @@ __osHandleInterrupt
     if (interrupt & N64_COP0_CAUSE_IP2) {
         __osHandleRCPInterrupt();
     }
+
+    // If Timer interrupt
+    if (interrupt & N64_COP0_CAUSE_IP7) {
+        __osHandleTimerInterrupt();
+    }
 }
 
 /**
