@@ -7,7 +7,7 @@
 
 /**
  * @file src/interfaces/vi.c
- * @brief Parallel interface
+ * @brief Video interface
  * @date 1 Aug 2018
  * @author pseudophpt
  *
