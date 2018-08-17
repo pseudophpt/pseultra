@@ -49,6 +49,12 @@
 void __osBoot ();
 #endif
 
+#ifdef __asm__
+.extern __osInitPif
+#else
+void __osInitPif ();
+#endif
+
 /*
  * Internal variables
  */

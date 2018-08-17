@@ -31,6 +31,9 @@ extern void main (void);
 void 
 __osBoot
 () {
+    // Initialize PIF
+    __osInitPif();
+    
     // Initialize exceptions
     __osInitExceptions();
 
