@@ -256,20 +256,23 @@ typedef struct __attribute__((__packed__)) rom_header_t {
 /** @brief KSEG3 Address (TLB mapped) */
 #define N64_KSEG3 0xE0000000
 
+/** @brief Convert to physical address */
+#define N64_TO_PHYS(x) (x & 0x1FFFFFFF)
+
 /** @brief Macro to transform physical address into KUSEG address */
-#define N64_KUSEG_ADDR(x) (N64_KUSEG | x)
+#define N64_KUSEG_ADDR(x) (N64_KUSEG | N64_TO_PHYS(x))
 
 /** @brief Macro to transform physical address into KSEG0 address */
-#define N64_KSEG0_ADDR(x) (N64_KSEG0 | x)
+#define N64_KSEG0_ADDR(x) (N64_KSEG0 | N64_TO_PHYS(x))
 
 /** @brief Macro to transform physical address into KSEG1 address */
-#define N64_KSEG1_ADDR(x) (N64_KSEG1 | x)
+#define N64_KSEG1_ADDR(x) (N64_KSEG1 | N64_TO_PHYS(x))
 
 /** @brief Macro to transform physical address into KSSEG address */
-#define N64_KSSEG_ADDR(x) (N64_KSSEG | x)
+#define N64_KSSEG_ADDR(x) (N64_KSSEG | N64_TO_PHYS(x))
 
 /** @brief Macro to transform physical address into KSEG3 address */
-#define N64_KSEG3_ADDR(x) (N64_KSEG3 | x)
+#define N64_KSEG3_ADDR(x) (N64_KSEG3 | N64_TO_PHYS(x))
 
 /** @brief RDRAM Base register */
 #define N64_RDRAM_BASE_REG 0x03F00000
