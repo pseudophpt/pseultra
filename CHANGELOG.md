@@ -13,6 +13,9 @@
 ### Changed
 - Improve documentation on N64 constants and prepend N64_
 
+### Fixed
+- Bug involving the use of an incorrect kernel register, which causes unknown behavior (usually an XTLB exception) in the exception unmasking routine
+
 ### Removed
 -  Documentation build from `scons` (users may do it manually now by running `doxygen`)
 
