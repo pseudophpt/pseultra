@@ -8,6 +8,7 @@
 #include <os_priv.sx>
 
 .global _boot
+.global __osInitPif
 
 // Boot process
 _boot:
