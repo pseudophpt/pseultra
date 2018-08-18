@@ -46,9 +46,8 @@ mfc0 $k0, Status
 
 // MIPS Interrupts
 
-ori $k0, 0xff00 // Unmask all interrupts
+ori $k0, 0x0400 // Unmask all interrupts
 
-or $k0, $k1 
 mtc0 $k0, Status
 
 jr $ra // Return
