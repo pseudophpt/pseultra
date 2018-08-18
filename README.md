@@ -45,4 +45,4 @@ This project is licensed under the BSD-3-Clause License - see the LICENSE.md fil
 
 - **Nabile Rahmani** and **fraser** for their help with regards to various PIF ROM related questions
 - **glankk** for helping me with general N64 and `gcc` related questions
-
+- **FoxyToaster** for continuous testing on console
