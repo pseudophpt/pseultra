@@ -119,6 +119,12 @@ extern u32 __osHandlerStart;
 extern u32 __osHandlerEnd;
 #endif
 
+#ifdef __asm__
+.extern __osExceptionRegSave
+#else
+extern u8 __osExceptionRegSave [];
+#endif
+
 #endif
 
 #endif
