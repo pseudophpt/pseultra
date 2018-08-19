@@ -16,6 +16,7 @@
 
 ### Fixed
 - Bug involving the use of an incorrect kernel register, which causes unknown behavior (usually an XTLB exception) in the exception unmasking routine
+- Bug involving exception handlers being stored only in DCache at vector locations, causing any exception to not reach its handler
 
 ### Removed
 -  Documentation build from `scons` (users may do it manually now by running `doxygen`)

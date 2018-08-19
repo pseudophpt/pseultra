@@ -26,12 +26,14 @@
  */
 void 
 __osInitExceptions 
-()
-{
+() {
     // Install exception handler for the three non-NMI exceptions
-    osCopyMemory((void *)N64_EXC_VEC_TLB_MISS, (void *)&__osHandlerStart, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
-    osCopyMemory((void *)N64_EXC_VEC_XTLB_MISS, (void *)&__osHandlerStart, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
-    osCopyMemory((void *)N64_EXC_VEC_GENERAL, (void *)&__osHandlerStart, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
+    osCopyMemory((void *)N64_KSEG1_ADDR(N64_EXC_VEC_TLB_MISS), (void *)&__osHandlerStart, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
+    osICacheInvalidate((void *)N64_EXC_VEC_TLB_MISS, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
+    osCopyMemory((void *)N64_KSEG1_ADDR(N64_EXC_VEC_XTLB_MISS), (void *)&__osHandlerStart, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
+    osICacheInvalidate((void *)N64_EXC_VEC_XTLB_MISS, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
+    osCopyMemory((void *)N64_KSEG1_ADDR(N64_EXC_VEC_GENERAL), (void *)&__osHandlerStart, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
+    osICacheInvalidate((void *)N64_EXC_VEC_GENERAL, (u32)&__osHandlerEnd - (u32)&__osHandlerStart);
 
     // Unmask all interrupts
     __osUnmaskInterrupts();
