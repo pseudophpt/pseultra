@@ -1,6 +1,6 @@
 /*
  * pseultra/n64/os/src/boot/font.h
- * OS Header
+ * Debug font header
  * 
  * (C) pseudophpt 2018 
  */
@@ -8,7 +8,7 @@
 /**
  * @file src/boot/font.h
  * @brief Boot font header 
- * @date 1 Aug 2018
+ * @date 19 Aug 2018
  * @author pseudophpt
  *
  * This file defines the font used for debugging
