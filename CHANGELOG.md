@@ -2,6 +2,8 @@
 
 ## [Unreleased](https://github.com/pseudophpt/pseultra/compare/master...develop)
 
+## [1.1.0](https://github.com/pseudophpt/pseultra/compare/v1.0.1...v1.1.0) - 2018-08-18
+
 ### Added
 - Memory zeroing functionality (see osZeroMemory())
 - Interrupt handling for RCP DP interrupts
