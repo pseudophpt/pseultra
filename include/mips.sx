@@ -44,3 +44,26 @@
 .macro eret
 .word 0x42000018
 .endm
+
+/** @brief Instruction cache identifier for MIPS CACHE instruction */
+#define MIPS_CACHE_ICACHE 0x0
+/** @brief Data cache identifier for MIPS CACHE instruction */
+#define MIPS_CACHE_DCACHE 0x1
+/** @brief Index_Invalidate subop for MIPS CACHE instruction */
+#define MIPS_CACHE_INDEX_INVALIDATE 0x00
+/** @brief Index_Write_Back_Invalidate subop for MIPS CACHE instruction */
+#define MIPS_CACHE_INDEX_WRITE_BACK_INVALIDATE 0x00
+/** @brief Index_Load_Tag subop for MIPS CACHE instruction */
+#define MIPS_CACHE_INDEX_LOAD_TAG 0x04
+/** @brief Index_Store_Tag subop for MIPS CACHE instruction */
+#define MIPS_CACHE_INDEX_STORE_TAG 0x08
+/** @brief Create_Dirty_Exclusive subop for MIPS CACHE instruction */
+#define MIPS_CACHE_CREATE_DIRTY_EXCLUSIVE 0x0C
+/** @brief Hit_Invalidate subop for MIPS CACHE instruction */
+#define MIPS_CACHE_HIT_INVALIDATE 0x10
+/** @brief Hit_Write_Back_Invalidate subop for MIPS CACHE instruction */
+#define MIPS_CACHE_HIT_WRITE_BACK_INVALIDATE 0x14
+/** @brief Fill subop for MIPS CACHE instruction */
+#define MIPS_CACHE_FILL 0x14
+/** @brief Hit_Write_Back subop for MIPS CACHE instruction */
+#define MIPS_CACHE_HIT_WRITE_BACK 0x18

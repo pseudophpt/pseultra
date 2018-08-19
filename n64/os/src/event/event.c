@@ -15,17 +15,22 @@
  * This file provides routines for the creation and scheduling of events 
  */
 
-#include <os.h>
-
-void __osEnqueueEvent (OSEvent event, OSEventQueue *queue);
-OSEvent __osDequeueEvent (OSEventQueue *queue);
-void __osCopyEventQueue (OSEventQueue *src, OSEventQueue *dest);
+#include <os_priv.h>
 
 /** @internal @brief Queue of events from which the main loop executes */
 OSEventQueue __osMainEventQueue;
-
-/** @internal @brief Queues of events to be added to the main event queue when a certain interrupt occurs */
-OSEventQueue __osInterruptEventQueue [INT_RCP_COUNT];
+/** @internal @brief Queues of events to be added to the main event queue when an SP interrupt occurs */
+OSEventQueue __osSpEventQueue;
+/** @internal @brief Queues of events to be added to the main event queue when a DP interrupt occurs */
+OSEventQueue __osDpEventQueue;
+/** @internal @brief Queues of events to be added to the main event queue when a SI interrupt occurs */
+OSEventQueue __osSiEventQueue;
+/** @internal @brief Queues of events to be added to the main event queue when a VI interrupt occurs */
+OSEventQueue __osViEventQueue;
+/** @internal @brief Queues of events to be added to the main event queue when a PI interrupt occurs */
+OSEventQueue __osPiEventQueue;
+/** @internal @brief Queues of events to be added to the main event queue when an AI interrupt occurs */
+OSEventQueue __osAiEventQueue;
 
 /**
  * @brief Schedules an event for processing
@@ -36,26 +41,27 @@ OSEventQueue __osInterruptEventQueue [INT_RCP_COUNT];
  * This function schedules an event for processing by placing it on the queue which corresponds to the OSEvent type value. If one of the RCP interrupt types are specified, they are placed on the corresponding queue to be copied to the main queue when that interrupt fires. If the main type is specified, the event is immediately schedules on the main event queue.
  *
  */
-
-void osScheduleEvent (OSEvent event) {
+void 
+osScheduleEvent 
+(OSEvent event) {
     switch (event.type) {
     case OS_EVENT_TYPE_SP:
-        __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_SP]);
+        __osEnqueueEvent(event, &__osSpEventQueue);
         break;
     case OS_EVENT_TYPE_DP:
-        __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_DP]);
+        __osEnqueueEvent(event, &__osDpEventQueue);
         break;
     case OS_EVENT_TYPE_SI:
-        __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_SI]);
+        __osEnqueueEvent(event, &__osSiEventQueue);
         break;
     case OS_EVENT_TYPE_VI:
-        __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_VI]);
+        __osEnqueueEvent(event, &__osViEventQueue);
         break;
     case OS_EVENT_TYPE_PI:
-        __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_PI]);
+        __osEnqueueEvent(event, &__osPiEventQueue);
         break;
     case OS_EVENT_TYPE_AI:
-        __osEnqueueEvent(event, &__osInterruptEventQueue [INT_RCP_CAUSE_AI]);
+        __osEnqueueEvent(event, &__osAiEventQueue);
         break;
     case OS_EVENT_TYPE_MAIN:
         __osEnqueueEvent(event, &__osMainEventQueue);
@@ -75,7 +81,9 @@ void osScheduleEvent (OSEvent event) {
  *
  * @see __osDequeueEvent
  */
-void __osEnqueueEvent (OSEvent event, OSEventQueue *queue) {
+void 
+__osEnqueueEvent 
+(OSEvent event, OSEventQueue *queue) {
     // Is there space? If not, return
     if ((queue->end + 1) % OS_EVENT_QUEUE_SIZE == queue->start) {
         return;
@@ -100,7 +108,9 @@ void __osEnqueueEvent (OSEvent event, OSEventQueue *queue) {
  *
  * @see __osEnqueueEvent
  */
-OSEvent __osDequeueEvent (OSEventQueue *queue) {
+OSEvent 
+__osDequeueEvent
+(OSEventQueue *queue) {
     // Is there an event in the queue?
     if (queue->end == queue->start) {
         OSEvent no_event;
@@ -128,7 +138,9 @@ OSEvent __osDequeueEvent (OSEventQueue *queue) {
  *
  * This function removes the events from a source queue, specified in the src parameter, and places them at the end of the destination queue.  
  */
-void __osCopyEventQueue (OSEventQueue *src, OSEventQueue *dest) {
+void 
+__osCopyEventQueue
+(OSEventQueue *src, OSEventQueue *dest) {
     while (src->start != src->end) {
         __osEnqueueEvent(__osDequeueEvent(src), dest);
     }

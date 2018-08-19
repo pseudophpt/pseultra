@@ -5,15 +5,15 @@
  * (C) pseudophpt 2018 
  */
 
-#include <n64.sx>
-#include <mips.sx>
+#include <os_priv.sx>
 
 .global __osHandlerStart
 .global __osHandlerEnd
 .global __osHandleException
 .global __osUnmaskInterrupts
-
-.extern __osHandleInterrupt
+.global __osEnableInterrupts
+.global __osDisableInterrupts
+.global __osHandleTimerInterrupt
 
 .macro savereg
 
@@ -46,12 +46,50 @@ mfc0 $k0, Status
 
 // MIPS Interrupts
 
-ori $k0, 0xff01 // Unmask all interrupts and enable
+ori $k0, 0x0400 // Unmask all interrupts
 
-or $k0, $k1 
 mtc0 $k0, Status
 
 jr $ra // Return
+
+//
+// Enable all interrupts
+//
+
+__osEnableInterrupts:
+mfc0 $k0, Status
+
+ori $k0, 0x0001
+mtc0 $k0, Status
+
+jr $ra
+
+//
+// Disable all interrupts
+//
+
+__osDisableInterrupts:
+mfc0 $k0, Status
+
+li $k1, ~0x1
+and $k0, $k1
+mtc0 $k0, Status
+
+jr $ra
+
+//
+// Handles timer interrupts
+//
+
+__osHandleTimerInterrupt:
+
+// Clear ip7 bit
+mfc0 $k0, Cause
+li $k1, ~N64_COP0_CAUSE_IP7
+and $k0, $k1
+mtc0 $k0, Cause 
+
+jr $ra
 
 //
 // Called on exception 
@@ -74,13 +112,13 @@ __osHandleException:
 savereg
 
 mfc0 $t0, Cause
-andi $t1, $t0, 0x007c
+andi $t1, $t0, N64_COP0_CAUSE_EXC_CODE // Get exception code
 
-bnez $t1, .handleException // Interrupt code is 0
+bne $t1, N64_COP0_CAUSE_EXC_CODE_INT, .handleException // Branch to handle exception if it's not the interrupt code 
 
 .handleInterrupt:
 
-andi $a0, $t0, 0xff00
+andi $a0, $t0, N64_COP0_CAUSE_IP // Pass interrupt bits
 jal __osHandleInterrupt
 b .done
 

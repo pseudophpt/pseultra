@@ -5,10 +5,10 @@
  * (C) pseudophpt 2018 
  */
 
-#include <n64.sx>
+#include <os_priv.sx>
 
-.extern __osBoot
 .global _boot
+.global __osInitPif
 
 // Boot process
 _boot:
@@ -22,6 +22,19 @@ lui $t0, %hi(__osBoot)
 addiu $t0, %lo(__osBoot)
 
 jr $t0
+
+//
+// Initializes the PIF to prevent console lock
+//
+
+__osInitPif:
+
+// Write 0x08 to the PIF RAM status byte
+li $k0, N64_KSEG1_ADDR(N64_PIF_RAM_START + 0x3C)
+ori $k1, $zero, 0x08
+sw $k1, 0($k0)
+
+jr $ra
 
 // OS Boot Stack
 .lcomm __osBootStack, 0x1000

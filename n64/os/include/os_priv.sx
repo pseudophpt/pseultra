@@ -1,0 +1,15 @@
+/*
+ * pseultra/n64/os/include/os_priv.sx
+ * Internal OS header for assembly
+ * 
+ * (C) pseudophpt 2018 
+ */
+
+#ifndef OS_PRIV_SX_GUARD
+#define OS_PRIV_SX_GUARD
+
+#define __os_internal__
+
+#include <os.sx>
+
+#endif

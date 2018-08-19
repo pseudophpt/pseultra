@@ -14,12 +14,8 @@
  * This file provides routines for the boot process
  */
 
-#include <os.h>
+#include <os_priv.h>
 
-extern OSEventQueue __osMainEventQueue;
-
-extern void __osInitExceptions (void);
-extern OSEvent __osDequeueEvent (OSEventQueue *queue);
 extern void main (void);
 
 /**
@@ -32,7 +28,12 @@ extern void main (void);
  *
  * @see __osInitExceptions()
  */
-void __osBoot () {
+void 
+__osBoot
+() {
+    // Initialize PIF
+    __osInitPif();
+    
     // Initialize exceptions
     __osInitExceptions();
 

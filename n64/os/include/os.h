@@ -19,6 +19,8 @@
 
 #include <n64.h>
 
+#ifndef __asm__
+
 /** @brief Unsigned 8 bit type */
 typedef unsigned char u8;
 /** @brief Signed 8 bit type */
@@ -34,6 +36,8 @@ typedef unsigned long u32;
 /** @brief Signed 32 bit type */
 typedef signed long s32;
 
+#endif
+
 /** @brief Void pointer to 0 */
 #define NULL ((void *) 0)
 /** @brief Default OS stack size */
@@ -41,5 +45,7 @@ typedef signed long s32;
 
 #include <os/memory.h>
 #include <os/event.h>
+#include <os/boot.h>
+#include <os/interfaces.h>
 
 #endif

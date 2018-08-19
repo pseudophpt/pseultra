@@ -17,7 +17,48 @@
 #ifndef OS_MEMORY_MEMCPY_H_GUARD
 #define OS_MEMORY_MEMCPY_H_GUARD
 
-// Functions
+/*
+ * Macros
+ */
+
+/*
+ * Structs
+ */
+
+#ifndef __asm__
+
+#endif
+
+/*
+ * Public functions
+ */
+
+#ifdef __asm__
+.extern osCopyMemory
+#else
 void osCopyMemory (void *dest, void *src, int size);
+#endif
+
+#ifdef __asm__
+.extern osZeroMemory
+#else
+void osZeroMemory (void *dest, int size);
+#endif
+
+/*
+ * Public variables
+ */
+
+#ifdef __os_internal__
+
+/*
+ * Internal functions
+ */
+
+/*
+ * Internal variables
+ */
+
+#endif
 
 #endif

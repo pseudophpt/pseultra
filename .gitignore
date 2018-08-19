@@ -1,0 +1,9 @@
+*.[oa]
+*~
+*.elf
+*.dblite
+.deps/
+bin/
+lib/
+doc/
+

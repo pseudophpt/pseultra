@@ -1,59 +1,60 @@
+import os
+
 Import('mips_env')
 
 path = Dir('.').abspath
 
-mips_env.Append(CPPPATH = [path + '/include', path + '/../../include'])
+mips_env.Append(CPPPATH = ['./include', './../../include'])
 
-gen_priv_doc = mips_env.GetOption('gen_priv_doc')
-
-sources = [
-    path + '/src/event/event.c',
-    path + '/src/event/exception.c',
-    path + '/src/event/exception_s.sx',
-    path + '/src/boot/boot.c',
-    path + '/src/boot/boot_s.sx',
-    path + '/src/memory/malloc.c',
-    path + '/src/memory/memcpy.c',
-    path + '/include/os/event/event.h',
-    path + '/include/os/event/exception.h',
-    path + '/include/os/memory/malloc.h',
-    path + '/include/os/memory/memcpy.h',
+includes = [
+    './include/os/boot.h',
+    './include/os/event.h',
+    './include/os/memory.h',
+    './include/os/interfaces.h',
+    './include/os/event/event.h',
+    './include/os/event/exception.h',
+    './include/os/memory/malloc.h',
+    './include/os/memory/memcpy.h',
+    './include/os/memory/cache.h',
+    './include/os/boot/boot.h',
+    './include/os/interfaces/pi.h',
+    './include/os/interfaces/vi.h',
 ]
 
-# If generating documents
-if gen_priv_doc:
-    conf = path + '/Doxyfile'
-else:
-    conf = path + '/Doxyfile.priv'
-
-doc = mips_env.Command(
-    target = path + '/doc/last_updated',
-    source = sources,# + [path + '/Doxyfile', path + '/Doxyfile.priv', path +'/README.md'],
-    action = ['doxygen ' + conf, 'date > $TARGET']
-)
+sources = [
+    './src/event/event.c',
+    './src/event/exception.c',
+    './src/event/exception_s.sx',
+    './src/boot/boot.c',
+    './src/boot/boot_s.sx',
+    './src/memory/malloc.c',
+    './src/memory/memcpy.c',
+    './src/memory/cache_s.sx',
+    './src/interfaces/pi.c',
+    './src/interfaces/vi.c',
+] + includes
 
 pseultra = mips_env.Library(
-    target = path + '/lib/libpseultra.a',
+    target = './lib/libpseultra.a',
     source = sources
 )
 
 prefix = mips_env.GetOption('prefix')
 
 prefix_bin = prefix + '/bin'
-prefix_include = prefix + '/include'
+prefix_include = prefix 
 prefix_lib = prefix + '/lib'
-prefix_doc = prefix + '/doc/os'
+
+includes += ['./include/os.sx', './include/os.h']
 
 mips_env.Install(prefix_bin, [])
-mips_env.Install(prefix_include, [path + '/include/os.h', path + '/include/os'])
 mips_env.Install(prefix_lib, [pseultra])
-mips_env.Install(prefix_doc, [path + '/doc/html', path + '/doc/latex'])
+install_include = [mips_env.Install(prefix_include + '/' + os.path.dirname(h), h) for h in includes]
 
 install_bin = mips_env.Alias('install-bin', prefix_bin)
 install_lib = mips_env.Alias('install-lib', prefix_lib)
-install_include = mips_env.Alias('install-include', prefix_include)
-install_doc = mips_env.Alias('install-doc', prefix_doc)
+install_include = mips_env.Alias('install-include', install_include)
 
-installs = [install_bin, install_lib, install_include, install_doc]
+installs = [install_bin, install_lib, install_include]
 
 mips_env.Alias('install', installs)

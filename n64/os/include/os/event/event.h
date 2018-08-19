@@ -17,13 +17,9 @@
 #ifndef OS_EVENT_EVENT_H_GUARD
 #define OS_EVENT_EVENT_H_GUARD
 
-/** @brief Struct describing an OS event */
-typedef struct OSEvent_t {
-    /** @brief Callback associated with the execution of this event */
-    void (*callback) (void); 
-    /** @brief Type of event */
-    u8 type; 
-} OSEvent;
+/*
+ * Macros
+ */
 
 /** @brief Type for an event which is added to the main queue on an SP interrupt */
 #define OS_EVENT_TYPE_SP 0 
@@ -44,6 +40,20 @@ typedef struct OSEvent_t {
 /** @brief Size for OS defined event queues */
 #define OS_EVENT_QUEUE_SIZE 32
 
+/*
+ * Structs
+ */
+
+#ifndef __asm__
+
+/** @brief Struct describing an OS event */
+typedef struct OSEvent_t {
+    /** @brief Callback associated with the execution of this event */
+    void (*callback) (void); 
+    /** @brief Type of event */
+    u8 type; 
+} OSEvent;
+
 /** @brief Struct describing a circular FIFO queue of OS events */
 typedef struct OSEventQueue_t {
     /** @brief An array of events on the queue */
@@ -54,7 +64,92 @@ typedef struct OSEventQueue_t {
     int end; 
 } OSEventQueue;
 
-// Functions
+#endif
+
+/*
+ * Public functions
+ */
+
+#ifdef __asm__
+.extern osScheduleEvent
+#else
 void osScheduleEvent (OSEvent event);
+#endif
+
+/*
+ * Public variables
+ */
+
+#ifdef __os_internal__
+
+/*
+ * Internal functions
+ */
+
+#ifdef __asm__
+.extern __osEnqueueEvent
+#else
+void __osEnqueueEvent (OSEvent event, OSEventQueue *queue);
+#endif
+
+#ifdef __asm__
+.extern __osDequeueEvent
+#else
+OSEvent __osDequeueEvent (OSEventQueue *queue);
+#endif
+
+#ifdef __asm__
+.extern __osCopyEventQueue 
+#else
+void __osCopyEventQueue (OSEventQueue *src, OSEventQueue *dest);
+#endif
+
+/*
+ * Internal variables
+ */
+
+#ifdef __asm__
+.extern __osMainEventQueue
+#else
+extern OSEventQueue __osMainEventQueue;
+#endif
+
+#ifdef __asm__
+.extern __osSpEventQueue
+#else
+extern OSEventQueue __osSpEventQueue;
+#endif
+
+#ifdef __asm__
+.extern __osDpEventQueue
+#else
+extern OSEventQueue __osDpEventQueue;
+#endif
+
+#ifdef __asm__
+.extern __osSiEventQueue
+#else
+extern OSEventQueue __osSiEventQueue;
+#endif
+
+#ifdef __asm__
+.extern __osViEventQueue
+#else
+extern OSEventQueue __osViEventQueue;
+#endif
+
+#ifdef __asm__
+.extern __osAiEventQueue
+#else
+extern OSEventQueue __osAiEventQueue;
+#endif
+
+#ifdef __asm__
+.extern __osPiEventQueue
+#else
+extern OSEventQueue __osPiEventQueue;
+#endif
+
+#endif
 
 #endif

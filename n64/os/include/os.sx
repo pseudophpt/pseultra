@@ -1,0 +1,16 @@
+/*
+ * pseultra/n64/os/include/os.sx
+ * OS header for assembly
+ * 
+ * (C) pseudophpt 2018 
+ */
+
+#ifndef OS_SX_GUARD
+#define OS_SX_GUARD
+
+#define __asm__
+
+#include <mips.sx>
+#include <os.h>
+
+#endif

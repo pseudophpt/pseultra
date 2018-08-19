@@ -2,6 +2,27 @@
 
 ## [Unreleased](https://github.com/pseudophpt/pseultra/compare/master...develop)
 
+## [1.1.0](https://github.com/pseudophpt/pseultra/compare/v1.0.1...v1.1.0) - 2018-08-18
+
+### Added
+- Memory zeroing functionality (see osZeroMemory())
+- Interrupt handling for RCP DP interrupts
+- PI functionality (DMA)
+- VI functionality (buffer swapping)
+- Timer interrupt handler
+- PIF initialization in OS
+- Caching operations
+
+### Changed
+- Improve documentation on N64 constants and prepend N64_
+
+### Fixed
+- Bug involving the use of an incorrect kernel register, which causes unknown behavior (usually an XTLB exception) in the exception unmasking routine
+- Bug involving exception handlers being stored only in DCache at vector locations, causing any exception to not reach its handler
+
+### Removed
+-  Documentation build from `scons` (users may do it manually now by running `doxygen`)
+
 ## [1.0.1](https://github.com/pseudophpt/pseultra/compare/v1.0.0...v1.0.1) - 2018-08-02
 
 ### Added
