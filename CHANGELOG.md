@@ -9,6 +9,7 @@
 - VI functionality (buffer swapping)
 - Timer interrupt handler
 - PIF initialization in OS
+- Caching operations
 
 ### Changed
 - Improve documentation on N64 constants and prepend N64_

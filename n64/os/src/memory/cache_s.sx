@@ -1,0 +1,81 @@
+/*
+ * pseultra/n64/os/src/memory/cache_s.sx
+ * OS cache code
+ * 
+ * (C) pseudophpt 2018 
+ */
+
+#include <os_priv.sx>
+
+.global osDCacheInvalidate
+.global osICacheInvalidate
+
+//
+// Invalidate data cache lines
+//
+osDCacheInvalidate:
+
+addiu $sp, -0x10
+
+sw $s8, 0($sp)
+sw $s7, 4($sp)
+
+// s8 = vaddr 
+move $s8, $a0
+// s7 = start byte of cache line after last
+addu $s7, $a0, $a1
+addiu $s7, -1
+ori $s7, 0xF
+addiu $s7, 1
+
+.invalidateDCacheLine:
+// Invalidate DCache line at s8
+cache MIPS_CACHE_DCACHE | MIPS_CACHE_HIT_INVALIDATE, 0($s8) 
+
+// Increment s8 to next cache line
+addiu $s8, 0x10
+
+// If this cache line is outside of the region to be invalidated, do not continue invalidation
+blt $s8, $s7, .invalidateDCacheLine 
+
+lw $s7, 4($sp)
+lw $s8, 0($sp)
+
+addiu $sp, 0x10
+
+jr $ra
+
+//
+// Invalidate instruction cache lines
+//
+osICacheInvalidate:
+
+addiu $sp, -0x10
+
+sw $s8, 0($sp)
+sw $s7, 4($sp)
+
+// s8 = vaddr 
+move $s8, $a0
+// s7 = start byte of cache line after last
+addu $s7, $a0, $a1
+addiu $s7, -1
+ori $s7, 0x1F
+addiu $s7, 1
+
+.invalidateICacheLine:
+// Invalidate DCache line at s8
+cache MIPS_CACHE_ICACHE | MIPS_CACHE_HIT_INVALIDATE, 0($s8) 
+
+// Increment s8 to next cache line
+addiu $s8, 0x20
+
+// If this cache line is outside of the region to be invalidated, do not continue invalidation
+blt $s8, $s7, .invalidateICacheLine 
+
+lw $s7, 4($sp)
+lw $s8, 0($sp)
+
+addiu $sp, 0x10
+
+jr $ra

@@ -15,6 +15,7 @@ includes = [
     './include/os/event/exception.h',
     './include/os/memory/malloc.h',
     './include/os/memory/memcpy.h',
+    './include/os/memory/cache.h',
     './include/os/boot/boot.h',
     './include/os/interfaces/pi.h',
     './include/os/interfaces/vi.h',
@@ -28,6 +29,7 @@ sources = [
     './src/boot/boot_s.sx',
     './src/memory/malloc.c',
     './src/memory/memcpy.c',
+    './src/memory/cache_s.sx',
     './src/interfaces/pi.c',
     './src/interfaces/vi.c',
 ] + includes
