@@ -122,7 +122,7 @@ extern u32 __osHandlerEnd;
 #ifdef __asm__
 .extern __osExceptionRegSave
 #else
-extern u8 __osExceptionRegSave [];
+extern u32 __osExceptionRegSave [];
 #endif
 
 #endif
