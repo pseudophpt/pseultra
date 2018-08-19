@@ -2,6 +2,9 @@
 
 ## [Unreleased](https://github.com/pseudophpt/pseultra/compare/master...develop)
 
+### Added
+- Debug functionality
+
 ## [1.1.0](https://github.com/pseudophpt/pseultra/compare/v1.0.1...v1.1.0) - 2018-08-18
 
 ### Added
