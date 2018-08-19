@@ -123,22 +123,22 @@ osViInit
     // Set resolution
     *(u32 *)N64_KSEG1_ADDR(N64_VI_WIDTH_REG) = resolution;
 
+    // Interrupt at line 2
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_INTR_REG) = 0x2; 
+
+     // Initalize other VI registers (Don't ask me what they mean lmao)
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_BURST_REG) = 0x3E52239;
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_V_SYNC_REG) = 0x20D;
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_H_SYNC_REG) = 0xC15;
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_LEAP_REG) = 0xC150C15;
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_H_START_REG) = 0x6C02EC;
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_V_START_REG) = 0x2501FF;
+    *(u32 *)N64_KSEG1_ADDR(N64_VI_V_BURST_REG) = 0xE0204;
+    
     // Scale registers
     *(u32 *)N64_KSEG1_ADDR(N64_VI_X_SCALE_REG) = 0x200; // Scale by 1
     *(u32 *)N64_KSEG1_ADDR(N64_VI_Y_SCALE_REG) = 0x400; // Scale by 1/2
 
-    // Interrupt at line 2
-    *(u32 *)N64_KSEG1_ADDR(N64_VI_INTR_REG) = 0x2; 
-
-    // Initalize other VI registers (Don't ask me what they mean lmao)
-    *(u32 *)N64_KSEG1_ADDR(N64_VI_BURST_REG) = 0x3E52239;
-    *(u32 *)N64_KSEG1_ADDR(N64_VI_V_BURST_REG) = 0xE0204;
-    *(u32 *)N64_KSEG1_ADDR(N64_VI_H_START_REG) = 0x6C02EC;
-    *(u32 *)N64_KSEG1_ADDR(N64_VI_V_START_REG) = 0x2501FF;
-    *(u32 *)N64_KSEG1_ADDR(N64_VI_H_SYNC_REG) = 0xC15;
-    *(u32 *)N64_KSEG1_ADDR(N64_VI_V_SYNC_REG) = 0x20D;
-    *(u32 *)N64_KSEG1_ADDR(N64_VI_LEAP_REG) = 0xC150C15;
-    
-    // Enable interrupts
+    // Re-enable interrupts
     __osEnableInterrupts();
 }
