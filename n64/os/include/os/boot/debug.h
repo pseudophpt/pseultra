@@ -80,6 +80,18 @@ extern u8 osDebugFont [];
 void __osDebugInit ();
 #endif
 
+#ifdef __asm__
+.extern __osDebugWriteChar
+#else
+void __osDebugWriteChar (int x, int y, u8 ch);
+#endif
+
+#ifdef __asm__
+.extern __osDebugPrint
+#else
+void __osDebugPrint (int x, int y, char *str);
+#endif
+
 /*
  * Internal variables
  */

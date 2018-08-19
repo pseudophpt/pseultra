@@ -84,6 +84,19 @@ __osDebugWriteChar
     }
 }
 
+/**
+ * @internal
+ * @brief Print string to debug screen 
+ * @date 19 Aug 2018
+ * @author pseudophpt
+ *
+ * @param x X position of string
+ * @param y Y position of string
+ * @param str String to print
+ *
+ * This function draws a null-terminated string to the debug screen
+ *
+ */
 void
 __osDebugPrint
 (int x, int y, char *str) {
