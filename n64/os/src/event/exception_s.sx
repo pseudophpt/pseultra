@@ -16,7 +16,12 @@
 .global __osHandleTimerInterrupt
 .global __osExceptionRegSave
 
+// The savereg and loadreg macros use CacheErr, an unused coprocessor 0 register kept in the vr4300 for compatibility with its vr4200 predecessor.
+// This register is used to store the value of $k0
+
 .macro savereg
+
+mtc0 $k0, CacheErr
 
 lui $k0, %hi(__osExceptionRegSave)
 addiu $k0, %lo(__osExceptionRegSave)
@@ -44,6 +49,8 @@ lw $\reg, (\reg * 4)($k0)
 
 .set at
 
+mfc0 $k0, CacheErr
+
 .endm
 
 //
@@ -58,7 +65,11 @@ nop
 nop
 .set reorder
 ori $k0, 0x0400 // Unmask all interrupts
-
+.set noreorder
+nop // COP0 Delay
+nop
+nop
+.set reorder
 mtc0 $k0, Status
 
 jr $ra // Return
@@ -75,6 +86,11 @@ nop
 nop
 .set reorder
 ori $k0, 0x0001
+.set noreorder
+nop // COP0 Delay
+nop
+nop
+.set reorder
 mtc0 $k0, Status
 
 jr $ra
@@ -92,6 +108,11 @@ nop
 .set reorder
 li $k1, ~0x1
 and $k0, $k1
+.set noreorder
+nop // COP0 Delay
+nop
+nop
+.set reorder
 mtc0 $k0, Status
 
 jr $ra
