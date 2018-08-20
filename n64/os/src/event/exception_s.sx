@@ -98,7 +98,7 @@ jr $ra
 __osHandlerStart:
 
 lui $k0, %hi(__osHandleException)
-addiu $k0, %lo(__osHandleException)
+ori $k0, %lo(__osHandleException)
 jr $k0
 
 __osHandlerEnd:
@@ -116,13 +116,31 @@ andi $t1, $t0, N64_COP0_CAUSE_EXC_CODE // Get exception code
 
 bne $t1, N64_COP0_CAUSE_EXC_CODE_INT, .handleException // Branch to handle exception if it's not the interrupt code 
 
+// Handle interrupt
 .handleInterrupt:
 
 andi $a0, $t0, N64_COP0_CAUSE_IP // Pass interrupt bits
 jal __osHandleInterrupt
 b .done
 
+// Handle exception
 .handleException:
+
+// Debug screen
+#ifdef __debug__
+
+// Get exception message offset
+lui $t2, %hi(osDebugExceptStr)
+ori $t2, %lo(osDebugExceptStr)
+addu $t2, $t1, $t2
+lw $a0, 0($t2)
+
+jal __osError
+
+#endif
+
+.spin: // Spin forever and ever and ever and ...
+b .spin
 
 .done:
 

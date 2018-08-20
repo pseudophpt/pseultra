@@ -49,6 +49,12 @@ void osSetIntMask(u32 mask);
  * Public variables
  */
 
+#ifdef __asm__
+.extern osDebugExceptStr
+#else
+extern char *osDebugExceptStr [];
+#endif
+
 #ifdef __os_internal__
 
 /*

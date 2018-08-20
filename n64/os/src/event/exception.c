@@ -16,6 +16,9 @@
 
 #include <os_priv.h>
 
+/* Exception strings */
+#include "exceptstr.h"
+
 /**
  * @internal
  * @brief Initializes exception handlers
