@@ -77,11 +77,13 @@ __osDebugWriteChar
     else return;
 
     // Write character to frame buffer
-    for (int row = 0; row < 5; row ++) {
+    for (int row = 0; row < OS_DEBUG_CHAR_WIDTH; row ++) {
         // Get bitmap for this row
         u8 row_pixels = osDebugFont[(offset * 5) + row];
+        // Last row blank
+        if (row == OS_DEBUG_CHAR_WIDTH - 1) row_pixels = 0;
 
-        for (int col = 0; col < 5; col ++) {
+        for (int col = 0; col < OS_DEBUG_CHAR_WIDTH; col ++) {
             *(u32 *)N64_KSEG1_ADDR(OS_DEBUG_BUFFER + OS_DEBUG_XY_PIXEL_TO_OFFSET(
                         OS_DEBUG_CHAR_TO_X_PIXEL(x) + col, // X pixel
                         OS_DEBUG_CHAR_TO_Y_PIXEL(y) + row // Y pixel
