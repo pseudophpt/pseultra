@@ -28,14 +28,17 @@
  * @date 19 Aug 2018
  * @author pseudophpt
  *
- * This function should be called when an assertion fails or an exception occurs. It initializes the VI for printing out debug information
+ * This function should be called when an assertion fails or an exception occurs. It initializes the VI for printing out debug information.
  *
- * @todo Make VI safe
+ * @note Draw debug info to the screen before calling this function, so the VI doesn't end up reading something that being written to
  */
 void 
 __osDebugInit
 () {
-    // Initialize VI mode for 5/5/5/3 320x240 
+    // Poll VI register for vblank
+    while (*(u32 *)N64_KSEG1_ADDR(N64_VI_CURRENT_REG) != 0);
+
+    // Initialize VI mode for 8/8/8/8 320x240 
     osViInit(OS_VI_MODE(8888, LOW));
 
     // Set and swap VI buffer
@@ -187,15 +190,15 @@ __osError
     // Disable interrupts
     __osDisableInterrupts();
     
-    // Initialize debug
-    __osDebugInit();
-
     // Write message
     __osDebugPrint(0, 0, error_msg);
 
     // Dump registers
     __osDebugDumpRegisters();
 
+    // Initialize debug
+    __osDebugInit();
+    
     // Spin forever
     while(1);
 }
