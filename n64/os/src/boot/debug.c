@@ -73,6 +73,22 @@ __osDebugWriteChar
     else if (ch >= '0' && ch <= '9') {
         offset = 26 + (ch - '0'); // Get number offset
     }
+    // Symbol type 1
+    else if (ch >= '!' && ch <= '/') {
+        offset = 36 + (ch - '!');
+    }
+    // Symbol type 2
+    else if (ch >= ':' && ch <= '@') {
+        offset = 51 + (ch - ':');
+    }
+    // Symbol type 3
+    else if (ch >= '[' && ch <= '`') {
+        offset = 58 + (ch - '[');
+    }
+    // Symbol type 4
+    else if (ch >= '{' && ch <= '~') {
+        offset = 64 + (ch - '{');
+    }
     // No character found, return
     else return;
 

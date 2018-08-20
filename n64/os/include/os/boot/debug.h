@@ -38,7 +38,7 @@
 /** @brief Debug buffer character width in pixels */
 #define OS_DEBUG_CHAR_WIDTH 6
 /** @brief Debug font character count */
-#define OS_DEBUG_CHAR_COUNT 36
+#define OS_DEBUG_CHAR_COUNT 68
 /** @brief Convert character block to debug buffer x pixel */
 #define OS_DEBUG_CHAR_TO_X_PIXEL(x) (((x) * OS_DEBUG_CHAR_WIDTH) + OS_DEBUG_BUFFER_X_START)
 /** @brief Convert character block to debug buffer y pixel */
