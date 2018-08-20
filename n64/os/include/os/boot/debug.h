@@ -68,6 +68,12 @@
 extern u8 osDebugFont [];
 #endif
 
+#ifdef __asm__
+.extern osDebugRegNames
+#else
+extern char *osDebugRegNames [];
+#endif
+
 #ifdef __os_internal__
 
 /*
@@ -90,6 +96,18 @@ void __osDebugWriteChar (int x, int y, u8 ch);
 .extern __osDebugPrint
 #else
 void __osDebugPrint (int x, int y, char *str);
+#endif
+
+#ifdef __asm__
+.extern __osDebugDumpRegisters
+#else
+void __osDebugDumpRegisters ();
+#endif
+
+#ifdef __asm__
+.extern __osError
+#else
+void __osError (char *error_msg);
 #endif
 
 /*

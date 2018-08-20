@@ -29,6 +29,7 @@ sources = [
     './src/boot/boot.c',
     './src/boot/debug.c',
     './src/boot/font.h',
+    './src/boot/reg.h',
     './src/boot/boot_s.sx',
     './src/memory/malloc.c',
     './src/memory/memcpy.c',

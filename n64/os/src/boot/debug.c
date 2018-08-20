@@ -19,6 +19,9 @@
 /* Font data */
 #include "font.h"
 
+/* Register names */
+#include "reg.h"
+
 /**
  * @internal
  * @brief Initialize debugging mode
@@ -27,6 +30,7 @@
  *
  * This function should be called when an assertion fails or an exception occurs. It initializes the VI for printing out debug information
  *
+ * @todo Make VI safe
  */
 void 
 __osDebugInit
@@ -112,4 +116,86 @@ __osDebugPrint
         }
         str ++;
     }
+}
+
+/**
+ * @internal
+ * @brief Dump register values to debug screen
+ * @date 19 Aug 2018
+ * @author pseudophpt
+ *
+ * This function draws the values of the 32 vr4300 GPRs to the screen
+ *
+ */
+void
+__osDebugDumpRegisters
+() {
+    for (int x = 0; x < 3; x ++) {
+        for (int y = 0; y < 11; y ++) {
+            // Register number
+            int reg = (x * 11) + y;
+
+            // If not a register
+            if (reg == 32) break;
+
+            // Draw register names 
+            __osDebugPrint(x * 12, y + 4, osDebugRegNames[reg]); 
+            
+            // Format register value as hex string
+            char value_string [9];
+
+            // Null terminate
+            value_string[8] = 0;
+
+            // Get register value
+            u32 value = __osExceptionRegSave[reg];
+            
+            for (int digit = 0; digit < 8; digit ++) {
+                // Get digit value
+                u8 digit_value = (value & (0xF << (4 * (7 - digit)))) >> (4 * (7 - digit));
+
+                // Convert to character
+                // Digit
+                if (digit_value < 0xa) {
+                    value_string[digit] = '0' + digit_value;
+                }
+                // Letter
+                else value_string[digit] = 'a' + (digit_value - 0xa);
+            }
+
+            // Print value
+            __osDebugPrint(x * 12 + 3, y + 4, value_string); 
+        }
+    }
+}
+
+/**
+ * @internal
+ * @brief Enter error state 
+ * @date 19 Aug 2018
+ * @author pseudophpt
+ *
+ * @param error_msg Message to display as cause
+ *
+ * This function should be called on exception or when an assertion fails. It displays the cause passed via error_msg, the value of the 32 GPRs, and then enters an infinite loop which cannot be exited.
+ *
+ */
+
+void
+__osError
+(char *error_msg) {
+    // Disable interrupts
+    __osDisableInterrupts();
+    
+    // Initialize debug
+    __osDebugInit();
+
+    // Write message
+    __osDebugPrint(0, 0, error_msg);
+
+    // Dump registers
+    __osDebugDumpRegisters();
+
+    // Spin forever
+    while(1);
 }
