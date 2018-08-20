@@ -38,8 +38,16 @@ sources = [
     './src/interfaces/vi.c',
 ] + includes
 
+oslib_debug = mips_env.GetOption('oslib_debug')
+
+if oslib_debug:
+    libpseultra = './lib/libpseultra_d.a'
+    mips_env.Append(CCFLAGS = ' -g -D__debug__')
+else:
+    libpseultra = './lib/libpseultra.a'
+
 pseultra = mips_env.Library(
-    target = './lib/libpseultra.a',
+    target = libpseultra,
     source = sources
 )
 
