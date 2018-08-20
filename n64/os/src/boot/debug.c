@@ -198,6 +198,9 @@ __osError
     // Dump registers
     __osDebugDumpRegisters();
 
+    // Draw build date
+    __osDebugPrint(0, 19, "Build date " __DATE__ " " __TIME__);
+
     // Initialize debug
     __osDebugInit();
     
