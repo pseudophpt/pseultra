@@ -44,8 +44,10 @@ lw $\reg, (\reg * 4)($k0)
 
 __osUnmaskInterrupts:
 mfc0 $k0, Status
+.set noreorder
 nop // COP0 Delay
 nop
+.set reorder
 ori $k0, 0x0400 // Unmask all interrupts
 
 mtc0 $k0, Status
@@ -58,8 +60,10 @@ jr $ra // Return
 
 __osEnableInterrupts:
 mfc0 $k0, Status
+.set noreorder
 nop // COP0 Delay
 nop
+.set reorder
 ori $k0, 0x0001
 mtc0 $k0, Status
 
@@ -71,7 +75,10 @@ jr $ra
 
 __osDisableInterrupts:
 mfc0 $k0, Status
+.set noreorder
 nop // COP0 Delay
+nop
+.set reorder
 li $k1, ~0x1
 and $k0, $k1
 mtc0 $k0, Status
