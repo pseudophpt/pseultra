@@ -43,6 +43,7 @@ oslib_debug = mips_env.GetOption('oslib_debug')
 if oslib_debug:
     libpseultra = './lib/libpseultra_d.a'
     mips_env.Append(CCFLAGS = ' -g -D__debug__')
+    mips_env.Append(ASFLAGS = ' -g -D__debug__')
 else:
     libpseultra = './lib/libpseultra.a'
 
