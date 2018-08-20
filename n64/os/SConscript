@@ -7,6 +7,7 @@ path = Dir('.').abspath
 mips_env.Append(CPPPATH = ['./include', './../../include'])
 
 includes = [
+    './include/os/assert.h',
     './include/os/boot.h',
     './include/os/event.h',
     './include/os/memory.h',

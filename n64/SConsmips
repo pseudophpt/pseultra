@@ -12,7 +12,7 @@ mips_env.Replace(OBJDUMP = cc_prefix + '-objdump')
 mips_env.Replace(OBJCOPY = cc_prefix + '-objcopy')
 mips_env.Replace(AR = cc_prefix + '-ar')
 
-mips_env.Replace(CCFLAGS = '-G0 -EB')
+mips_env.Replace(CCFLAGS = '-G0 -EB -ffreestanding')
 mips_env.Replace(ASFLAGS = '-G0 -EB -Iinclude -I../../include')
 
 mips_env.Replace(ENV = os.environ)

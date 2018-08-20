@@ -43,6 +43,8 @@ typedef signed long s32;
 /** @brief Default OS stack size */
 #define OS_STACK_SIZE 0x4000
 
+#include <os/assert.h>
+
 #include <os/memory.h>
 #include <os/event.h>
 #include <os/boot.h>
