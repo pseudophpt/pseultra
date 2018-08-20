@@ -118,6 +118,11 @@ __osDebugPrint
         else {
             __osDebugWriteChar(x, y, *str);
             x ++;
+            // Overflow
+            if (x >= ((OS_DEBUG_BUFFER_X_END - OS_DEBUG_BUFFER_X_START) / OS_DEBUG_CHAR_WIDTH)) {
+                x = 0;
+                y ++;
+            }
         }
         str ++;
     }
