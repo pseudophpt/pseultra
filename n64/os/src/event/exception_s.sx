@@ -47,6 +47,7 @@ mfc0 $k0, Status
 .set noreorder
 nop // COP0 Delay
 nop
+nop
 .set reorder
 ori $k0, 0x0400 // Unmask all interrupts
 
@@ -63,6 +64,7 @@ mfc0 $k0, Status
 .set noreorder
 nop // COP0 Delay
 nop
+nop
 .set reorder
 ori $k0, 0x0001
 mtc0 $k0, Status
@@ -77,6 +79,7 @@ __osDisableInterrupts:
 mfc0 $k0, Status
 .set noreorder
 nop // COP0 Delay
+nop
 nop
 .set reorder
 li $k1, ~0x1
