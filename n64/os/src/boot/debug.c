@@ -129,12 +129,15 @@ __osDebugPrint
  * @date 19 Aug 2018
  * @author pseudophpt
  *
- * This function draws the values of the 32 vr4300 GPRs to the screen
+ * This function draws the values of useful registers to the debug screen 
  *
  */
 void
 __osDebugDumpRegisters
 () {
+    // String for drawing values
+    char value_string [9];
+    
     for (int x = 0; x < 3; x ++) {
         for (int y = 0; y < 11; y ++) {
             // Register number
@@ -144,33 +147,78 @@ __osDebugDumpRegisters
             if (reg == 32) break;
 
             // Draw register names 
-            __osDebugPrint(x * 12, y + 4, osDebugRegNames[reg]); 
+            __osDebugPrint(x * 12, y + 5, osDebugRegNames[reg]); 
             
-            // Format register value as hex string
-            char value_string [9];
-
-            // Null terminate
-            value_string[8] = 0;
-
             // Get register value
             u32 value = __osExceptionRegSave[reg];
             
-            for (int digit = 0; digit < 8; digit ++) {
-                // Get digit value
-                u8 digit_value = (value & (0xF << (4 * (7 - digit)))) >> (4 * (7 - digit));
-
-                // Convert to character
-                // Digit
-                if (digit_value < 0xa) {
-                    value_string[digit] = '0' + digit_value;
-                }
-                // Letter
-                else value_string[digit] = 'a' + (digit_value - 0xa);
-            }
+            // Format register value as hex string
+            __osDebugFormatHex(value, value_string);
 
             // Print value
-            __osDebugPrint(x * 12 + 3, y + 4, value_string); 
+            __osDebugPrint(x * 12 + 3, y + 5, value_string); 
         }
+    }
+    
+    // Get C0 values
+    u32 Cause, Status, BadVAddr, EPC;
+    
+    asm volatile ("mfc0 %0, $12" : "=r" (Status));
+    asm volatile ("mfc0 %0, $13" : "=r" (Cause));
+    asm volatile ("mfc0 %0, $14" : "=r" (EPC));
+    asm volatile ("mfc0 %0, $8" : "=r" (BadVAddr));
+
+    __osDebugFormatHex(Status, value_string);
+    
+    __osDebugPrint(0, 16, "Status");
+    __osDebugPrint(8, 16, value_string);
+
+    __osDebugFormatHex(Cause, value_string);
+    
+    __osDebugPrint(18, 16, "Cause");
+    __osDebugPrint(27, 16, value_string);
+    
+    __osDebugFormatHex(EPC, value_string);
+    
+    __osDebugPrint(0, 17, "EPC");
+    __osDebugPrint(8, 17, value_string);
+    
+    __osDebugFormatHex(BadVAddr, value_string);
+    
+    __osDebugPrint(18, 17, "BadVAddr");
+    __osDebugPrint(27, 17, value_string);
+}
+
+/**
+ * @internal
+ * @brief Format u32 hex value as string 
+ * @date 20 Aug 2018
+ * @author pseudophpt
+ *
+ * @param value Value to format
+ * @param str Character array to store to (9 bytes)
+ *
+ * This function formats the u32 value passed by value and formats it as a hex string, stored in str
+ *
+ */
+void
+__osDebugFormatHex
+(u32 value, char *str) {
+    // Null terminate
+    str[8] = '\0';
+    
+    for (int digit = 0; digit < 8; digit ++) {
+        // Get digit value
+        u8 digit_value = (value & (0xF << (4 * (7 - digit)))) >> (4 * (7 - digit));
+
+        // Convert to character
+        // Digit
+        if (digit_value < 0xa) {
+            str[digit] = '0' + digit_value;
+        }
+
+        // Letter
+        else str[digit] = 'a' + (digit_value - 0xa);
     }
 }
 

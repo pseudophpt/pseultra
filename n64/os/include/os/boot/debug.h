@@ -105,6 +105,12 @@ void __osDebugDumpRegisters ();
 #endif
 
 #ifdef __asm__
+.extern __osDebugFormatHex
+#else
+void __osDebugFormatHex (u32 value, char *str);
+#endif
+
+#ifdef __asm__
 .extern __osError
 #else
 void __osError (char *error_msg);
