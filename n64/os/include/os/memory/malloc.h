@@ -18,17 +18,6 @@
 #define OS_MEMORY_MALLOC_H_GUARD
 
 /*
- * Macros
- */
-
-/** @brief Size of one block header */
-#define OS_HEAP_HEAD_SIZE sizeof(OSHeapLink)
-/** @brief Flag describing a used block */
-#define OS_ALLOC_USED 0
-/** @brief Flag describing a free block */
-#define OS_ALLOC_FREE 1
-
-/*
  * Structs
  */
 

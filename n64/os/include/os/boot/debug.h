@@ -21,31 +21,6 @@
  * Macros
  */
 
-/** @brief Default location for debug buffer */
-#define OS_DEBUG_BUFFER 0x100000
-/** @brief Debug buffer width */
-#define OS_DEBUG_BUFFER_WIDTH 320
-/** @brief Debug buffer height */
-#define OS_DEBUG_BUFFER_HEIGHT 240
-/** @brief Debug buffer X start  pixels */
-#define OS_DEBUG_BUFFER_X_START 40
-/** @brief Debug buffer X end in pixels*/
-#define OS_DEBUG_BUFFER_X_END 280
-/** @brief Debug buffer Y start in pixels */
-#define OS_DEBUG_BUFFER_Y_START 60
-/** @brief Debug buffer Y end in pixels */
-#define OS_DEBUG_BUFFER_Y_END 180
-/** @brief Debug buffer character width in pixels */
-#define OS_DEBUG_CHAR_WIDTH 6
-/** @brief Debug font character count */
-#define OS_DEBUG_CHAR_COUNT 68
-/** @brief Convert character block to debug buffer x pixel */
-#define OS_DEBUG_CHAR_TO_X_PIXEL(x) (((x) * OS_DEBUG_CHAR_WIDTH) + OS_DEBUG_BUFFER_X_START)
-/** @brief Convert character block to debug buffer y pixel */
-#define OS_DEBUG_CHAR_TO_Y_PIXEL(y) (((y) * OS_DEBUG_CHAR_WIDTH) + OS_DEBUG_BUFFER_Y_START)
-/** @brief Convert x and y pixel to offset */
-#define OS_DEBUG_XY_PIXEL_TO_OFFSET(x,y) (((x) * 0x4) + ((y) * 0x4 * OS_DEBUG_BUFFER_WIDTH))
-
 /*
  * Structs
  */
