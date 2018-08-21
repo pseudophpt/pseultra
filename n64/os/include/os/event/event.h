@@ -21,6 +21,9 @@
  * Macros
  */
 
+/** @brief Size for OS defined event queues */
+#define OS_EVENT_QUEUE_SIZE 32
+
 /** @brief Type for an event which is added to the main queue on an SP interrupt */
 #define OS_EVENT_TYPE_SP 0 
 /** @brief Type for an event which is added to the main queue on a DP interrupt */

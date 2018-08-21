@@ -16,12 +16,6 @@
 
 #include <os_priv.h>
 
-/* Font data */
-#include "font.h"
-
-/* Register names */
-#include "reg.h"
-
 /** @internal @brief Default location for debug buffer */
 #define OS_DEBUG_BUFFER 0x100000
 /** @internal @brief Debug buffer width */
@@ -46,6 +40,12 @@
 #define OS_DEBUG_CHAR_TO_Y_PIXEL(y) (((y) * OS_DEBUG_CHAR_WIDTH) + OS_DEBUG_BUFFER_Y_START)
 /** @internal @brief Convert x and y pixel to offset */
 #define OS_DEBUG_XY_PIXEL_TO_OFFSET(x,y) (((x) * 0x4) + ((y) * 0x4 * OS_DEBUG_BUFFER_WIDTH))
+
+/* Font data */
+#include "font.h"
+
+/* Register names */
+#include "reg.h"
 
 /**
  * @internal
