@@ -29,7 +29,7 @@ mips_env.Command(target = path + '/src/psm3d.elf', source = path + '/src/psm3d.o
 binary = mips_env.Command(target = path + '/lib/psm3d.bin', source = path + '/src/psm3d.elf', action = '$OBJCOPY --only-section=.text -O binary $SOURCE $TARGET')
 object = mips_env.Command(
     target = path + '/lib/psm3d.o', 
-    source = path + '/src/psm3d.bin', 
+    source = path + '/lib/psm3d.bin', 
     action = "mips64-objcopy --input binary --output elf32-bigmips --binary-architecture mips -S --prefix-sections=psm3d $SOURCE $TARGET"
 )
 
