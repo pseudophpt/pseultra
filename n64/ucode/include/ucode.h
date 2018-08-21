@@ -20,8 +20,4 @@
 #include <ucode/rsp.h>
 #include <ucode/rdp.h>
 
-#ifdef __ucode_psm3d__
-#include <ucode/psm3d.h>
-#endif
-
 #endif

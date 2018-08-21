@@ -23,14 +23,7 @@
 #include <mips.sx>
 #include <ucode.sx>
 
-.global uPSM3DStart
-.global uPSM3DEnd
-
-// Beginning of microcode
-uPSM3DStart:
-
 // Just break for now
 break
 
-// End of microcode
-uPSM3DEnd:
+#include "dma.sx"
