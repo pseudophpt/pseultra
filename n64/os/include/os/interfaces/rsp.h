@@ -39,6 +39,12 @@
 void osRspLoadUCode (void *ucode_start, void *ucode_end);
 #endif
 
+#ifdef __asm__
+.extern osRspStartTask
+#else
+void osRspStartTask ();
+#endif
+
 /*
  * Public variables
  */
