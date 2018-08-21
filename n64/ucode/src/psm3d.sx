@@ -1,0 +1,36 @@
+/*
+ * pseultra/n64/boot/ucode/psm3d.sx
+ * PSM3D microcode - Pseultra Microcode 3D
+ * 
+ * (C) pseudophpt 2018
+ */
+
+/*
+ * Hey, its like 8 o clock right now. How are you?
+ * I'm writing some microcode for my N64 library.
+ * I'm kind of tired, but I wanna get this done. I
+ * recently just drew a hardware rectangle for the
+ * first time by manually setting the RDP buffer
+ * via the CPU. It was cool but kind of anti clim-
+ * actic because it was just a yellow rectangle on
+ * the screen. Alas, I better get to work now, it
+ * was nice talking to you, hopefully we will cross
+ * paths again some time in the future.
+ */
+
+// N64 Definitions
+#include <n64.sx>
+#include <mips.sx>
+#include <ucode.sx>
+
+.global uPSM3DStart
+.global uPSM3DEnd
+
+// Beginning of microcode
+uPSM3DStart:
+
+// Just break for now
+break
+
+// End of microcode
+uPSM3DEnd:

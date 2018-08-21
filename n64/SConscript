@@ -3,4 +3,5 @@ SConscript('./SConsmips')
 
 # Call build scripts
 SConscript('./os/SConscript')
+SConscript('./ucode/SConscript')
 SConscript('./boot/SConscript')

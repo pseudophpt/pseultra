@@ -1,0 +1,15 @@
+/*
+ * pseultra/n64/ucode/include/ucode.sx
+ * Microcode Header for assembly
+ * 
+ * (C) pseudophpt 2018 
+ */
+
+#ifndef UCODE_SX_GUARD
+#define UCODE_SX_GUARD
+
+#define __asm__
+
+#include <ucode.h>
+
+#endif

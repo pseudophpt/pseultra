@@ -1,0 +1,49 @@
+#
+# pseultra/n64/ucode/SConscript
+# Build file for microcode
+# 
+# (C) pseudophpt 2018
+#
+
+import os
+
+Import('mips_env')
+
+path = Dir('.').abspath
+
+includes = [
+    './include/ucode/rsp.h',
+    './include/ucode/rdp.h',
+    './include/ucode/psm3d.h',
+]
+
+sources = [
+    './src/psm3d.sx'
+] 
+
+mips_env['BUILD_ROOT'] = path
+
+mips_env.Append(CPPPATH = [path + '/include', path + '/../../include'])
+
+ucode = mips_env.Object(target = path + '/lib/psm3d.o', source = sources)
+
+prefix = mips_env.GetOption('prefix')
+
+prefix_bin = prefix + '/bin'
+prefix_include = prefix 
+prefix_lib = prefix + '/lib'
+
+includes += [
+    './include/ucode.h',
+    './include/ucode.sx'
+]
+
+mips_env.Install(prefix_bin, [])
+mips_env.Install(prefix_lib, [ucode])
+install_include = [mips_env.Install(prefix_include + '/' + os.path.dirname(h), h) for h in includes]
+
+install_bin = mips_env.Alias('install-bin', prefix_bin)
+install_lib = mips_env.Alias('install-lib', prefix_lib)
+install_include = mips_env.Alias('install-include', install_include)
+
+mips_env.Alias('install', [install_bin, install_lib, install_include])
