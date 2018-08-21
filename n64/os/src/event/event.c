@@ -17,6 +17,9 @@
 
 #include <os_priv.h>
 
+/** @internal @brief Size for OS defined event queues */
+#define OS_EVENT_QUEUE_SIZE 32
+
 /** @internal @brief Queue of events from which the main loop executes */
 OSEventQueue __osMainEventQueue;
 /** @internal @brief Queues of events to be added to the main event queue when an SP interrupt occurs */

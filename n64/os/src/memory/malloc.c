@@ -16,6 +16,17 @@
 
 #include <os_priv.h>
 
+/*
+ * Macros
+ */
+
+/** @internal @brief Size of one block header */
+#define OS_HEAP_HEAD_SIZE sizeof(OSHeapLink)
+/** @internal @brief Flag describing a used block */
+#define OS_ALLOC_USED 0
+/** @internal @brief Flag describing a free block */
+#define OS_ALLOC_FREE 1
+
 /**
  * @brief Initializes the specified heap
  * @param[out] heap Pointer to the start of the heap to initialize
