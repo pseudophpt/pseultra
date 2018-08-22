@@ -40,12 +40,15 @@ uPSM3DStart:
 #define dl_dram_ptr $s0
 #define xbus_ptr $s1 
     
-    ori $t0, $zero, header // Initialize pointers to the current DRAM and XBUS locations
-    lw dl_dram_ptr, 0($t0)
+    lw dl_dram_ptr, header($zero) // Initialize pointers to the current DRAM and XBUS locations
 
     ori xbus_ptr, $zero, xbus_buffer
 
+// Main execution loop
+
 .ExecutionLoop:
+
+// Load display list command
 
     move $a0, dl_dram_ptr
     ori $a1, $zero, cmd
