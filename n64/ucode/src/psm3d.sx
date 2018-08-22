@@ -97,23 +97,20 @@ uPSM3DStart:
 
 // TODO: Separate into a different function and check for end wraparound
 
-#define xbus_pos $t0
-#define command $t1
+#define word1 $a0
+#define word2 $a1
 
-    mfc0 xbus_pos, CMD_END // Simple pipe
-    lw command, cmd($zero)
-    sw command, 0(xbus_pos)
-    lw command, (cmd + 4)($zero)
-    sw command, 4(xbus_pos)
-    addiu xbus_pos, 0x8
-    mtc0 xbus_pos, CMD_END
+    lw word1, cmd($zero)
+    lw word2, (cmd + 4)($zero)
 
-    addiu dl_dram_ptr, 0x8 // Advance DL pointer
+    jal XBUSPush
 
-    bnez command, .ExecutionLoop
+    addiu dl_dram_ptr, 8
 
-#undef command
-#undef xbus_pos
+    bnez word2, .ExecutionLoop
+
+#undef word2
+#undef word1
 
 #undef dl_dram_ptr
 
@@ -125,6 +122,7 @@ uPSM3DStart:
     break
 
 #include "dma.sx"
+#include "xbus.sx"
 
 .align 3
 

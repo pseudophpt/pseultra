@@ -1,0 +1,59 @@
+/*
+ * pseultra/n64/boot/ucode/xbus.sx
+ * PSM3D microcode XBUS functions
+ * 
+ * (C) pseudophpt 2018
+ */
+
+//
+// Push RDP command to XBUS buffer
+// 
+// a0 = first word to push
+// a1 = second word to push
+// 
+
+#define word1 $a0
+#define word2 $a1
+
+#define xbus_pos $t0
+
+#define xbus_max_pos $t1
+
+XBUSPush:
+    mfc0 xbus_pos, CMD_END // Get last command position
+    ori xbus_max_pos, $zero, (xbus_buffer + PSM3D_XBUS_BUFFER_SIZE) // End of XBUS buffer
+    bne xbus_pos, xbus_max_pos, .XBUSPushCommand // If we're not at the end of the buffer yet, it's safe to push
+
+#undef xbus_max_pos
+
+// Wait for the RDP to finish processing up to the end of the XBUS buffer, then wrap around
+
+#define rdp_pos $t1
+#define xbus_start $t2
+
+.XBUSWaitBufferWrap:
+    mfc0 rdp_pos, CMD_CURRENT // Get current position
+    bne rdp_pos, xbus_pos, .XBUSWaitBufferWrap // Wait more if the current position is not advanced to the end of the buffer
+    
+    ori xbus_start, $zero, xbus_buffer // Re-set RDP command buffer positions
+    mtc0 xbus_start, CMD_START
+    mtc0 xbus_start, CMD_END
+
+#undef xbus_start
+#undef rdp_pos
+
+// Push the actual command to xbus: assumes the RDP command buffer can be pushed to
+
+.XBUSPushCommand:
+    sw word1, 0(xbus_pos) // Write command to XBUS buffer
+    sw word2, 4(xbus_pos)
+
+    addiu xbus_pos, 8 // Advance command position
+    mtc0 xbus_pos, CMD_END
+
+#undef xbus_pos
+
+    jr $ra
+
+#undef word1 
+#undef word2 
