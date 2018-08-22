@@ -8,22 +8,31 @@
 //
 // Push RDP command to XBUS buffer
 // 
-// a0 = first word to push
-// a1 = second word to push
+// a0 = pointer to data to push
+// a1 = size of data to push
+//
+// NOTE: Do not push multiple commands at once. This is inefficient in using
+// the XBUS FiFo buffer. Sizes larger than 8 bytes should only be used if 
+// the RDP command being passed is larger than 8 bytes.
 // 
 
-#define word1 $a0
-#define word2 $a1
+#define data_ptr $a0
+#define data_size $a1
 
 #define xbus_pos $t0
 
+// Beginning of routine, where space in the buffer is checked
+
 #define xbus_max_pos $t1
+#define xbus_pos_after $t2
 
 XBUSPush:
     mfc0 xbus_pos, CMD_END // Get last command position
+    addu xbus_pos_after, xbus_pos, data_size
     ori xbus_max_pos, $zero, (xbus_buffer + PSM3D_XBUS_BUFFER_SIZE) // End of XBUS buffer
-    bne xbus_pos, xbus_max_pos, .XBUSPushCommand // If we're not at the end of the buffer yet, it's safe to push
+    blt xbus_pos_after, xbus_max_pos, .XBUSPushCommand // If we're not at the end of the buffer yet, it's safe to push
 
+#undef xbus_pos_after
 #undef xbus_max_pos
 
 // Wait for the RDP to finish processing up to the end of the XBUS buffer, then wrap around
@@ -46,16 +55,28 @@ XBUSPush:
 
 // Push the actual command to xbus: assumes the RDP command buffer can be pushed to
 
-.XBUSPushCommand:
-    sw word1, 0(xbus_pos) // Write command to XBUS buffer
-    sw word2, 4(xbus_pos)
+#define data $t1
 
-    addiu xbus_pos, 8 // Advance command position
+.XBUSPushCommand:
+    lw data, 0(data_ptr)
+    sw data, 0(xbus_pos) // Write command to XBUS buffer
+
+    addiu data_ptr, 4 // Advance positions
+    addiu xbus_pos, 4 
+    addiu data_size, -4 
+
+    bnez data_size, .XBUSPushCommand // If we're not done pushing data, keep pushing
+    
+#undef data
+
+// Write XBUS position to RDP command register
+
+.XBUSPushDone:
     mtc0 xbus_pos, CMD_END
 
 #undef xbus_pos
 
     jr $ra
 
-#undef word1 
-#undef word2 
+#undef data_size 
+#undef data_ptr 

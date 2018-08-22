@@ -100,22 +100,23 @@ uPSM3DStart:
 
     jal DMARead // DMA command
 
-// TODO: Separate into a different function and check for end wraparound
+#define cmd_ptr $a0
+#define cmd_len $a1
 
-#define word1 $a0
-#define word2 $a1
-
-    lw word1, cmd($zero)
-    lw word2, (cmd + 4)($zero)
+    ori cmd_ptr, $zero, cmd
+    ori cmd_len, $zero, 8
 
     jal XBUSPush
 
     addiu dl_dram_ptr, 8
 
-    bnez word2, .ExecutionLoop
+    lb $t0, 0(cmd_ptr)
+    ori $t1, $zero, 0x29 // Sync_Full
 
-#undef word2
-#undef word1
+    bne $t0, $t1, .ExecutionLoop
+
+#undef cmd_ptr
+#undef cmd_len
 
 #undef dl_dram_ptr
 
