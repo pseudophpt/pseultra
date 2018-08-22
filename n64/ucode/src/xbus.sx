@@ -39,6 +39,8 @@ XBUSPush:
     mtc0 xbus_start, CMD_START
     mtc0 xbus_start, CMD_END
 
+    move xbus_pos, xbus_start // XBUS position is now at the start
+
 #undef xbus_start
 #undef rdp_pos
 
