@@ -6,17 +6,17 @@
  */
 
 /*
- * Hey, its like 8 o clock right now. How are you?
- * I'm writing some microcode for my N64 library.
- * I'm kind of tired, but I wanna get this done. I
- * recently just drew a hardware rectangle for the
- * first time by manually setting the RDP buffer
- * via the CPU. It was cool but kind of anti clim-
- * actic because it was just a yellow rectangle on
- * the screen. Alas, I better get to work now, it
- * was nice talking to you, hopefully we will cross
- * paths again some time in the future.
+ * NOTES ON THE STATUS WORD
+ *
+ * The PSM3D microcode, and any other microcodes for use with the pseultra lib-
+ * rary, assume the last word of DMEM, 0xFFC, to be zero-initialized on first
+ * run, and is used as a status word. In this microcode, the byte at 0xFFC is
+ * used to specify whether the XBUS buffer has been initialized or not, so
+ * that more tasks can be run while the RDP output produced by previous tasks
+ * are processed by the RDP
  */
+
+// TODO: add notes on stack
 
 // N64 Definitions
 #include <n64.sx>
@@ -24,6 +24,9 @@
 #include <ucode.sx>
 
 #define PSM3D_XBUS_BUFFER_SIZE 0x400
+
+#define PSM3D_STATUS_WORD 0xFFC // Location of the status word in SP DMEM
+#define PSM3D_STATUS_XBUS_INIT_BYTE (PSM3D_STATUS_WORD + 0) // Has the XBUS buffer been initialized?
 
 .global uPSM3DStart
 .global uPSM3DEnd
@@ -37,29 +40,87 @@
 
 uPSM3DStart:
 
+//
+// Test if the XBUS buffer has been initialized 
+//
+
+#define xbus_initialized $t0
+
+.XBUSTestInit:
+    lb xbus_initialized, PSM3D_STATUS_XBUS_INIT_BYTE($zero)
+    bnez xbus_initialized, .BeginExecution
+
+//
+// Initialize the XBUS buffer
+//
+
+.XBUSInit:
+
+#define set_xbus_dmem_dma $t0
+
+    ori set_xbus_dmem_dma, $zero, 0x2 // Use XBUS as a command buffer 
+    mtc0 set_xbus_dmem_dma, CMD_STATUS
+
+#undef set_xbus_dmem_dma
+
+#define xbus_buffer_start $t0
+
+    ori xbus_buffer_start, $zero, xbus_buffer // Initialize command buffer positions
+    mtc0 xbus_buffer_start, CMD_START // CMD_START is written to first, since CMD_END begins actual processing
+    mtc0 xbus_buffer_start, CMD_END
+
+#undef xbus_buffer_start
+
+#undef xbus_initialized
+
+//
+// Begin execution
+//
+
 #define dl_dram_ptr $s0
-#define xbus_ptr $s1 
-    
-    lw dl_dram_ptr, header($zero) // Initialize pointers to the current DRAM and XBUS locations
 
-    ori xbus_ptr, $zero, xbus_buffer
+.BeginExecution:
+    lw dl_dram_ptr, header($zero) // Initialize pointer to the current DRAM location
 
+//
 // Main execution loop
+//
+
+// TODO: Load more than 1 command at a time
 
 .ExecutionLoop:
-
-// Load display list command
-
-    move $a0, dl_dram_ptr
+    move $a0, dl_dram_ptr // Load display list command
     ori $a1, $zero, cmd
     ori $a2, $zero, 8
 
-    jal DMARead
+    jal DMARead // DMA command
 
-#undef xbus_ptr
+// TODO: Separate into a different function and check for end wraparound
+
+#define xbus_pos $t0
+#define command $t1
+
+    mfc0 xbus_pos, CMD_END // Simple pipe
+    lw command, cmd($zero)
+    sw command, 0(xbus_pos)
+    lw command, (cmd + 4)($zero)
+    sw command, 4(xbus_pos)
+    addiu xbus_pos, 0x8
+    mtc0 xbus_pos, CMD_END
+
+    addiu dl_dram_ptr, 0x8 // Advance DL pointer
+
+    bnez command, .ExecutionLoop
+
+#undef command
+#undef xbus_pos
+
 #undef dl_dram_ptr
 
+//
 // Finish execution with a break instruction
+//
+
 .FinishExecution:
     break
 

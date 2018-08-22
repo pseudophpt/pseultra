@@ -16,6 +16,9 @@
 
 #include <os_priv.h>
 
+/** @brief Address in SP DMEM of the status word */
+#define OS_SP_DMEM_STATUS_WORD 0xFFC
+
 /**
  * @brief Load microcode into RSP
  * @date 20 Aug 2018
@@ -56,6 +59,9 @@ osRspLoadUCode
             (N64_SP_STATUS_REG_DMA_BUSY |
              N64_SP_STATUS_REG_DMA_FULL |
              N64_SP_STATUS_REG_IO_FULL));
+    
+    // Clear status word
+    *(u32 *)N64_KSEG1_ADDR(N64_SP_DMEM + OS_SP_DMEM_STATUS_WORD) = 0;
 }
 
 /**
