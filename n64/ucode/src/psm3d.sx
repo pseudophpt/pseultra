@@ -23,7 +23,58 @@
 #include <mips.sx>
 #include <ucode.sx>
 
-// Just break for now
-break
+#define PSM3D_XBUS_BUFFER_SIZE 0x400
+
+.global uPSM3DStart
+.global uPSM3DEnd
+
+//
+// Beginning of task execution
+//
+// At this point, the microcode assumes the header is stored in DMEM
+//
+.align 3 // Align to 64-bit boundaries
+
+uPSM3DStart:
+
+#define dl_dram_ptr $s0
+#define xbus_ptr $s1 
+    
+    ori $t0, $zero, header // Initialize pointers to the current DRAM and XBUS locations
+    lw dl_dram_ptr, 0($t0)
+
+    ori xbus_ptr, $zero, xbus_buffer
+
+.ExecutionLoop:
+
+    move $a0, dl_dram_ptr
+    ori $a1, $zero, cmd
+    ori $a2, $zero, 8
+
+    jal DMARead
+
+#undef xbus_ptr
+#undef dl_dram_ptr
+
+// Finish execution with a break instruction
+.FinishExecution:
+    break
 
 #include "dma.sx"
+
+.align 3
+
+uPSM3DEnd:
+
+//
+// Data section
+//
+
+// 0x10 bytes of header written to by the task executor
+.lcomm header, 0x10
+// XBUS buffer
+.lcomm xbus_buffer, 0x400
+// Current display list command
+.lcomm cmd, 0x8
+// Stack
+.lcomm stack, 0x80
