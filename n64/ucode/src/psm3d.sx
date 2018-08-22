@@ -79,5 +79,3 @@ uPSM3DEnd:
 .lcomm xbus_buffer, PSM3D_XBUS_BUFFER_SIZE
 // Current display list command
 .lcomm cmd, 0x8
-// Stack
-.lcomm stack, 0x80
