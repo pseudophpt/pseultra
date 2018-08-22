@@ -48,7 +48,7 @@ osRspLoadUCode
     // DMA length of ucode into IMEM
     *(u32 *)N64_KSEG1_ADDR(N64_SP_RD_LEN_REG) = 
         N64_SP_RD_LEN_REG_LENGTH((u32)ucode_end - (u32)ucode_start - 1) |
-        N64_SP_RD_LEN_REG_COUNT(1) |
+        N64_SP_RD_LEN_REG_COUNT(0) |
         N64_SP_RD_LEN_REG_SKIP(0);
 
     // Wait for this DMA to finish
