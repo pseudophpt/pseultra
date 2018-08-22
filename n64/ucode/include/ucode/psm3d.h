@@ -22,6 +22,7 @@
 #ifdef __asm__
 .extern uPSM3DStart
 #else
+extern u8 uPSM3DStart [];
 #endif
 
 #ifdef __asm__

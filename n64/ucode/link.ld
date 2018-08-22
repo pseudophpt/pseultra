@@ -18,5 +18,7 @@ SECTIONS {
 
     /DISCARD/ : {
         * (.MIPS.*)
+        * (.reginfo)
+        * (.gnu.*)
     }
 }

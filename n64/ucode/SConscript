@@ -25,12 +25,11 @@ mips_env['BUILD_ROOT'] = path
 
 mips_env.Append(CPPPATH = [path + '/include', path + '/../../include'])
 mips_env.Object(target = path + '/src/psm3d.o', source = sources)
-mips_env.Command(target = path + '/src/psm3d.elf', source = path + '/src/psm3d.o', action = '$LD -T ' + path + '/link.ld -o $TARGET $SOURCE')
-binary = mips_env.Command(target = path + '/lib/psm3d.bin', source = path + '/src/psm3d.elf', action = '$OBJCOPY --only-section=.text -O binary $SOURCE $TARGET')
-object = mips_env.Command(
+mips_env.Command(target = path + '/src/psm3d.elf', source = path + '/src/psm3d.o', action = '$LD -r -T ' + path + '/link.ld -o $TARGET $SOURCE')
+psm3d_obj = mips_env.Command(
     target = path + '/lib/psm3d.o', 
-    source = path + '/lib/psm3d.bin', 
-    action = "mips64-objcopy --input binary --output elf32-bigmips --binary-architecture mips -S --prefix-sections=psm3d $SOURCE $TARGET"
+    source = path + '/src/psm3d.elf', 
+    action = 'mips64-objcopy --only-section=.text -S -K uPSM3DStart -K uPSM3DEnd $SOURCE $TARGET'
 )
 
 prefix = mips_env.GetOption('prefix')
@@ -45,7 +44,7 @@ includes += [
 ]
 
 mips_env.Install(prefix_bin, [])
-mips_env.Install(prefix_lib, [binary, object])
+mips_env.Install(prefix_lib, [psm3d_obj])
 install_include = [mips_env.Install(prefix_include + '/' + os.path.dirname(h), h) for h in includes]
 
 install_bin = mips_env.Alias('install-bin', prefix_bin)
