@@ -63,7 +63,9 @@ osRspLoadUCode
  * @date 20 Aug 2018
  * @author pseudophpt
  *
- * This function starts an RSP task 
+ * @param[in] task Microcode task to execute
+ *
+ * This function starts an RSP task which reads from the task header specified in the task argument 
  *
  * @note Microcode must be loaded via osRspLoadUCode() before starting an RSP task
  * @note One must be careful not to start a new task into the RSP while a task is currently executing or microcode is being loaded. Wait for an SP interrupt before loading more microcode or starting a new task
@@ -72,7 +74,10 @@ osRspLoadUCode
  */
 void
 osRspStartTask
-() {
+(OSUTask task) {
+    // Load task into the bottom of DMEM
+    *(OSUTask *)N64_KSEG1_ADDR(N64_SP_DMEM) = task;
+
     // Set halt bit, clear broke bit, set interrupt on break
     *(u32 *)N64_KSEG1_ADDR(N64_SP_STATUS_REG) = 
         N64_SP_STATUS_REG_SET_HALT |

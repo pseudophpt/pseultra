@@ -27,6 +27,14 @@
 
 #ifndef __asm__
 
+/** @brief Structure describing an RSP microcode task */
+typedef struct __attribute__((packed, aligned(8))) OSUTask_t {
+    /** @brief Physical DRAM Pointer to display list @note The display list must be aligned to 64 bits */
+    void *dl;
+    /** @brief Currently unused */
+    u32 unused1 [3];
+} OSUTask;
+
 #endif
 
 /*
@@ -42,7 +50,7 @@ void osRspLoadUCode (void *ucode_start, void *ucode_end);
 #ifdef __asm__
 .extern osRspStartTask
 #else
-void osRspStartTask ();
+void osRspStartTask (OSUTask task);
 #endif
 
 /*
