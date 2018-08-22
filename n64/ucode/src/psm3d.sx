@@ -73,7 +73,7 @@ uPSM3DEnd:
 // 0x10 bytes of header written to by the task executor
 .lcomm header, 0x10
 // XBUS buffer
-.lcomm xbus_buffer, 0x400
+.lcomm xbus_buffer, PSM3D_XBUS_BUFFER_SIZE
 // Current display list command
 .lcomm cmd, 0x8
 // Stack
