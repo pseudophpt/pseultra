@@ -54,6 +54,8 @@ uPSM3DStart:
 // Initialize the XBUS buffer
 //
 
+// TODO: If CMD_CUR == CMD_END, we can reset them both to 0 to prevent the need to do a FiFo wrap-around
+
 .XBUSInit:
 
 #define set_xbus_dmem_dma $t0
@@ -70,6 +72,9 @@ uPSM3DStart:
     mtc0 xbus_buffer_start, CMD_END
 
 #undef xbus_buffer_start
+
+    ori $t0, $zero, 1 // Store 1 to XBUS initialized byte to signify that it has been initialized
+    sb $t0, PSM3D_STATUS_XBUS_INIT_BYTE($zero)
 
 #undef xbus_initialized
 
