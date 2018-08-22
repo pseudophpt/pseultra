@@ -71,7 +71,7 @@ nop // COP0 Delay
 nop
 nop
 .set reorder
-ori $k0, 0x0400 // Unmask all interrupts
+ori $k0, 0xFF00 // Unmask all interrupts
 .set noreorder
 nop // COP0 Delay
 nop
