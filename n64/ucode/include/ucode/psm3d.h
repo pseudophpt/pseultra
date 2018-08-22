@@ -17,8 +17,6 @@
 #ifndef UCODE_PSM3D_H_GUARD
 #define UCODE_PSM3D_H_GUARD
 
-#define uPSM3DStart _binary_psm3d_start
-
 #ifdef __asm__
 .extern uPSM3DStart
 #else
