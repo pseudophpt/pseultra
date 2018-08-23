@@ -1,0 +1,15 @@
+/*
+ * pseultra/n64/boot/ucode/noop.sx
+ * PSM3D microcode noop (No operation) function
+ * 
+ * (C) pseudophpt 2018
+ */
+
+//
+// Noop (No operation code) 
+// 
+
+.global OPNoop
+
+OPNoop:
+    op_ret // Return

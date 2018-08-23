@@ -68,7 +68,7 @@ osRspLoadUCode
     *(u32 *)N64_KSEG1_ADDR(N64_SP_MEM_ADDR_REG) = N64_SP_MEM_ADDR_REG_DMEM | N64_SP_MEM_ADDR_REG_ADDR(0);
     
     // Load from RDRAM at data_start 
-    *(u32 *)N64_KSEG1_ADDR(N64_SP_DRAM_ADDR_REG) = N64_SP_DRAM_ADDR_REG_ADDR((u32)microcode.text_start);
+    *(u32 *)N64_KSEG1_ADDR(N64_SP_DRAM_ADDR_REG) = N64_SP_DRAM_ADDR_REG_ADDR((u32)microcode.data_start);
     
     // DMA data section of ucode into DMEM
     *(u32 *)N64_KSEG1_ADDR(N64_SP_RD_LEN_REG) = 

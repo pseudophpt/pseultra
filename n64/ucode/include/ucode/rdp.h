@@ -38,5 +38,6 @@
 #define UCODE_RDP_OPC_Set_Fog_Color 0x38
 #define UCODE_RDP_OPC_Set_Fill_Color 0x37
 #define UCODE_RDP_OPC_Set_Prim_Depth 0x3c
+#define UCODE_RDP_OPC_Sync_Full 0x29
 
 #endif

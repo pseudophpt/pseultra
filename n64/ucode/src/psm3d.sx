@@ -28,6 +28,8 @@
 #define PSM3D_STATUS_WORD 0xFFC // Location of the status word in SP DMEM
 #define PSM3D_STATUS_XBUS_INIT_BYTE (PSM3D_STATUS_WORD + 0) // Has the XBUS buffer been initialized?
 
+#define op_ret b .ExecutionLoop
+
 .global uPSM3DTextStart
 .global uPSM3DTextEnd
 .global uPSM3DDataStart
@@ -103,23 +105,21 @@ uPSM3DTextStart:
 
     jal DMARead // DMA command
 
-#define cmd_ptr $a0
-#define cmd_len $a1
+    addiu dl_dram_ptr, 8 // Advance display list counter
 
-    ori cmd_ptr, $zero, cmd
-    ori cmd_len, $zero, 8
+#define dl_cmd $t0
+#define dl_cmd_handler $t1
 
-    jal XBUSPush
+    lb dl_cmd, cmd($zero) // Get display list command
+    addu dl_cmd, dl_cmd // Shift left 2
+    addu dl_cmd, dl_cmd 
 
-    addiu dl_dram_ptr, 8
+    lw dl_cmd_handler, jump_tbl(dl_cmd) // Get address of handler
 
-    lb $t0, 0(cmd_ptr)
-    ori $t1, $zero, 0x29 // Sync_Full
+    jr dl_cmd_handler // Jump to handler
 
-    bne $t0, $t1, .ExecutionLoop
-
-#undef cmd_ptr
-#undef cmd_len
+#undef dl_cmd_handler
+#undef dl_cmd
 
 #undef dl_dram_ptr
 
@@ -133,20 +133,27 @@ uPSM3DTextStart:
 #include "dma.sx"
 #include "xbus.sx"
 
-.align 3
+#include "psm3d/noop.sx"
+#include "psm3d/enddl.sx"
 
 uPSM3DTextEnd:
 
 //
-// Data / BSS section
+// BSS
 //
 
 .section .bss
+
+.align 3
 
 // XBUS buffer
 .lcomm xbus_buffer, PSM3D_XBUS_BUFFER_SIZE
 // Current display list command
 .lcomm cmd, 0x8
+
+//
+// Data
+//
 
 .section .data
 
@@ -154,5 +161,12 @@ uPSM3DDataStart:
 
 // 0x10 bytes of header written to by the task executor
 header: .dword 0, 0
+// Jump table
+
+.align 1
+
+jump_tbl:
+.word OPNoop 
+.word OPEndDL
 
 uPSM3DDataEnd:
