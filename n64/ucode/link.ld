@@ -8,10 +8,13 @@
 SECTIONS {
     .text 0x00000000 : {
         * (.text)
-        * (.data)
     }
 
-    .bss 0x00000000 : {
+    .data 0x00000000 : {
+        * (.data)
+    }
+    
+    .bss : {
         * (.bss)
         * (COMMON)
     }

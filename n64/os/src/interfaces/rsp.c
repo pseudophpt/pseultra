@@ -32,7 +32,7 @@
  */
 void
 osRspLoadUCode
-(void *ucode_start, void *ucode_end) {
+(OSUCode microcode) {
     // Wait for any SP DMAs to finish
     while (*(u32 *)N64_KSEG1_ADDR(N64_SP_STATUS_REG) & 
             (N64_SP_STATUS_REG_DMA_BUSY |
@@ -42,15 +42,17 @@ osRspLoadUCode
     // Make sure SP is halted
     *(u32 *)N64_KSEG1_ADDR(N64_SP_STATUS_REG) = N64_SP_STATUS_REG_SET_HALT;
 
+    // Load Text section
+
     // Load into IMEM at 0
     *(u32 *)N64_KSEG1_ADDR(N64_SP_MEM_ADDR_REG) = N64_SP_MEM_ADDR_REG_IMEM | N64_SP_MEM_ADDR_REG_ADDR(0);
     
-    // Load from RDRAM at ucode_start
-    *(u32 *)N64_KSEG1_ADDR(N64_SP_DRAM_ADDR_REG) = N64_SP_DRAM_ADDR_REG_ADDR((u32)ucode_start);
+    // Load from RDRAM at text_start 
+    *(u32 *)N64_KSEG1_ADDR(N64_SP_DRAM_ADDR_REG) = N64_SP_DRAM_ADDR_REG_ADDR((u32)microcode.text_start);
     
-    // DMA length of ucode into IMEM
+    // DMA text section of ucode into IMEM
     *(u32 *)N64_KSEG1_ADDR(N64_SP_RD_LEN_REG) = 
-        N64_SP_RD_LEN_REG_LENGTH((u32)ucode_end - (u32)ucode_start - 1) |
+        N64_SP_RD_LEN_REG_LENGTH((u32)microcode.text_end - (u32)microcode.text_start - 1) |
         N64_SP_RD_LEN_REG_COUNT(0) |
         N64_SP_RD_LEN_REG_SKIP(0);
 
@@ -59,7 +61,22 @@ osRspLoadUCode
             (N64_SP_STATUS_REG_DMA_BUSY |
              N64_SP_STATUS_REG_DMA_FULL |
              N64_SP_STATUS_REG_IO_FULL));
+ 
+    // Load Data section
+
+    // Load into DMEM at 0
+    *(u32 *)N64_KSEG1_ADDR(N64_SP_MEM_ADDR_REG) = N64_SP_MEM_ADDR_REG_DMEM | N64_SP_MEM_ADDR_REG_ADDR(0);
     
+    // Load from RDRAM at data_start 
+    *(u32 *)N64_KSEG1_ADDR(N64_SP_DRAM_ADDR_REG) = N64_SP_DRAM_ADDR_REG_ADDR((u32)microcode.text_start);
+    
+    // DMA data section of ucode into DMEM
+    *(u32 *)N64_KSEG1_ADDR(N64_SP_RD_LEN_REG) = 
+        N64_SP_RD_LEN_REG_LENGTH((u32)microcode.data_end - (u32)microcode.data_start - 1) |
+        N64_SP_RD_LEN_REG_COUNT(0) |
+        N64_SP_RD_LEN_REG_SKIP(0);
+
+   
     // Clear status word
     *(u32 *)N64_KSEG1_ADDR(N64_SP_DMEM + OS_SP_DMEM_STATUS_WORD) = 0;
 }

@@ -35,6 +35,14 @@ typedef struct __attribute__((packed, aligned(8))) OSUTask_t {
     u32 unused1 [3];
 } OSUTask;
 
+/** @brief Structure describing an RSP microcode */
+typedef struct OSUCode_t {
+    void *text_start;
+    void *text_end;
+    void *data_start;
+    void *data_end;
+} OSUCode;
+
 #endif
 
 /*
@@ -44,7 +52,7 @@ typedef struct __attribute__((packed, aligned(8))) OSUTask_t {
 #ifdef __asm__
 .extern osRspLoadUCode
 #else
-void osRspLoadUCode (void *ucode_start, void *ucode_end);
+void osRspLoadUCode (OSUCode microcode);
 #endif
 
 #ifdef __asm__

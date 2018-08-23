@@ -28,8 +28,10 @@
 #define PSM3D_STATUS_WORD 0xFFC // Location of the status word in SP DMEM
 #define PSM3D_STATUS_XBUS_INIT_BYTE (PSM3D_STATUS_WORD + 0) // Has the XBUS buffer been initialized?
 
-.global uPSM3DStart
-.global uPSM3DEnd
+.global uPSM3DTextStart
+.global uPSM3DTextEnd
+.global uPSM3DDataStart
+.global uPSM3DDataEnd
 
 //
 // Beginning of task execution
@@ -37,8 +39,9 @@
 // At this point, the microcode assumes the header is stored in DMEM
 //
 .align 3 // Align to 64-bit boundaries
+.section .text
 
-uPSM3DStart:
+uPSM3DTextStart:
 
 //
 // Test if the XBUS buffer has been initialized 
@@ -132,15 +135,24 @@ uPSM3DStart:
 
 .align 3
 
-uPSM3DEnd:
+uPSM3DTextEnd:
 
 //
-// Data section
+// Data / BSS section
 //
 
-// 0x10 bytes of header written to by the task executor
-.lcomm header, 0x10
+.section .bss
+
 // XBUS buffer
 .lcomm xbus_buffer, PSM3D_XBUS_BUFFER_SIZE
 // Current display list command
 .lcomm cmd, 0x8
+
+.section .data
+
+uPSM3DDataStart:
+
+// 0x10 bytes of header written to by the task executor
+header: .dword 0, 0
+
+uPSM3DDataEnd:

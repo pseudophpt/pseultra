@@ -25,11 +25,11 @@ mips_env['BUILD_ROOT'] = path
 
 mips_env.Append(CPPPATH = [path + '/include', path + '/../../include'])
 mips_env.Object(target = path + '/src/psm3d.o', source = sources)
-mips_env.Command(target = path + '/src/psm3d.elf', source = path + '/src/psm3d.o', action = '$LD -r -T ' + path + '/link.ld -o $TARGET $SOURCE')
+mips_env.Command(target = path + '/src/psm3d.elf', source = path + '/src/psm3d.o', action = '$LD -T ' + path + '/link.ld --no-check-sections -o $TARGET $SOURCE')
 psm3d_obj = mips_env.Command(
     target = path + '/lib/psm3d.o', 
     source = path + '/src/psm3d.elf', 
-    action = 'mips64-objcopy --only-section=.text -S -K uPSM3DStart -K uPSM3DEnd $SOURCE $TARGET'
+    action = 'mips64-objcopy --only-section .text --only-section .data -S -K uPSM3DTextStart -K uPSM3DTextEnd -K uPSM3DDataStart -K uPSM3DDataEnd $SOURCE $TARGET'
 )
 
 prefix = mips_env.GetOption('prefix')
