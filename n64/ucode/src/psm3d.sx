@@ -28,8 +28,6 @@
 #define PSM3D_STATUS_WORD 0xFFC // Location of the status word in SP DMEM
 #define PSM3D_STATUS_XBUS_INIT_BYTE (PSM3D_STATUS_WORD + 0) // Has the XBUS buffer been initialized?
 
-#define PSM3D_RDP_THROUGH_CMD 0x80
-
 #define op_ret b .ExecutionLoop
 
 .global uPSM3DTextStart
@@ -114,12 +112,7 @@ uPSM3DTextStart:
 
     lb dl_cmd, cmd($zero) // Get display list command
 
-#define dl_cmd_type $t2
-
-    andi dl_cmd_type, dl_cmd, PSM3D_RDP_THROUGH_CMD // Check if it's an RDP throughput command
-    beqz dl_cmd_type, .NormalCommand
-
-#undef dl_cmd_type
+    bgez dl_cmd, .NormalCommand // If it's not an RDP throughput command (negative), go to the jump table
 
 #define cmd_ptr $a0
 #define cmd_len $a1
