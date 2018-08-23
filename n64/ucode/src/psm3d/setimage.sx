@@ -1,0 +1,62 @@
+/*
+ * pseultra/n64/boot/ucode/setimage.sx
+ * PSM3D microcode SetImage function
+ * 
+ * (C) pseudophpt 2018
+ */
+
+//
+// SetImage 
+//
+// FORMAT:
+//
+// 02 XX TY YY -Z ZZ ZZ ZZ
+//
+// X: FFFB B--
+//     F: Image format 
+//     B: Pixel bit width
+//
+// Y: --WW WWWW WWWW
+//     W: Width in pixels - 1
+//
+// Z: --AA AAAA AAAA AAAA
+//     A: DRAM address in bytes
+//
+// T: Image type (1 = Color, 0 = Texture)
+//
+
+#define IMAGE_TYPE_COLOR 0x10 // That's right Europeans, it's "color".
+#define IMAGE_TYPE_TEXTURE 0x00
+
+.global OPSetImage
+
+OPSetImage:
+    
+#define set_img_cmd $t0
+#define rdp_cmd $a0
+#define rdp_cmd_len $a1
+
+    lb set_img_cmd, (cmd + 2)($zero) // Get TY byte
+    andi set_img_cmd, 0x10 // Get texture / color switch
+    beq set_img_cmd, IMAGE_TYPE_TEXTURE, .TextureImage
+
+.ColorImage:
+    ori set_img_cmd, UCODE_RDP_OPC_Set_Color_Image // Write a set color image command
+    b .PushCmd
+
+.TextureImage:
+    ori set_img_cmd, UCODE_RDP_OPC_Set_Texture_Image // Write a set texture image command
+
+.PushCmd:
+    ori rdp_cmd, $zero, cmd
+    sb set_img_cmd, 0(rdp_cmd)
+
+    ori rdp_cmd_len, $zero, 8
+
+    jal XBUSPush // The GBI format is the same as that of the RDP
+
+#undef rdp_cmd_len 
+#undef rdp_cmd 
+#undef set_img_cmd
+
+    op_ret // Return

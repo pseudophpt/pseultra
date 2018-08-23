@@ -135,7 +135,7 @@ uPSM3DTextStart:
 
 #include "psm3d/noop.sx"
 #include "psm3d/enddl.sx"
-#include "psm3d/setcolorimage.sx"
+#include "psm3d/setimage.sx"
 
 uPSM3DTextEnd:
 
@@ -169,6 +169,6 @@ header: .dword 0, 0
 jump_tbl:
 .word OPNoop 
 .word OPEndDL
-.word OPSetColorImage
+.word OPSetImage
 
 uPSM3DDataEnd:
