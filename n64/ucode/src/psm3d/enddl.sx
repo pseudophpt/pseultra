@@ -16,21 +16,4 @@
 .global OPEndDL
 
 OPEndDL:
-
-#define sync_full_cmd $t0
-#define rdp_cmd $a0
-#define rdp_cmd_len $a1
-
-    ori sync_full_cmd, $zero, UCODE_RDP_OPC_Sync_Full // Write a sync full command
-    ori rdp_cmd, $zero, cmd
-    sb sync_full_cmd, 0(rdp_cmd)
-
-    ori rdp_cmd_len, $zero, 8
-    
-    jal XBUSPush // Push to XBUS
-    
     break // Break
-
-#undef rdp_cmd_len 
-#undef rdp_cmd 
-#undef sync_full_cmd 
