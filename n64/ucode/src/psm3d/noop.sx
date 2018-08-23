@@ -7,6 +7,10 @@
 
 //
 // Noop (No operation code) 
+//
+// FORMAT:
+//
+// 00 -- -- -- -- -- -- --
 // 
 
 .global OPNoop

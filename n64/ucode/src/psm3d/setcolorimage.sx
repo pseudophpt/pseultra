@@ -1,0 +1,45 @@
+/*
+ * pseultra/n64/boot/ucode/setcolorimage.sx
+ * PSM3D microcode SetColorImage function
+ * 
+ * (C) pseudophpt 2018
+ */
+
+//
+// SetColorImage 
+//
+// FORMAT:
+//
+// 02 XX -Y YY -Z ZZ ZZ ZZ
+//
+// X: FFFB B--
+//     F: Image format 
+//     B: Pixel bit width
+//
+// Y: --WW WWWW WWWW
+//     W: Width in pixels - 1
+//
+// Z: --AA AAAA AAAA AAAA
+//     A: DRAM address in bytes
+
+.global OPSetColorImage
+
+OPSetColorImage:
+    
+#define set_color_img_cmd $t0
+#define rdp_cmd $a0
+#define rdp_cmd_len $a1
+
+    ori set_color_img_cmd, UCODE_RDP_OPC_Set_Color_Image // Write a set color image command
+    ori rdp_cmd, $zero, cmd
+    sb set_color_img_cmd, 0(rdp_cmd)
+
+    ori rdp_cmd_len, $zero, 8
+
+    jal XBUSPush // The GBI format is the same as that of the RDP
+
+#undef rdp_cmd_len 
+#undef rdp_cmd 
+#undef set_color_img_cmd
+
+    op_ret // Return

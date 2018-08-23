@@ -20,7 +20,7 @@
 #ifndef __asm__
 
 /** @brief Display list command for PSM3D */
-typedef struct __attribute__((packed, align(8))) uPSM3DDispCmd_t {
+typedef struct __attribute__((packed, aligned(8))) uPSM3DDispCmd_t {
     /** @brief First part of command */
     u32 cmd1;
     /** @brief Second part of command */
@@ -49,8 +49,29 @@ typedef struct __attribute__((packed, align(8))) uPSM3DDispCmd_t {
  */
 
 #define usPSM3DNoop() { (UCODE_PSM3D_OP_NOOP << 24) | 0, 0 }
+
 #define usPSM3DEndDL() { (UCODE_PSM3D_OP_END_DL << 24) | 0, 0 }
-#define usPSM3DSetColorImg(dram_addr) { (UCODEPSM_3D_OP_END_DL << 24) | 0, 0 }
+
+#define UCODE_PSM3D_SET_COLOR_IMAGE_FMT_RGBA 0
+#define UCODE_PSM3D_SET_COLOR_IMAGE_FMT_YUV 1
+#define UCODE_PSM3D_SET_COLOR_IMAGE_FMT_CI 2
+#define UCODE_PSM3D_SET_COLOR_IMAGE_FMT_IA 3
+#define UCODE_PSM3D_SET_COLOR_IMAGE_FMT_I 4
+
+#define UCODE_PSM3D_SET_COLOR_IMAGE_SIZE_4BPP 0
+#define UCODE_PSM3D_SET_COLOR_IMAGE_SIZE_8BPP 1
+#define UCODE_PSM3D_SET_COLOR_IMAGE_SIZE_16BPP 2
+#define UCODE_PSM3D_SET_COLOR_IMAGE_SIZE_32BPP 3
+
+#define usPSM3DSetColorImg(dram_addr, format, size, width) \
+    {\
+        (UCODE_PSM3D_OP_SET_COLOR_IMAGE << 24) |\
+        (UCODE_PSM3D_SET_COLOR_IMAGE_FMT_##format << 21) |\
+        (UCODE_PSM3D_SET_COLOR_IMAGE_SIZE_##size << 19) |\
+        (width - 1), \
+            \
+        dram_addr\
+    }
 
 /*
  * Microcode locations

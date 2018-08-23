@@ -7,6 +7,10 @@
 
 //
 // EndDL (End display list) 
+//
+// FORMAT:
+//
+// 01 -- -- -- -- -- -- 
 // 
 
 .global OPEndDL
