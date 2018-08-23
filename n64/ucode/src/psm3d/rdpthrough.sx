@@ -1,0 +1,36 @@
+/*
+ * pseultra/n64/boot/ucode/rdpthrough.sx
+ * PSM3D microcode RdpThrough function
+ * 
+ * (C) pseudophpt 2018
+ */
+
+//
+// RdpThrough
+//
+// FORMAT:
+//
+// AA DD DD DD DD DD DD DD
+//
+// A: 10CC CCCC
+//     C: Opcode of RDP command
+//
+// D: Low 56 bit of data to be passed to RDP command
+//
+
+.global OPRdpThrough
+
+OPRdpThrough:
+    
+#define rdp_cmd $a0
+#define rdp_cmd_len $a1
+
+    ori rdp_cmd, $zero, cmd
+    ori rdp_cmd_len, $zero, 8
+
+    jal XBUSPush // The GBI format is the same as that of the RDP
+
+#undef rdp_cmd_len 
+#undef rdp_cmd 
+
+    op_ret // Return

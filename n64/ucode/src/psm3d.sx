@@ -28,6 +28,8 @@
 #define PSM3D_STATUS_WORD 0xFFC // Location of the status word in SP DMEM
 #define PSM3D_STATUS_XBUS_INIT_BYTE (PSM3D_STATUS_WORD + 0) // Has the XBUS buffer been initialized?
 
+#define PSM3D_RDP_THROUGH_CMD 0x80
+
 #define op_ret b .ExecutionLoop
 
 .global uPSM3DTextStart
@@ -111,6 +113,29 @@ uPSM3DTextStart:
 #define dl_cmd_handler $t1
 
     lb dl_cmd, cmd($zero) // Get display list command
+
+#define dl_cmd_type $t2
+
+    andi dl_cmd_type, dl_cmd, PSM3D_RDP_THROUGH_CMD // Check if it's an RDP throughput command
+    beqz dl_cmd_type, .NormalCommand
+
+#undef dl_cmd_type
+
+#define cmd_ptr $a0
+#define cmd_len $a1
+
+    ori cmd_ptr, $zero, cmd // Push command
+    ori cmd_len, $zero, 8
+
+    jal XBUSPush
+
+    op_ret // Back to normal loop
+
+#undef cmd_len
+#undef cmd_ptr
+
+.NormalCommand:
+
     addu dl_cmd, dl_cmd // Shift left 2
     addu dl_cmd, dl_cmd 
 
@@ -135,7 +160,6 @@ uPSM3DTextStart:
 
 #include "psm3d/noop.sx"
 #include "psm3d/enddl.sx"
-#include "psm3d/setimage.sx"
 
 uPSM3DTextEnd:
 
@@ -169,6 +193,5 @@ header: .dword 0, 0
 jump_tbl:
 .word OPNoop 
 .word OPEndDL
-.word OPSetImage
 
 uPSM3DDataEnd:

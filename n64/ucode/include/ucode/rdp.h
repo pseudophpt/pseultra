@@ -37,7 +37,11 @@
 #define UCODE_RDP_OPC_Set_Blend_Color 0x39
 #define UCODE_RDP_OPC_Set_Fog_Color 0x38
 #define UCODE_RDP_OPC_Set_Fill_Color 0x37
-#define UCODE_RDP_OPC_Set_Prim_Depth 0x3c
+#define UCODE_RDP_OPC_Set_Prim_Depth 0x2e
+#define UCODE_RDP_OPC_Set_Scissor 0x2d
+#define UCODE_RDP_OPC_Set_Convert 0x2c
 #define UCODE_RDP_OPC_Sync_Full 0x29
+#define UCODE_RDP_OPC_Sync_Load 0x31
+#define UCODE_RDP_OPC_Sync_Pipe 0x27
 
 #endif
