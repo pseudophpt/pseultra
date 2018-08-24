@@ -117,6 +117,9 @@ uPSM3DTextStart:
 #define cmd_ptr $a0
 #define cmd_len $a1
 
+    andi dl_cmd, 0x3F // Remove 0x80 bit
+    sb dl_cmd, cmd($zero)
+
     ori cmd_ptr, $zero, cmd // Push command
     ori cmd_len, $zero, 8
 
