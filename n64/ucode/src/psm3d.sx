@@ -139,6 +139,13 @@ uPSM3DTextStart:
 #undef dl_cmd_handler
 #undef dl_cmd
 
+#include "dma.sx"
+#include "xbus.sx"
+
+#include "psm3d/noop.sx"
+#include "psm3d/enddl.sx"
+#include "psm3d/setothermode.sx"
+
 #undef dl_dram_ptr
 
 //
@@ -147,12 +154,6 @@ uPSM3DTextStart:
 
 .FinishExecution:
     break
-
-#include "dma.sx"
-#include "xbus.sx"
-
-#include "psm3d/noop.sx"
-#include "psm3d/enddl.sx"
 
 uPSM3DTextEnd:
 
@@ -179,6 +180,8 @@ uPSM3DDataStart:
 
 // 0x10 bytes of header written to by the task executor
 header: .dword 0, 0
+// OtherMode value
+othermode: .dword 0
 // Jump table
 
 .align 1
@@ -186,5 +189,6 @@ header: .dword 0, 0
 jump_tbl:
 .word OPNoop 
 .word OPEndDL
+.word OPSetOtherMode
 
 uPSM3DDataEnd:

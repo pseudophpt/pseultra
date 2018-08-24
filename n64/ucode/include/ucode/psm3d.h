@@ -39,16 +39,48 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DDispCmd_t {
 
 #define UCODE_PSM3D_OP_NOOP 0x00
 #define UCODE_PSM3D_OP_END_DL 0x01
-
-#define UCODE_PSM3D_OP_SET_BLEND_MODE 0x05
+#define UCODE_PSM3D_OP_SET_OTHER_MODE 0x02
 
 /*
  * Operation macros
  */
 
-#define usPSM3DNoop() { (UCODE_PSM3D_OP_NOOP << 24) | 0, 0 }
+#define usPSM3DNoop() { (UCODE_PSM3D_OP_NOOP << 24), 0 } 
 
-#define usPSM3DEndDL() { (UCODE_PSM3D_OP_END_DL << 24) | 0, 0 }
+#define usPSM3DEndDL() { (UCODE_PSM3D_OP_END_DL << 24), 0 }
+
+#define usPSM3DSetOtherMode(maskh, maskl, datah, datal) { (UCODE_PSM3D_OP_SET_OTHER_MODE << 24) | maskh , datah } , { maskl , datal }
+
+#define UCODE_PSM3D_BLEND_MODE_M1A_IN 0
+#define UCODE_PSM3D_BLEND_MODE_M1A_MEM 1
+#define UCODE_PSM3D_BLEND_MODE_M1A_BLEND 2
+#define UCODE_PSM3D_BLEND_MODE_M1A_FOG 3
+
+#define UCODE_PSM3D_BLEND_MODE_M1B_IN 0
+#define UCODE_PSM3D_BLEND_MODE_M1B_MEM 1
+#define UCODE_PSM3D_BLEND_MODE_M1B_BLEND 2
+#define UCODE_PSM3D_BLEND_MODE_M1B_FOG 3
+
+#define UCODE_PSM3D_BLEND_MODE_M2A_CCA 0
+#define UCODE_PSM3D_BLEND_MODE_M2A_FOGA 1
+#define UCODE_PSM3D_BLEND_MODE_M2A_SHADEA 2
+#define UCODE_PSM3D_BLEND_MODE_M2A_ZERO 3
+
+#define UCODE_PSM3D_BLEND_MODE_M2B_1MA 0
+#define UCODE_PSM3D_BLEND_MODE_M2B_MEMA 1
+#define UCODE_PSM3D_BLEND_MODE_M2B_ONE 2
+#define UCODE_PSM3D_BLEND_MODE_M2B_ZERO 3
+
+#define usPSM3DSetBlendMode(m1a0, m2a0, m1b0, m2b0, m1a1, m2a1, m1b1, m2b1) \
+    usPSM3DSetOtherMode(\
+        0x0000, 0xFFFF0000,\
+        0,\
+        (UCODE_PSM3D_BLEND_MODE_M1A_##m1a0 << 30) | (UCODE_PSM3D_BLEND_MODE_M1A_##m1a1 << 28) |\
+        (UCODE_PSM3D_BLEND_MODE_M1B_##m1b0 << 26) | (UCODE_PSM3D_BLEND_MODE_M1B_##m1b1 << 24) |\
+        (UCODE_PSM3D_BLEND_MODE_M2A_##m2a0 << 22) | (UCODE_PSM3D_BLEND_MODE_M2A_##m2a1 << 20) |\
+        (UCODE_PSM3D_BLEND_MODE_M2B_##m2b0 << 18) | (UCODE_PSM3D_BLEND_MODE_M2B_##m2b1) \
+    )\
+
 
 #define UCODE_PSM3D_SET_IMAGE_FMT_RGBA 0
 #define UCODE_PSM3D_SET_IMAGE_FMT_YUV 1
@@ -89,7 +121,6 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DDispCmd_t {
             \
         dram_addr\
     )
-
 
 #define usPSM3DSetEnvColor(r, g, b, a) \
     usPSM3DRdpThrough(\
@@ -161,6 +192,13 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DDispCmd_t {
         UCODE_RDP_OPC_Set_Convert,\
         ((k2 & 0x1f) << 27) | (k3 << 18) | (k4 << 9) | k5,\
         (k0 << 13) | (k1 << 4) \
+    )
+
+#define usPSM3DFillRect(xh, yh, xl, yl) \
+    usPSM3DRdpThrough(\
+        UCODE_RDP_OPC_Fill_Rectangle,\
+        (xl << 12) | yl,\
+        (xh << 12) | yh\
     )
 
 #define UCODE_PSM3D_CC_A_COMB 0
