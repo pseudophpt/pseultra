@@ -48,7 +48,7 @@ OPSetOtherMode:
     
     move $a0, dl_dram_ptr // Load display list command
     ori $a1, $zero, cmd
-    ori $a2, $zero, 8
+    ori $a2, $zero, 7
 
     jal DMARead // DMA command
 
