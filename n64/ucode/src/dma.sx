@@ -48,13 +48,13 @@ DMAWrite:
 
 // Wait until DMA
 
-#define full_state $t0
+#define busy_state $t0
 
 .DMAWait:
-    mfc0 full_state, DMA_FULL
-    bnez full_state, .DMAWait
+    mfc0 busy_state, DMA_BUSY
+    bnez busy_state, .DMAWait
 
-#undef full_state
+#undef busy_state
 
 // Write attributes for DMA
 
@@ -72,13 +72,13 @@ DMAWrite:
 
 // Wait until DMA is done
 
-#define full_state $t0
+#define busy_state $t0
 
 .DMAWaitDone:
-    mfc0 full_state, DMA_FULL
-    bnez full_state, .DMAWaitDone
+    mfc0 busy_state, DMA_BUSY
+    bnez busy_state, .DMAWaitDone
 
-#undef full_state
+#undef busy_state
 
 // Finished DMA
 
