@@ -6,7 +6,7 @@
  */
 
 #include "makerom.h"
-#include "elf.h"
+#include "makerom_elf.h"
 #include <util.h>
 #include <n64.h>
 #include <elf.h>

@@ -1,14 +1,14 @@
 /*
- * pseultra/tools/makerom/src/elf.h
- * ELF header
+ * pseultra/include/elf.h
+ * ELF definitions
  *
  * (C) pseudophpt 2018
  */
 
-#ifndef MAKEROM_ELF_H_GUARD
-#define MAKEROM_ELF_H_GUARD
-
 #include <stdint.h>
+
+#ifndef ELF_H_GUARD
+#define ELF_H_GUARD
 
 typedef struct __attribute__((__packed__)) elf32_header_t {
     uint32_t magic; // Magic number
@@ -47,7 +47,5 @@ typedef struct __attribute__((__packed__)) elf32_shentry_t {
     uint32_t addralign; // Address alignment in bytes
     uint32_t entsize; // Entry size for those with fixed entries
 } elf32_shentry;
-
-elf32_shentry get_section (char *buffer, const char *section_name); 
 
 #endif
