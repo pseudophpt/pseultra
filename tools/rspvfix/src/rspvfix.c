@@ -140,8 +140,10 @@ int main (int argc, char *argv[]) {
     uint32_t *text_ptr = text_contents;
     uint32_t *vsl_ptr = vsl_contents;
 
+    uint32_t text_left = text_size;
+
     // Read through text section for vector load/store ops
-    while (vsl_size > 0 && text_size > 0) {
+    while (vsl_size > 0 && text_left > 0) {
         uint32_t inst = BE_TO_LE32(*text_ptr);
 
         // Check if SWC2 / LWC2 instruction
@@ -176,7 +178,7 @@ int main (int argc, char *argv[]) {
 
         // Move text pointer
         text_ptr ++;
-        text_size -= 4;
+        text_left -= 4;
     }
 
     // If we reached the end before parsing all VSL relocations
