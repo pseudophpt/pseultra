@@ -7,6 +7,7 @@
 
 ### Fixed
 - Bug involving a coprocessor 0 delay slot which would cause arbitrary kernel reg data to be written to cop0 status reg, and usually an xtlb exception
+- Bug in util.h where the macro input to endian switchers isn't wrapped
 
 ## [1.1.0](https://github.com/pseudophpt/pseultra/compare/v1.0.1...v1.1.0) - 2018-08-18
 
