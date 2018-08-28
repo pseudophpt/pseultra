@@ -4,6 +4,7 @@
 
 ### Added
 - Debug functionality
+- RSP vector load/store fixer
 
 ### Fixed
 - Bug involving a coprocessor 0 delay slot which would cause arbitrary kernel reg data to be written to cop0 status reg, and usually an xtlb exception
