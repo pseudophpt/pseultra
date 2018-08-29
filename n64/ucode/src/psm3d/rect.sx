@@ -44,6 +44,9 @@
 //                                                                          // 
 //////////////////////////////////////////////////////////////////////////////
 
+#define TXRECT_NEWTRAPH 1 // Perform Newton-Raphson iteration on reciprocal result. This wastes IMEM and some cycles but creates more accurate rectangles
+#define TXRECT_NEWTRAPH_ITERATIONS 5 // How many Newton-Raphson iterations to perform
+
 .global OPRect
 
 OPRect:
@@ -129,13 +132,41 @@ OPRect:
 
         vsubc vc18, vc19, vc18, f // Calculate dx, dy
 
+#if TXRECT_NEWTRAPH   
+    ori $t0, $zero, TXRECT_NEWTRAPH_ITERATIONS // Load amount of iterations
+#endif
+
         vrcph vc19, 0, vc18, 0 // Calculate 1/dx, 1/dy
-        vrcpl vc18, 0, nullconst, 0
-
+        vrcpl vc17, 0, nullconst, 0
         vrcph vc19, 1, vc18, 1 
-        vrcpl vc18, 1, nullconst, 1
+        vrcpl vc17, 1, nullconst, 1
 
-        vmudm vc16, vc16, vc18, f // Calculate dt/dx, ds/dy as fractional and integral parts
+#if TXRECT_NEWTRAPH   
+
+        vor vc22, nullconst, v2nconst, v2n_2 // Load 2 in vector register
+
+.TrectNewtraph: // Perform Newton-Raphton iteration if enabled
+
+    addiu $t0, -1 // Decrement iteration counter
+        
+        vmudm vc20, vc18, vc17, f // Calculate R*X
+        vmadn vc21, nullconst, nullconst, f // Get fractional part
+
+        vmudn vc21, vc21, v2nconst, v2n_2
+        vmadm vc20, vc20, v2nconst, v2n_2
+        vmadn vc21, nullconst, nullconst, f
+        
+        vsubc vc21, nullconst, vc21, f // Get 2-(R*X)
+        vsub vc20, vc22, vc20, f
+
+        vmudl vc23, vc21, vc17, f
+        vmudm vc23, vc20, vc17, f
+        vmadn vc17, nullconst, nullconst, f
+
+    bne $t0, $zero, .TrectNewtraph // Iterate again
+    nop
+#endif
+        vmudm vc16, vc16, vc17, f // Calculate dt/dx, ds/dy as fractional and integral parts
         vmadn vc17, nullconst, nullconst, f
 
         vmudn vc18, vc17, v2nconst2, v2n2_256
