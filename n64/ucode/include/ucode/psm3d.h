@@ -55,8 +55,8 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DDispCmd_t {
 #define usPSM3DEndDL() { (UCODE_PSM3D_OP_END_DL << 24), 0 }
 #define uPSM3DEndDL(dl) *((dl) ++) = (uPSM3DDispCmd) { _FMT(UCODE_PSM3D_OP_END_DL, 24, 8), 0 }
 
-#define usPSM3DSetOtherMode(maskh, maskl, datah, datal) { _FMT(UCODE_PSM3D_OP_SET_OTHER_MODE, 24, 8) | _FMT(maskh, 0, 24) , _FMT(datah, 0, 24) } , { _FMT(maskl, 0, 32) , _FMT(datal, 0, 32) }
-#define uPSM3DSetOtherMode(dl, maskh, maskl, datah, datal) *((dl)++) = (uPSM3DDispCmd) { _FMT(UCODE_PSM3D_OP_SET_OTHER_MODE, 24, 8) | _FMT(maskh, 0, 24) , _FMT(datah, 0, 24) }; *((dl) ++) = { _FMT(maskl, 0, 32) , _FMT(datal, 0, 32) }
+#define usPSM3DSetOtherMode(maskh, maskl, datah, datal) { _FMT(UCODE_PSM3D_OP_SET_OTHER_MODE, 24, 8) | _FMT(maskh, 0, 24) , _FMT(datah, 0, 24) } , { maskl , datal }
+#define uPSM3DSetOtherMode(dl, maskh, maskl, datah, datal) *((dl) ++) = (uPSM3DDispCmd) { _FMT(UCODE_PSM3D_OP_SET_OTHER_MODE, 24, 8) | _FMT(maskh, 0, 24) , _FMT(datah, 0, 24) }; *((dl) ++) = (uPSM3DDispCmd) {  maskl , datal }
 
 #define UCODE_PSM3D_TXMODE_TEXTURING_KEEP 0
 #define UCODE_PSM3D_TXMODE_TEXTURING_ON 0x8080

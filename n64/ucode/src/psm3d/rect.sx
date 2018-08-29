@@ -83,8 +83,7 @@ OPRect:
 // Draw rectangle by texturing
 
 .TextureRect:
-// UNIMPLEMENTED
-/*
+
 #define text_rect_cmd $t0
     
     ori text_rect_cmd, $zero, UCODE_RDP_OPC_Texture_Rectangle // Write texture rectangle command
@@ -99,69 +98,51 @@ OPRect:
     jal DMARead
     ori $a2, $zero, 7
 
-#define delta vc16
+    lui $t0, 0xf000 // Mask to remove unwanted bytes
+    nor $t0, $t0
 
-// Load delta
-
-#define low vc17
-#define high vc18
-
-    llv low, 0, cmd + 8, $zero
-    llv high, 0, cmd + 12, $zero
-    vsubc delta, high, low, f
-
-#undef high 
-#undef low
-
-#define delta_int vc17
-#define delta_frac vc18
-
-// Split delta into integer and fractional parts
-
-    vmudm delta_int, delta, v2nconst2, v2n2_2048
-    vmadn delta_frac, nullconst, nullconst, f
-
-#undef delta
-
-#define low vc19
-#define high vc20
-
-// Split x and y coordinates into separate bytes
-
-    lw $t0, (%lo(cmd))($zero) // Get the first word and shift left by 4 so X and Y are in separate vector elements
-    sll $t0, $t0, 4
-
-    sw $t0, (%lo(cmd) + 12)($zero) // Store in the last word of the command, which will be overwritten soon
-
-    llv high, 0, cmd + 12, $zero // Load shifted high coordinates
+        llv vc17, 0, cmd + 12, $zero // Load bottom right t, s coords
     
-    lw $t0, (%lo(cmd) + 4)($zero) // Get the second word and shift left by 4 so A and B are in separate vector elements
-    sll $t0, $t0, 4
-
-    sw $t0, (%lo(cmd) + 12)($zero) // Store in the last word of the command, which will be overwritten soon
-
-    llv low, 0, cmd + 12, $zero // Load shifted low coordinates
-   
-// Mask out and calculate delta
-
-#define deltaxy vc21 
-
-#define mask vc21
-
-    vor mask, nullconst, v2nconst, v2n_1 // Shift X / A left 4, Y / B left 0
-    vmov mask, 0, v2nconst, v2n_16
+    lw $t1, (%lo(cmd))($zero) // Get bottom right x, y
+    sll $t2, $t1, 4 // Shift left 4 to correct boundary
+    and $t2, $t0 // Mask to remove 0x04 command byte
     
-    vmudn low, mask, low, f
-    vmudn high, mask, high, f
-
-#undef mask
+        llv vc16, 0, cmd + 8, $zero // Load top left t, s coords
     
-    vsubc deltaxy, high, low, f // Calculate delta
+    sw $t2, (%lo(cmd) + 12)($zero) // Store in now unused part of cmd block
+    andi $t1, 0x0fff // Mask out additional x nibble
+    sh $t1, (%lo(cmd) + 14)($zero) // Overwrite second halfword with unshifted, masked y coordinate
 
-#undef high
-#undef low
+        llv vc19, 0, cmd + 12, $zero // Load bottom right x, y
 
-// Reciprocate
+    lw $t1, (%lo(cmd) + 4)($zero) // Get top left x, y
+    sll $t2, $t1, 4 // Shift left 4 to correct boundary
+    and $t2, $t0 // Mask to remove 0x04 command byte
+    
+        vsubc vc16, vc17, vc16, f // Calculate dt, ds
+    
+    sw $t2, (%lo(cmd) + 12)($zero) // Store in now unused part of cmd block
+    andi $t1, 0x0fff // Mask out additional x nibble
+    sh $t1, (%lo(cmd) + 14)($zero) // Overwrite second halfword with unshifted, masked y coordinate
+    
+        llv vc18, 0, cmd + 12, $zero // Load top left x, y
+
+        vsubc vc18, vc19, vc18, f // Calculate dx, dy
+
+        vrcph vc19, 0, vc18, 0 // Calculate 1/dx, 1/dy
+        vrcpl vc18, 0, nullconst, 0
+
+        vrcph vc19, 1, vc18, 1 
+        vrcpl vc18, 1, nullconst, 1
+
+        vmudm vc16, vc16, vc18, f // Calculate dt/dx, ds/dy as fractional and integral parts
+        vmadn vc17, nullconst, nullconst, f
+
+        vmudn vc18, vc17, v2nconst2, v2n2_256
+        vmadh vc19, vc16, v2nconst2, v2n2_256
+        vmadn vc18, nullconst, nullconst, 0
+
+        slv vc19, 0, cmd + 12, $zero
 
 // Push to xbus
 
@@ -169,7 +150,6 @@ OPRect:
     jal XBUSPush
     ori $a1, $zero, 16
 
-*/
 
     op_ret
     nop

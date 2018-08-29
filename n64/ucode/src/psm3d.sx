@@ -114,9 +114,9 @@ uPSM3DTextStart:
 //
 
 .VectorInit:
-    lqv v2nconst, 0, v2n, $zero
-    lqv v2nconst2, 0, v2n2, $zero
-    vxor nullconst, v2nconst, v2nconst, f
+        lqv v2nconst, 0, v2n, $zero // Initialize constants
+        lqv v2nconst2, 0, v2n2, $zero
+        vxor nullconst, v2nconst, v2nconst, f
 
 //
 // Begin execution
