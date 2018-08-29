@@ -31,6 +31,7 @@ XBUSPush:
     addu xbus_pos_after, xbus_pos, data_size
     ori xbus_max_pos, $zero, (xbus_buffer + PSM3D_XBUS_BUFFER_SIZE) // End of XBUS buffer
     blt xbus_pos_after, xbus_max_pos, .XBUSPushCommand // If we're not at the end of the buffer yet, it's safe to push
+    nop
 
 #undef xbus_pos_after
 #undef xbus_max_pos
@@ -43,7 +44,8 @@ XBUSPush:
 .XBUSWaitBufferWrap:
     mfc0 rdp_pos, CMD_CURRENT // Get current position
     bne rdp_pos, xbus_pos, .XBUSWaitBufferWrap // Wait more if the current position is not advanced to the end of the buffer
-    
+    nop
+
     ori xbus_start, $zero, xbus_buffer // Re-set RDP command buffer positions
     mtc0 xbus_start, CMD_START
     mtc0 xbus_start, CMD_END
@@ -62,11 +64,10 @@ XBUSPush:
     sw data, 0(xbus_pos) // Write command to XBUS buffer
 
     addiu data_ptr, 4 // Advance positions
-    addiu xbus_pos, 4 
     addiu data_size, -4 
+    bgtz data_size, .XBUSPushCommand // If we're not done pushing data, keep pushing
+    addiu xbus_pos, 4 
 
-    bnez data_size, .XBUSPushCommand // If we're not done pushing data, keep pushing
-    
 #undef data
 
 // Write XBUS position to RDP command register
@@ -77,6 +78,7 @@ XBUSPush:
 #undef xbus_pos
 
     jr $ra
+    nop
 
 #undef data_size 
 #undef data_ptr 

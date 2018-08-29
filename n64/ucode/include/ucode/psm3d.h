@@ -31,6 +31,8 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DDispCmd_t {
 
 #endif
 
+#define _FMT(data, shift, size) (((data) << shift) & (((1 << size) - 1) << shift))
+
 /*
  * Opcodes
  */
@@ -40,19 +42,90 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DDispCmd_t {
 #define UCODE_PSM3D_OP_NOOP 0x00
 #define UCODE_PSM3D_OP_END_DL 0x01
 #define UCODE_PSM3D_OP_SET_OTHER_MODE 0x02
+#define UCODE_PSM3D_OP_SET_TX_MODE 0x03
+#define UCODE_PSM3D_OP_RECT 0x04
 
 /*
  * Operation macros
  */
 
 #define usPSM3DNoop() { (UCODE_PSM3D_OP_NOOP << 24), 0 } 
-#define uPSM3DNoop(dl) *((dl) ++) = (uPSM3DDispCmd) { (UCODE_PSM3D_OP_NOOP << 24), 0 } 
+#define uPSM3DNoop(dl) *((dl) ++) = (uPSM3DDispCmd) { _FMT(UCODE_PSM3D_OP_NOOP, 24, 8), 0 } 
 
 #define usPSM3DEndDL() { (UCODE_PSM3D_OP_END_DL << 24), 0 }
-#define uPSM3DEndDL(dl) *((dl) ++) = (uPSM3DDispCmd) { (UCODE_PSM3D_OP_END_DL << 24), 0 }
+#define uPSM3DEndDL(dl) *((dl) ++) = (uPSM3DDispCmd) { _FMT(UCODE_PSM3D_OP_END_DL, 24, 8), 0 }
 
-#define usPSM3DSetOtherMode(maskh, maskl, datah, datal) { (UCODE_PSM3D_OP_SET_OTHER_MODE << 24) | maskh , datah } , { maskl , datal }
-#define uPSM3DSetOtherMode(dl, maskh, maskl, datah, datal) *((dl)++) = (uPSM3DDispCmd) { (UCODE_PSM3D_OP_SET_OTHER_MODE << 24) | maskh , datah }; *((dl) ++) = (uPSM3DDispCmd) { maskl , datal }
+#define usPSM3DSetOtherMode(maskh, maskl, datah, datal) { _FMT(UCODE_PSM3D_OP_SET_OTHER_MODE, 24, 8) | _FMT(maskh, 0, 24) , _FMT(datah, 0, 24) } , { _FMT(maskl, 0, 32) , _FMT(datal, 0, 32) }
+#define uPSM3DSetOtherMode(dl, maskh, maskl, datah, datal) *((dl)++) = (uPSM3DDispCmd) { _FMT(UCODE_PSM3D_OP_SET_OTHER_MODE, 24, 8) | _FMT(maskh, 0, 24) , _FMT(datah, 0, 24) }; *((dl) ++) = { _FMT(maskl, 0, 32) , _FMT(datal, 0, 32) }
+
+#define UCODE_PSM3D_TXMODE_TEXTURING_KEEP 0
+#define UCODE_PSM3D_TXMODE_TEXTURING_ON 0x8080
+#define UCODE_PSM3D_TXMODE_TEXTURING_OFF 0x8000
+
+#define usPSM3DSetTextureMode(texturing) \
+    {\
+        _FMT(UCODE_PSM3D_OP_SET_TX_MODE, 24, 8)\
+            ,\
+        UCODE_PSM3D_TXMODE_TEXTURING_##texturing\
+    }
+#define uPSM3DSetTextureMode(dl, texturing) \
+    *((dl) ++) = (uPSM3DDispCmd) {\
+        _FMT(UCODE_PSM3D_OP_SET_TX_MODE, 24, 8)\
+            ,\
+        UCODE_PSM3D_TXMODE_TEXTURING_##texturing\
+    }
+
+#define usPSM3DFillRectangle(xh, yh, xl, yl) \
+    {\
+        _FMT(UCODE_PSM3D_OP_RECT, 24, 8) |\
+        _FMT(xl, 12, 12) |\
+        _FMT(yl, 0, 12),\
+            \
+        _FMT(xh, 12, 12) |\
+        _FMT(yh, 0, 12)\
+    }
+#define uPSM3DFillRectangle(dl, xh, yh, xl, yl) \
+    *((dl) ++) = (uPSM3DDispCmd) {\
+        _FMT(UCODE_PSM3D_OP_RECT, 24, 8) |\
+        _FMT(xl, 12, 12) |\
+        _FMT(yl, 0, 12),\
+            \
+        _FMT(xh, 12, 12) |\
+        _FMT(yh, 0, 12)\
+    }
+
+#define usPSM3DTextureRectangle(xh, yh, xl, yl, sh, th, sl, tl) \
+    {\
+        _FMT(UCODE_PSM3D_OP_RECT, 24, 8) |\
+        _FMT(xl, 12, 12) |\
+        _FMT(yl, 0, 12),\
+            \
+        _FMT(xh, 12, 12) |\
+        _FMT(yh, 0, 12)\
+    },\
+    {\
+        _FMT(sh, 16, 16) |\
+        _FMT(th, 0, 16),\
+            \
+        _FMT(sl, 16, 16) |\
+        _FMT(tl, 0, 16)\
+    }
+#define uPSM3DTextureRectangle(dl, xh, yh, xl, yl, sh, th, sl, tl) \
+    *((dl) ++) = (uPSM3DDispCmd) {\
+        _FMT(UCODE_PSM3D_OP_RECT, 24, 8) |\
+        _FMT(xl, 12, 12) |\
+        _FMT(yl, 0, 12),\
+            \
+        _FMT(xh, 12, 12) |\
+        _FMT(yh, 0, 12)\
+    };\
+    *((dl) ++) = (uPSM3DDispCmd) {\
+        _FMT(sh, 16, 16) |\
+        _FMT(th, 0, 16),\
+            \
+        _FMT(sl, 16, 16) |\
+        _FMT(tl, 0, 16)\
+    }
 
 #define UCODE_PSM3D_BLEND_MODE_M1A_IN 0
 #define UCODE_PSM3D_BLEND_MODE_M1A_MEM 1
@@ -140,7 +213,6 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DDispCmd_t {
             \
         dram_addr\
     )
-
 
 #define usPSM3DSetTextureImg(dram_addr, format, size, width) \
     usPSM3DRdpThrough(\
@@ -384,19 +456,6 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DDispCmd_t {
         UCODE_RDP_OPC_Set_Convert,\
         ((k2 & 0x1f) << 27) | (k3 << 18) | (k4 << 9) | k5,\
         (k0 << 13) | (k1 << 4) \
-    )
-
-#define usPSM3DFillRect(xh, yh, xl, yl) \
-    usPSM3DRdpThrough(\
-        UCODE_RDP_OPC_Fill_Rectangle,\
-        (xl << 12) | yl,\
-        (xh << 12) | yh\
-    )
-#define uPSM3DFillRect(dl, xh, yh, xl, yl) \
-    uPSM3DRdpThrough(dl, \
-        UCODE_RDP_OPC_Fill_Rectangle,\
-        (xl << 12) | yl,\
-        (xh << 12) | yh\
     )
 
 #define UCODE_PSM3D_CC_A_COMB 0

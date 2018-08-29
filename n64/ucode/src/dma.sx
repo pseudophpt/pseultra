@@ -22,6 +22,7 @@
 DMARead:
     ori dma_type, $zero, DMA_READ
     b .DMA
+    nop
 
 DMAWrite:
     ori dma_type, $zero, DMA_WRITE
@@ -42,6 +43,7 @@ DMAWrite:
 .DMAAcquireSemaphore:
     mfc0 semaphore, SP_RESERVED
     bnez semaphore, .DMAAcquireSemaphore
+    nop
 
 #undef semaphore
 */
@@ -53,6 +55,7 @@ DMAWrite:
 .DMAWait:
     mfc0 busy_state, DMA_BUSY
     bnez busy_state, .DMAWait
+    nop
 
 #undef busy_state
 
@@ -62,10 +65,12 @@ DMAWrite:
     mtc0 spmem_addr, DMA_CACHE
     mtc0 dram_addr, DMA_DRAM
     beq dma_type, DMA_READ, .DMARead
+    nop
 
 .DMAWrite:
     mtc0 dma_len, DMA_WRITE_LENGTH
     b .DMAWaitDone
+    nop
 
 .DMARead:
     mtc0 dma_len, DMA_READ_LENGTH
@@ -77,6 +82,7 @@ DMAWrite:
 .DMAWaitDone:
     mfc0 busy_state, DMA_BUSY
     bnez busy_state, .DMAWaitDone
+    nop
 
 #undef busy_state
 
@@ -84,6 +90,7 @@ DMAWrite:
 
 .DMADone:
     jr $ra
+    nop
 
 #undef dma_len 
 #undef spmem_addr

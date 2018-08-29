@@ -5,17 +5,21 @@
  * (C) pseudophpt 2018
  */
 
-//
-// SetOtherMode
-//
-// FORMAT:
-//
-// 02 MM MM MM 00 DD DD DD MM MM MM MM DD DD DD DD 
-//
-// M: Mask for D bits
-//
-// D: Values of bits in high word to set 
-// 
+//////////////////////////////////////////////////////////////////////////////
+//                                                                          // 
+// SetOtherMode                                                             // 
+//                                                                          // 
+// Sets modes associated with the Set_Other_Mode RDP command                // 
+//                                                                          // 
+// FORMAT:                                                                  // 
+//                                                                          // 
+// 02 MM MM MM 00 DD DD DD MM MM MM MM DD DD DD DD                          // 
+//                                                                          // 
+// M: Mask for D bits                                                       // 
+//                                                                          // 
+// D: Values of bits in high word to set                                    //
+//                                                                          // 
+////////////////////////////////////////////////////////////////////////////// 
 
 .global OPSetOtherMode
 
@@ -31,9 +35,9 @@ OPSetOtherMode:
     or modeword_ptr, $zero, $zero
 
 .SetWord:
-    lw mask, cmd($zero) // Load mask, data, and current mode for high word
-    lw data, (cmd + 4)($zero)
-    lw mode, othermode(modeword_ptr)
+    lw mask, %lo(cmd)($zero) // Load mask, data, and current mode for high word
+    lw data, (%lo(cmd) + 4)($zero)
+    lw mode, %lo(othermode)(modeword_ptr)
 
     and data, mask // Mask data
 
@@ -42,20 +46,17 @@ OPSetOtherMode:
 
     or mode, data // Put data together
 
-    sw mode, othermode(modeword_ptr)
-
     bnez modeword_ptr, .WriteCommand // If we're on the second word, we're ready to write the command
-    
+    sw mode, %lo(othermode)(modeword_ptr)
+
     move $a0, dl_dram_ptr // Load display list command
-    ori $a1, $zero, cmd
+    ori $a1, $zero, %lo(cmd)
+    jal DMARead // DMA command
     ori $a2, $zero, 7
 
-    jal DMARead // DMA command
-
     addiu dl_dram_ptr, 8 // Advance display list counter and modeword pointer
-    addiu modeword_ptr, 4
-
     b .SetWord
+    addiu modeword_ptr, 4
 
 #undef mode 
 #undef data
@@ -73,13 +74,13 @@ OPSetOtherMode:
 #define set_other_mode_cmd $t0
 
     ori set_other_mode_cmd, $zero, UCODE_RDP_OPC_Set_Other_Modes 
+    jal XBUSPush // push command to xbus
     sb set_other_mode_cmd, 0(cmd_ptr)
 
 #undef set_other_mode_cmd
-
-    jal XBUSPush // push command to xbus
 
 #undef cmd_len
 #undef cmd_ptr
 
     op_ret
+    nop

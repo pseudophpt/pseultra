@@ -19,6 +19,10 @@ SECTIONS {
         * (COMMON)
     }
 
+    .vsl : {
+        * (.vsl)
+    }
+
     /DISCARD/ : {
         * (.MIPS.*)
         * (.reginfo)

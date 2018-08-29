@@ -1,0 +1,52 @@
+/*
+ * pseultra/n64/boot/ucode/settxmode.sx
+ * PSM3D microcode SetTxMode function
+ * 
+ * (C) pseudophpt 2018
+ */
+
+//////////////////////////////////////////////////////////////////////////////
+//                                                                          // 
+// SetTxMode                                                                // 
+//                                                                          // 
+// Sets the PSM3D texturing mode                                            // 
+//                                                                          // 
+// FORMAT:                                                                  // 
+//                                                                          // 
+// 03 -- -- -- -- -- MM DD                                                  // 
+//                                                                          // 
+// M: Mask for D bits                                                       // 
+//                                                                          // 
+// D: E--- -TTT                                                             // 
+//     E: Textures enabled                                                  // 
+//     T: Tile to use                                                       // 
+//                                                                          // 
+//////////////////////////////////////////////////////////////////////////////
+
+.global OPSetTxMode
+
+OPSetTxMode:
+
+#define mask $t0
+#define data $t1
+#define mode $t2
+
+    lb mask, (%lo(cmd) + 6)($zero) // Load mask, data, and current mode for high word
+    lb data, (%lo(cmd) + 7)($zero)
+    lb mode, PSM3D_STATUS_TX_BYTE($zero)
+
+    and data, mask // Mask data
+
+    nor mask, mask // Invert mask to mask mode
+    and mode, mask 
+
+    or mode, data // Put data together
+
+    sb mode, PSM3D_STATUS_TX_BYTE($zero)
+
+#undef mode
+#undef data
+#undef mask
+
+    op_ret
+    nop
