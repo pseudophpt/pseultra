@@ -29,6 +29,12 @@
 #define PSM3D_STATUS_INIT_BYTE (PSM3D_STATUS_WORD + 0) // Has the ucode been initialized?
 #define PSM3D_STATUS_TX_BYTE (PSM3D_STATUS_WORD + 1) // What's the status of the texture engine?
 
+#define PSM3D_MTX_SIZE 4 * 16 * 2
+#define PSM3D_MTX_COUNT 8
+
+#define PSM3D_VTX_SIZE 16
+#define PSM3D_VTX_COUNT 16
+
 #define v2nconst vc0 // Contains powers of 2
 #define v2nconst2 vc1 // Contains powers of 2
 #define nullconst vc2 // Contains 0 
@@ -115,6 +121,10 @@ uPSM3DTextStart:
 
 .VectorInit:
         lqv v2nconst, 0, v2n, $zero // Initialize constants
+    
+    ori $t0, $zero, mtx_stack // Store matrix stack pointer
+    sw $t0, %lo(mtx_stack_ptr)($zero)
+    
         lqv v2nconst2, 0, v2n2, $zero
         vxor nullconst, v2nconst, v2nconst, f
 
@@ -185,6 +195,8 @@ uPSM3DTextStart:
 #include "psm3d/setothermode.sx"
 #include "psm3d/settxmode.sx"
 #include "psm3d/rect.sx"
+#include "psm3d/loadvtx.sx"
+#include "psm3d/loadmtx.sx"
 
 #undef dl_dram_ptr
 
@@ -200,10 +212,18 @@ uPSM3DTextEnd:
 
 .align 3
 
-// Current display list command
-.lcomm cmd, 0x10
+// Current display list command: also used as temp memory for subroutines
+.lcomm cmd, 0x80
+// Vertex cache
+.lcomm vtx_cache, PSM3D_VTX_SIZE * PSM3D_VTX_COUNT
+// Projection matrix
+.lcomm mtx_proj, PSM3D_MTX_SIZE
+// Modeling matrix stack
+.lcomm mtx_stack, PSM3D_MTX_SIZE * PSM3D_MTX_COUNT
 // XBUS buffer
 .lcomm xbus_buffer, PSM3D_XBUS_BUFFER_SIZE
+// Mtx stack pointer
+.lcomm mtx_stack_ptr, 4
 
 //
 // Data
@@ -227,6 +247,8 @@ jump_tbl:
 .word OPSetOtherMode
 .word OPSetTxMode
 .word OPRect
+.word OPLoadVtx
+.word OPLoadMtx
 
 .align 4
 

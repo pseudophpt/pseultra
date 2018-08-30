@@ -29,6 +29,33 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DDispCmd_t {
     u32 cmd2;
 } uPSM3DDispCmd;
 
+/** @brief Vertex for PSM3D */
+typedef struct __attribute__((packed, aligned(8))) uPSM3DVtx_t {
+    /** @brief X-Coordinate (s15.16 fixed point) */
+    u32 x;
+    /** @brief Y-Coordinate (s15.16 fixed point) */
+    u32 y;
+    /** @brief Z-Coordinate (s15.16 fixed point) */
+    u32 z;
+    /** @brief Padding */
+    u8 pad;
+    /** @brief X-Normal (s.7 fixed point) */
+    u8 xn;
+    /** @brief Y-Normal (s.7 fixed point) */
+    u8 yn;
+    /** @brief Z-Normal (s.7 fixed point) */
+    u8 zn;
+} uPSM3DVtx;
+
+/** @brief Matrix for PSM3D */
+typedef struct __attribute__((packed, aligned(8))) uPSM3DMtx_t {
+    /** @brief Integral part of matrix */
+    u16 intgr [4][4];
+    /** @brief Fractional part of matrix */
+    u16 frac [4][4];
+} uPSM3DMtx;
+
+
 #endif
 
 #define _FMT(data, shift, size) (((data) << shift) & (((1 << size) - 1) << shift))
@@ -44,6 +71,8 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DDispCmd_t {
 #define UCODE_PSM3D_OP_SET_OTHER_MODE 0x02
 #define UCODE_PSM3D_OP_SET_TX_MODE 0x03
 #define UCODE_PSM3D_OP_RECT 0x04
+#define UCODE_PSM3D_OP_LOAD_VTX 0x05
+#define UCODE_PSM3D_OP_LOAD_MTX 0x06
 
 /*
  * Operation macros
@@ -125,6 +154,31 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DDispCmd_t {
             \
         _FMT(sl, 16, 16) |\
         _FMT(tl, 0, 16)\
+    }
+
+#define UCODE_PSM3D_LOAD_MTX_PUSH_MULTIPLY 0
+#define UCODE_PSM3D_LOAD_MTX_PUSH_LOAD 1
+
+#define UCODE_PSM3D_LOAD_MTX_STACK_PROJECTION 0
+#define UCODE_PSM3D_LOAD_MTX_STACK_MODEL 1
+
+#define usPSM3DLoadMtx(addr, pushtype, stack) \
+    {\
+        _FMT(UCODE_PSM3D_OP_LOAD_MTX, 24, 8) |\
+        (UCODE_PSM3D_LOAD_MTX_PUSH_##pushtype << 8) |\
+        UCODE_PSM3D_LOAD_MTX_STACK_##stack\
+        ,\
+            \
+        _FMT(addr, 0, 24)\
+    }
+#define uPSM3DLoadMtx(dl, addr, pushtype, stack) \
+    *((dl) ++) = (uPSM3DDispCmd) {\
+        (_FMT(UCODE_PSM3D_OP_LOAD_MTX, 24, 8) |\
+        UCODE_PSM3D_LOAD_MTX_PUSH_##pushtype << 8) |\
+        UCODE_PSM3D_LOAD_MTX_STACK_##stack\
+        ,\
+            \
+        _FMT(addr, 0, 24)\
     }
 
 #define UCODE_PSM3D_BLEND_MODE_M1A_IN 0

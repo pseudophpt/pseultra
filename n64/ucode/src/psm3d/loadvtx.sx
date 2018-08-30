@@ -1,0 +1,59 @@
+/*
+ * pseultra/n64/boot/ucode/loadvtx.sx
+ * PSM3D microcode LoadVtx function
+ * 
+ * (C) pseudophpt 2018
+ */
+
+//////////////////////////////////////////////////////////////////////////////
+//                                                                          // 
+// LoadVtx                                                                  // 
+//                                                                          // 
+// Loads a vertex into the vertex cache                                     // 
+//                                                                          // 
+////////////////////////////////////////////////////////////////////////////// 
+//                                                                          // 
+// FORMAT:                                                                  // 
+//                                                                          // 
+// 05 -- PP CC -- DD DD DD                                                  // 
+//                                                                          // 
+// P: Position in vertex cache to load                                      // 
+// C: Count of vertices to load                                             // 
+// D: DRAM address of vertices                                              // 
+//                                                                          // 
+//////////////////////////////////////////////////////////////////////////////
+
+.global OPLoadVtx
+
+OPLoadVtx:
+
+    lb $s4, (%lo(cmd) + 3)($zero) // Load count
+    lb $s5, (%lo(cmd) + 2)($zero) // Load position
+    sll $s5, $s5, 4
+    lw $s6, (%lo(cmd) + 4)($zero) // Load DRAM address
+    sll $s6, $s6, 4
+    
+.VertexLoop:
+
+    move $a0, $s6 // Load from DRAM address
+    ori $a1, $zero, %lo(cmd) // Load into command 
+    jal DMARead 
+    ori $a2, $zero, 15 // Read vertex
+
+/*
+ * Actual shading should be performed here by calculating the dot product of 
+ * the supplied vector normal with the light unit vector to get shading 
+ * values. Here, we're going to assume light unit vector <0, 0, 1>, so that
+ * we can just take the Z component of the normal and use it as a shade value
+ */
+
+    addiu $s4, -1 // Decrement count left
+
+    addiu $s6, 16
+    bne $s4, $zero, .VertexLoop // Jump back if we're not done 
+    addiu $s5, 16
+
+    op_ret
+    nop
+
+
