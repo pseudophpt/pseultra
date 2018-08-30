@@ -1,5 +1,5 @@
 /*
- * pseultra/n64/boot/ucode/setothermode.sx
+ * pseultra/n64/ucode/src/psm3d/setothermode.sx
  * PSM3D microcode SetOtherMode functions
  * 
  * (C) pseudophpt 2018

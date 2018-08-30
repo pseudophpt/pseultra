@@ -1,5 +1,5 @@
 /*
- * pseultra/n64/boot/ucode/noop.sx
+ * pseultra/n64/ucode/src/psm3d/noop.sx
  * PSM3D microcode noop (No operation) function
  * 
  * (C) pseudophpt 2018

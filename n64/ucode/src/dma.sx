@@ -1,5 +1,5 @@
 /*
- * pseultra/n64/boot/ucode/dma.sx
+ * pseultra/n64/ucode/src/dma.sx
  * PSM3D microcode DMA functions
  * 
  * (C) pseudophpt 2018

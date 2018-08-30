@@ -1,5 +1,5 @@
 /*
- * pseultra/n64/boot/ucode/enddl.sx
+ * pseultra/n64/ucode/src/psm3d/enddl.sx
  * PSM3D microcode EndDL (End display list) function
  * 
  * (C) pseudophpt 2018

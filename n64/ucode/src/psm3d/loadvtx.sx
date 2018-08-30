@@ -1,5 +1,5 @@
 /*
- * pseultra/n64/boot/ucode/loadvtx.sx
+ * pseultra/n64/ucode/src/psm3d/loadvtx.sx
  * PSM3D microcode LoadVtx function
  * 
  * (C) pseudophpt 2018

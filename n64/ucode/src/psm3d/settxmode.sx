@@ -1,5 +1,5 @@
 /*
- * pseultra/n64/boot/ucode/settxmode.sx
+ * pseultra/n64/ucode/src/psm3d/settxmode.sx
  * PSM3D microcode SetTxMode function
  * 
  * (C) pseudophpt 2018

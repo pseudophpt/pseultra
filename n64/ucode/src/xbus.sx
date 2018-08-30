@@ -1,5 +1,5 @@
 /*
- * pseultra/n64/boot/ucode/xbus.sx
+ * pseultra/n64/ucode/src/xbus.sx
  * PSM3D microcode XBUS functions
  * 
  * (C) pseudophpt 2018

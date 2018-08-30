@@ -1,5 +1,5 @@
 /*
- * pseultra/n64/boot/ucode/rect.sx
+ * pseultra/n64/ucode/src/psm3d/rect.sx
  * PSM3D microcode Rect functions
  * 
  * (C) pseudophpt 2018

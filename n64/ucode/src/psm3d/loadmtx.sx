@@ -1,5 +1,5 @@
 /*
- * pseultra/n64/boot/ucode/loadmtx.sx
+ * pseultra/n64/ucode/src/psm3d/loadmtx.sx
  * PSM3D microcode LoadMtx functions
  * 
  * (C) pseudophpt 2018
