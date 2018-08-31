@@ -31,16 +31,22 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DDispCmd_t {
 
 /** @brief Vertex for PSM3D */
 typedef struct __attribute__((packed, aligned(8))) uPSM3DVtx_t {
-    /** @brief X-Coordinate (s15.16 fixed point) */
-    u32 x;
-    /** @brief Y-Coordinate (s15.16 fixed point) */
-    u32 y;
-    /** @brief Z-Coordinate (s15.16 fixed point) */
-    u32 z;
+    /** @brief X-Coordinate Integral (s15.16 fixed point) */
+    u16 xi;
+    /** @brief Y-Coordinate Integral (s15.16 fixed point) */
+    u16 yi;
+    /** @brief Z-Coordinate Integral (s15.16 fixed point) */
+    u16 zi;
     /** @brief Padding */
     u8 pad;
     /** @brief X-Normal (s.7 fixed point) */
     u8 xn;
+    /** @brief X-Coordinate Fractional (s15.16 fixed point) */
+    u16 xf;
+    /** @brief Y-Coordinate Fractional (s15.16 fixed point) */
+    u16 yf;
+    /** @brief Z-Coordinate Fractional (s15.16 fixed point) */
+    u16 zf;
     /** @brief Y-Normal (s.7 fixed point) */
     u8 yn;
     /** @brief Z-Normal (s.7 fixed point) */
@@ -180,6 +186,26 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DMtx_t {
             \
         _FMT(addr, 0, 24)\
     }
+
+#define usPSM3DLoadVtx(addr, pos, count) \
+    {\
+        _FMT(UCODE_PSM3D_OP_LOAD_VTX, 24, 8) |\
+        _FMT(pos, 8, 8) |\
+        _FMT(count, 0, 8)\
+        ,\
+            \
+        _FMT(addr, 0, 24)\
+    }
+#define uPSM3DLoadVtx(dl, addr, pos, count) \
+    *((dl) ++) = (uPSM3DDispCmd) {\
+        _FMT(UCODE_PSM3D_OP_LOAD_VTX, 24, 8) |\
+        _FMT(pos, 8, 8) |\
+        _FMT(count, 0, 8)\
+        ,\
+            \
+        _FMT(addr, 0, 24)\
+    }
+
 
 #define UCODE_PSM3D_BLEND_MODE_M1A_IN 0
 #define UCODE_PSM3D_BLEND_MODE_M1A_MEM 1

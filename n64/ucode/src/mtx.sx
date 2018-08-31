@@ -74,8 +74,8 @@ MTXMult4x4:
 //
 // Returns 
 //
-// vc14 = Vector w integer part, elements 0-4
-// vc15 = Vector w fractional part, elements 0-4
+// vc14 = Vector w integer part, elements 0-4 repeated twice
+// vc15 = Vector w fractional part, elements 0-4 repeated twice
 //
 MTXApply4x4:
 

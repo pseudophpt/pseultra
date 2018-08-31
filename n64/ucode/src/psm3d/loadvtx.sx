@@ -31,7 +31,6 @@ OPLoadVtx:
     lb $s5, (%lo(cmd) + 2)($zero) // Load position
     sll $s5, $s5, 4
     lw $s6, (%lo(cmd) + 4)($zero) // Load DRAM address
-    sll $s6, $s6, 4
     
 .VertexLoop:
 
@@ -46,6 +45,34 @@ OPLoadVtx:
  * values. Here, we're going to assume light unit vector <0, 0, 1>, so that
  * we can just take the Z component of the normal and use it as a shade value
  */
+
+        ldv vc8, 0, cmd, $zero // Load integral part into vc8
+        ldv vc8, 8, cmd, $zero
+
+        vmov vc8, 3, v2nconst, 0 // Load 1 into w coordinate
+        vmov vc8, 7, v2nconst, 0
+
+        ldv vc9, 0, cmd + 8, $zero // Load fractional part into vc9
+        ldv vc9, 8, cmd + 8, $zero
+
+        vmov vc9, 3, nullconst, 0 // Load 0 into w coordinate fractopm
+        vmov vc9, 7, nullconst, 0
+    
+    lw $a0, (%lo(mtx_stack_ptr))($zero) // Model matrix multiply 
+    jal MTXApply4x4
+    addiu $a0, -PSM3D_MTX_SIZE
+
+        vor vc8, nullconst, vc14, f // Use output as input to projection
+        vor vc9, nullconst, vc15, f
+
+        sdv vc8, 0, cmd, $zero // Copy second halves
+        ldv vc8, 8, cmd, $zero
+
+        sdv vc9, 0, cmd, $zero
+        ldv vc9, 8, cmd, $zero
+    
+    jal MTXApply4x4
+    ori $a0, $zero, %lo(mtx_proj) // Projection matrix multiply 
 
     addiu $s4, -1 // Decrement count left
 
