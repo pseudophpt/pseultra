@@ -189,6 +189,7 @@ uPSM3DTextStart:
 
 #include "dma.sx"
 #include "xbus.sx"
+#include "mtx.sx"
 
 #include "psm3d/noop.sx"
 #include "psm3d/enddl.sx"
