@@ -250,7 +250,7 @@ makevecop vadd, 0x10
 /** @brief Vector Add Short Elements With Carry */
 makevecop vaddc, 0x14
 /** @brief Vector AND of Short Elements */
-makevecop vand, 0x18
+makevecop vand, 0x28
 /** @brief Vector Select Clip Test High */
 makevecop vch, 0x25
 /** @brief Vector Select Clip Test Low */
