@@ -1,0 +1,39 @@
+import os
+
+Import('mips_env')
+
+path = Dir('.').abspath
+
+mips_env.Append(CPPPATH = ['./include', './../../include'])
+
+includes = [
+    './include/math.h',
+    './include/math/mathf.h'
+]
+
+sources = [
+    './src/mathf.c'
+] + includes
+
+psemath = mips_env.Library(
+    target = path + '/lib/libpsemath.a',
+    source = sources
+)
+
+prefix = mips_env.GetOption('prefix')
+
+prefix_bin = prefix + '/bin'
+prefix_include = prefix 
+prefix_lib = prefix + '/lib'
+
+mips_env.Install(prefix_bin, [])
+mips_env.Install(prefix_lib, [psemath])
+install_include = [mips_env.Install(prefix_include + '/' + os.path.dirname(h), h) for h in includes]
+
+install_bin = mips_env.Alias('install-bin', prefix_bin)
+install_lib = mips_env.Alias('install-lib', prefix_lib)
+install_include = mips_env.Alias('install-include', install_include)
+
+installs = [install_bin, install_lib, install_include]
+
+mips_env.Alias('install', installs)
