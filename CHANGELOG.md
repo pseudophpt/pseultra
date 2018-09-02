@@ -2,6 +2,17 @@
 
 ## [Unreleased](https://github.com/pseudophpt/pseultra/compare/master...develop)
 
+## [1.2.0](https://github.com/pseudophpt/pseultra/compare/v1.1.0...v1.2.0) - 2018-09-02
+
+### Added
+- Debug functionality
+- RSP vector load/store fixer
+- PSM3D microcode
+
+### Fixed
+- Bug involving a coprocessor 0 delay slot which would cause arbitrary kernel reg data to be written to cop0 status reg, and usually an xtlb exception
+- Bug in util.h where the macro input to endian switchers isn't wrapped
+
 ## [1.1.0](https://github.com/pseudophpt/pseultra/compare/v1.0.1...v1.1.0) - 2018-08-18
 
 ### Added

@@ -1,0 +1,22 @@
+/*
+ * pseultra/n64/ucode/src/psm3d/enddl.sx
+ * PSM3D microcode EndDL (End display list) function
+ * 
+ * (C) pseudophpt 2018
+ */
+
+//////////////////////////////////////////////////////////////////////////////
+// EndDL                                                                    // 
+//                                                                          // 
+// Ends a PSM3D display list                                                // 
+//                                                                          // 
+// FORMAT:                                                                  // 
+//                                                                          // 
+// 01 -- -- -- -- -- -- --                                                  // 
+//////////////////////////////////////////////////////////////////////////////
+
+.global OPEndDL
+
+OPEndDL:
+    break // Break
+    nop

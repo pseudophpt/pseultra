@@ -1,0 +1,6 @@
+env = Environment()
+Export('env')
+
+SConscript('../../SConsopt')
+SConscript('../SConsmips')
+SConscript('./SConscript')

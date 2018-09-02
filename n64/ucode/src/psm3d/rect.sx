@@ -1,0 +1,190 @@
+/*
+ * pseultra/n64/ucode/src/psm3d/rect.sx
+ * PSM3D microcode Rect functions
+ * 
+ * (C) pseudophpt 2018
+ */
+
+//////////////////////////////////////////////////////////////////////////////
+//                                                                          // 
+// Rect                                                                     // 
+//                                                                          // 
+// Draws a rectangle primitive                                              // 
+//                                                                          // 
+//// IF TEXTURING ENABLED //////////////////////////////////////////////////// 
+//                                                                          // 
+// FORMAT:                                                                  // 
+//                                                                          // 
+// 04 XX XY YY 0T AA AB BB SS SS TT TT UU UU VV VV                          //
+//                                                                          //
+// X: Bottom right X (10.2)                                                 //
+// Y: Bottom right Y (10.2)                                                 // 
+// T: Tile number                                                           // 
+// A: Top left X (10.2)                                                     // 
+// B: Top left Y (10.2)                                                     // 
+//                                                                          // 
+// S: S coordinate of top left                                              // 
+// T: T coordinate of top left                                              // 
+//                                                                          // 
+// U: S coordinate of bottom right                                          // 
+// V: T coordinate of bottom right                                          // 
+//                                                                          // 
+// D: Values of bits in high word to set                                    // 
+//                                                                          // 
+//// IF TEXTURING DISABLED /////////////////////////////////////////////////// 
+//                                                                          // 
+// FORMAT:                                                                  // 
+//                                                                          // 
+// 04 XX XY YY -- AA AB BB                                                  // 
+//                                                                          // 
+// X: Bottom right X (10.2)                                                 // 
+// Y: Bottom right Y (10.2)                                                 // 
+// A: Top left X (10.2)                                                     // 
+// B: Top left Y (10.2)                                                     // 
+//                                                                          // 
+//////////////////////////////////////////////////////////////////////////////
+
+#define TXRECT_NEWTRAPH 0 // Perform Newton-Raphson iteration on reciprocal result. This wastes IMEM and some cycles but creates more accurate rectangles. WARNING: WILL BE REMOVED SOON
+#define TXRECT_NEWTRAPH_ITERATIONS 1 // How many Newton-Raphson iterations to perform
+
+.global OPRect
+
+OPRect:
+
+#define tx_status $t0
+
+    lb tx_status, PSM3D_STATUS_TX_BYTE($zero)
+    bltz tx_status, .TextureRect // Branch to TextureRect if the texture enable bit is set
+
+#undef tx_status
+
+// Draw rectangle by filling
+
+.FillRect:
+
+#define fill_rect_cmd $t0
+    
+    ori fill_rect_cmd, $zero, UCODE_RDP_OPC_Fill_Rectangle
+    sb fill_rect_cmd, %lo(cmd)($zero)
+
+#undef fill_rect_cmd
+
+#define cmd_ptr $a0
+#define cmd_len $a1
+
+    ori cmd_ptr, $zero, %lo(cmd)
+    jal XBUSPush
+    ori cmd_len, $zero, 8
+
+#undef cmd_len
+#undef cmd_ptr
+
+    op_ret
+    nop
+
+
+// Draw rectangle by texturing
+
+.TextureRect:
+
+#define text_rect_cmd $t0
+    
+    ori text_rect_cmd, $zero, UCODE_RDP_OPC_Texture_Rectangle // Write texture rectangle command
+    sb text_rect_cmd, %lo(cmd)($zero)
+
+#undef text_rect_cmd
+
+// DMA second part of command  
+
+    move $a0, dl_dram_ptr
+    ori $a1, $zero, %lo(cmd) + 8
+    jal DMARead
+    ori $a2, $zero, 7
+
+    lui $t0, 0xf000 // Mask to remove unwanted bytes
+    nor $t0, $t0
+
+        llv vc17, 0, cmd + 12, $zero // Load bottom right t, s coords
+    
+    lw $t1, (%lo(cmd))($zero) // Get bottom right x, y
+    sll $t2, $t1, 4 // Shift left 4 to correct boundary
+    and $t2, $t0 // Mask to remove 0x04 command byte
+    
+        llv vc16, 0, cmd + 8, $zero // Load top left t, s coords
+    
+    sw $t2, (%lo(cmd) + 12)($zero) // Store in now unused part of cmd block
+    andi $t1, 0x0fff // Mask out additional x nibble
+    sh $t1, (%lo(cmd) + 14)($zero) // Overwrite second halfword with unshifted, masked y coordinate
+
+        llv vc19, 0, cmd + 12, $zero // Load bottom right x, y
+
+    lw $t1, (%lo(cmd) + 4)($zero) // Get top left x, y
+    sll $t2, $t1, 4 // Shift left 4 to correct boundary
+    and $t2, $t0 // Mask to remove 0x04 command byte
+    
+        vsubc vc16, vc17, vc16, f // Calculate dt, ds
+    
+    sw $t2, (%lo(cmd) + 12)($zero) // Store in now unused part of cmd block
+    andi $t1, 0x0fff // Mask out additional x nibble
+    sh $t1, (%lo(cmd) + 14)($zero) // Overwrite second halfword with unshifted, masked y coordinate
+    
+        llv vc18, 0, cmd + 12, $zero // Load top left x, y
+
+        vsubc vc18, vc19, vc18, f // Calculate dx, dy
+
+#if TXRECT_NEWTRAPH   
+    ori $t0, $zero, TXRECT_NEWTRAPH_ITERATIONS // Load amount of iterations
+#endif
+
+        vrcph vc17, 0, nullconst, 0 // Calculate 1/dx, 1/dy as fractions and integers
+        vrcpl vc19, 0, vc18, 0
+        vrcph vc17, 0, nullconst, 1 
+        vrcpl vc19, 1, vc18, 1
+        vrcph vc17, 1, nullconst, 1 // Calculate 1/dx, 1/dy as fractions and integers
+
+#if TXRECT_NEWTRAPH   
+
+        vor vc22, nullconst, v2nconst, v2n_2 // Load 2 in vector register
+
+.TrectNewtraph: // Perform Newton-Raphton iteration if enabled
+
+    addiu $t0, -1 // Decrement iteration counter
+        
+/*        vmudm vc20, vc18, vc17, f // Calculate R*X1
+        vmadn vc21, nullconst, nullconst, f // Get fractional part
+
+        vmudn vc21, vc21, v2nconst, v2n_2
+        vmadm vc20, vc20, v2nconst, v2n_2
+        vmadn vc21, nullconst, nullconst, f
+        
+        vsubc vc21, nullconst, vc21, f // Get 2-(R*X)
+        vsub vc20, vc22, vc20, f
+
+        vmudl vc23, vc21, vc17, f
+        vmudm vc23, vc20, vc17, f
+        vmadn vc17, nullconst, nullconst, f*/
+
+        vmudn vc21, vc19, vc18, f // Calculate R * X, fractional part
+        vmadh vc20, vc17, vc18, f
+
+    bne $t0, $zero, .TrectNewtraph // Iterate again
+    nop
+#endif
+        vmudm vc16, vc16, vc17, f // Calculate dt/dx, ds/dy as fractional and integral parts
+        vmadn vc17, nullconst, nullconst, f
+
+        vmudn vc18, vc17, v2nconst2, v2n2_256
+        vmadh vc19, vc16, v2nconst2, v2n2_256
+        vmadn vc18, nullconst, nullconst, 0
+
+        slv vc19, 0, cmd + 12, $zero
+
+// Push to xbus
+
+    ori $a0, $zero, %lo(cmd)
+    jal XBUSPush
+    ori $a1, $zero, 16
+
+
+    op_ret
+    nop

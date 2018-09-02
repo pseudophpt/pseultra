@@ -5,6 +5,8 @@
  * (C) pseudophpt 2018 
  */
 
+// TODO: Make consistent formatting
+
 #include <os_priv.sx>
 
 .global __osHandlerStart
@@ -14,15 +16,30 @@
 .global __osEnableInterrupts
 .global __osDisableInterrupts
 .global __osHandleTimerInterrupt
+.global __osExceptionRegSave
+
+// The savereg and loadreg macros use CacheErr, an unused coprocessor 0 register kept in the vr4300 for compatibility with its vr4200 predecessor.
+// This register is used to store the value of $k0
 
 .macro savereg
+
+mtc0 $k0, CacheErr
 
 lui $k0, %hi(__osExceptionRegSave)
 addiu $k0, %lo(__osExceptionRegSave)
 
-.irp reg,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31
+.set noat
+
+.irp reg,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,27,28,29,30,31
 sw $\reg, (\reg * 4)($k0)
 .endr
+
+.set at
+
+// Save $k0 into correct spot
+
+mfc0 $k1, CacheErr
+sw $k1, (26 * 4)($k0)
 
 .endm
 
@@ -31,9 +48,15 @@ sw $\reg, (\reg * 4)($k0)
 lui $k0, %hi(__osExceptionRegSave)
 addiu $k0, %lo(__osExceptionRegSave)
 
-.irp reg,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31
+.set noat
+
+.irp reg,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,27,28,29,30,31
 lw $\reg, (\reg * 4)($k0)
 .endr
+
+.set at
+
+mfc0 $k0, CacheErr
 
 .endm
 
@@ -43,11 +66,17 @@ lw $\reg, (\reg * 4)($k0)
 
 __osUnmaskInterrupts:
 mfc0 $k0, Status
-
-// MIPS Interrupts
-
-ori $k0, 0x0400 // Unmask all interrupts
-
+.set noreorder
+nop // COP0 Delay
+nop
+nop
+.set reorder
+ori $k0, 0xFF00 // Unmask all interrupts
+.set noreorder
+nop // COP0 Delay
+nop
+nop
+.set reorder
 mtc0 $k0, Status
 
 jr $ra // Return
@@ -58,8 +87,17 @@ jr $ra // Return
 
 __osEnableInterrupts:
 mfc0 $k0, Status
-
+.set noreorder
+nop // COP0 Delay
+nop
+nop
+.set reorder
 ori $k0, 0x0001
+.set noreorder
+nop // COP0 Delay
+nop
+nop
+.set reorder
 mtc0 $k0, Status
 
 jr $ra
@@ -70,9 +108,18 @@ jr $ra
 
 __osDisableInterrupts:
 mfc0 $k0, Status
-
+.set noreorder
+nop // COP0 Delay
+nop
+nop
+.set reorder
 li $k1, ~0x1
 and $k0, $k1
+.set noreorder
+nop // COP0 Delay
+nop
+nop
+.set reorder
 mtc0 $k0, Status
 
 jr $ra
@@ -98,7 +145,7 @@ jr $ra
 __osHandlerStart:
 
 lui $k0, %hi(__osHandleException)
-addiu $k0, %lo(__osHandleException)
+ori $k0, %lo(__osHandleException)
 jr $k0
 
 __osHandlerEnd:
@@ -116,13 +163,31 @@ andi $t1, $t0, N64_COP0_CAUSE_EXC_CODE // Get exception code
 
 bne $t1, N64_COP0_CAUSE_EXC_CODE_INT, .handleException // Branch to handle exception if it's not the interrupt code 
 
+// Handle interrupt
 .handleInterrupt:
 
 andi $a0, $t0, N64_COP0_CAUSE_IP // Pass interrupt bits
 jal __osHandleInterrupt
 b .done
 
+// Handle exception
 .handleException:
+
+// Debug screen
+#ifdef __debug__
+
+// Get exception message offset
+lui $t2, %hi(osDebugExceptStr)
+ori $t2, %lo(osDebugExceptStr)
+addu $t2, $t1, $t2
+lw $a0, 0($t2)
+
+jal __osError
+
+#endif
+
+.spin: // Spin forever and ever and ever and ...
+b .spin
 
 .done:
 

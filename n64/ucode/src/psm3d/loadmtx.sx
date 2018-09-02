@@ -1,0 +1,90 @@
+/*
+ * pseultra/n64/ucode/src/psm3d/loadmtx.sx
+ * PSM3D microcode LoadMtx functions
+ * 
+ * (C) pseudophpt 2018
+ */
+
+//////////////////////////////////////////////////////////////////////////////
+//                                                                          // 
+// LoadMtx                                                                  // 
+//                                                                          // 
+// Loads a matrix into a matrix stack                                       // 
+//                                                                          // 
+////////////////////////////////////////////////////////////////////////////// 
+//                                                                          // 
+// FORMAT:                                                                  // 
+//                                                                          // 
+// 06 -- -T -S -- DD DD DD                                                  // 
+//                                                                          // 
+// T: Push type                                                             // 
+//     0: Multiply                                                          // 
+//     1: Load                                                              // 
+// S: Stack to push to                                                      // 
+//     0: Projection                                                        // 
+//     1: Modeling                                                          // 
+// D: DRAM address of matrix                                                // 
+//                                                                          // 
+//////////////////////////////////////////////////////////////////////////////
+
+
+.global OPLoadMtx
+
+OPLoadMtx:
+
+    lb $s4, (%lo(cmd) + 3)($zero) // Get stack to push to
+    bnez $s4, .MtxModel // Branch to model matrix actions if that's where we're pushing
+    lb $s5, (%lo(cmd) + 2)($zero) // Get push type
+
+.MtxProj:
+    ori $s6, $zero, %lo(mtx_proj) // Projection matrix pointer as destination
+
+    b .MtxAction // Go to matrix's action
+    move $s7, $s6 // Projection matrix pointer as source
+
+.MtxModel:
+    lw $s6, %lo(mtx_stack_ptr)($zero) // Matrix stack pointer as destination
+    addiu $s7, $s6, PSM3D_MTX_SIZE // Make stack space
+    sw $s7, %lo(mtx_stack_ptr)($zero) // Save new stack pointer
+
+    addiu $s7, $s6, -PSM3D_MTX_SIZE // Matrix below as source
+
+.MtxAction:
+    bnez $s5, .MtxLoad // Branch to push type
+    lw $a0, (%lo(cmd) + 4)($zero) // Get matrix DRAM address
+
+.MtxMultiply:
+    ori $a1, $zero, %lo(cmd) // Load into temp memory low
+    jal DMARead
+    ori $a2, $zero, PSM3D_MTX_SIZE - 1 // DMA matrix
+
+    ori $a0, $zero, %lo(cmd) + 0x40 // Result stored
+    move $a1, $s7 // A matrix as source
+    jal MTXMult4x4
+    ori $a2, $zero, %lo(cmd) // B matrix as passed
+
+    ori $t0, $zero, 4 // Matrix parts left
+    ori $t1, $zero, %lo(cmd) + 0x40 // Source
+
+.MtxCopy:
+        
+        lqv vc16, 0, 0, $t1 // Read from source
+
+    addiu $t0, -1 // One less matrix qword
+    addiu $t1, 0x10 // Increment source
+
+        sqv vc16, 0, 0, $s6
+
+    bnez $t0, .MtxCopy // Branch back if not done copying
+    addiu $s6, 0x10 // Increment destination
+        
+    op_ret
+    nop
+
+.MtxLoad:
+    move $a1, $s6 // DMA directly into destination
+    jal DMARead
+    ori $a2, $zero, PSM3D_MTX_SIZE - 1 // DMA matrix
+
+    op_ret // Return
+    nop

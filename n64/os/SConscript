@@ -7,6 +7,7 @@ path = Dir('.').abspath
 mips_env.Append(CPPPATH = ['./include', './../../include'])
 
 includes = [
+    './include/os/assert.h',
     './include/os/boot.h',
     './include/os/event.h',
     './include/os/memory.h',
@@ -17,7 +18,9 @@ includes = [
     './include/os/memory/memcpy.h',
     './include/os/memory/cache.h',
     './include/os/boot/boot.h',
+    './include/os/boot/debug.h',
     './include/os/interfaces/pi.h',
+    './include/os/interfaces/rsp.h',
     './include/os/interfaces/vi.h',
 ]
 
@@ -26,16 +29,29 @@ sources = [
     './src/event/exception.c',
     './src/event/exception_s.sx',
     './src/boot/boot.c',
+    './src/boot/debug.c',
+    './src/boot/font.h',
+    './src/boot/reg.h',
     './src/boot/boot_s.sx',
     './src/memory/malloc.c',
     './src/memory/memcpy.c',
     './src/memory/cache_s.sx',
     './src/interfaces/pi.c',
+    './src/interfaces/rsp.c',
     './src/interfaces/vi.c',
 ] + includes
 
+oslib_debug = mips_env.GetOption('oslib_debug')
+
+if oslib_debug:
+    libpseultra = './lib/libpseultra_d.a'
+    mips_env.Append(CCFLAGS = ' -g -D__debug__')
+    mips_env.Append(ASFLAGS = ' -g -D__debug__')
+else:
+    libpseultra = './lib/libpseultra.a'
+
 pseultra = mips_env.Library(
-    target = './lib/libpseultra.a',
+    target = libpseultra,
     source = sources
 )
 

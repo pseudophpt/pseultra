@@ -1,0 +1,122 @@
+/*
+ * pseultra/n64/ucode/src/mtx.sx
+ * PSM3D microcode Matrix operations
+ * 
+ * (C) pseudophpt 2018
+ */
+
+//
+// Matrix multiply 4x4 AB -> C
+// 
+// a0 = DMEM addr of matrix C
+// a1 = DMEM addr of matrix A
+// a2 = DMEM addr of matrix B
+//
+// THIS ROUTINE TAKES IN B AS A TRANSPOSED MATRIX
+//
+MTXMult4x4:
+
+    ori $t0, $zero, 4 // Row count + 1
+
+.MTXMult4x4Row:
+
+        ldv vc8, 0, 0, $a1 // Load the current row of matrix A twice for 2 calculations at a time
+        ldv vc8, 8, 0, $a1
+        
+        ldv vc9, 0, 32, $a1 // Load the fractional part
+        ldv vc9, 8, 32, $a1
+
+    ori $t1, $zero, 2 // Column halves left
+    move $t2, $a2 // Matrix B current column half pointer
+
+.MTXMult4x4ColHalf:
+    
+    addiu $t1, -1
+
+        lqv vc10, 0, 0, $t2 // Load first and second columns and their fractional parts
+        lqv vc11, 0, 32, $t2
+
+    addiu $t2, 16 // Move to next column half
+    
+        vmudl vc12, vc9, vc11, f // Multiply double precision
+        vmadm vc12, vc8, vc11, f
+        vmadn vc13, vc9, vc10, f
+        vmadh vc12, vc8, vc10, f
+
+        vaddc vc13, vc13, vc13, q1 // Accumulate results
+        vadd vc12, vc12, vc12, q1
+        
+        vaddc vc13, vc13, vc13, h2
+        vadd vc12, vc12, vc12, h2
+
+        ssv vc12, 0, 0, $a0 // Store results
+        ssv vc12, 8, 2, $a0 
+        ssv vc13, 0, 32, $a0 
+        ssv vc13, 8, 34, $a0 
+
+    bnez $t1, .MTXMult4x4ColHalf
+    addiu $a0, 4 // Increment C matrix pointer
+
+    addiu $t0, -1 // Decrement row count
+
+    bnez $t0, .MTXMult4x4Row
+    addiu $a1, 8 // Go to next row
+
+    jr $ra
+    nop
+
+//
+// Matrix multiply 4x4 Av -> w
+// 
+// a0 = DMEM addr of matrix A
+// vc8 = Vector v integer part, repeated twice
+// vc9 = Vector v fractional part, repeated twice
+//
+// Returns 
+//
+// vc14 = Vector w integer part, elements 0-4 repeated twice
+// vc15 = Vector w fractional part, elements 0-4 repeated twice
+//
+MTXApply4x4:
+
+    ori $t0, $zero, 2 // Halves left
+
+.MTXApply4x4Half:
+
+        lqv vc10, 0, 0, $a0 // Load first half, int and fractional parts
+        lqv vc11, 0, 32, $a0
+
+        vmudl vc12, vc9, vc11, f // Multiply double precision
+        vmadm vc12, vc8, vc11, f
+        vmadn vc13, vc9, vc10, f
+        vmadh vc12, vc8, vc10, f
+
+    addiu $t0, -1 // Decrement "halves left"
+
+        vaddc vc13, vc13, vc13, q1 // Accumulate results
+        vadd vc12, vc12, vc12, q1
+
+        vaddc vc13, vc13, vc13, h2
+        vadd vc12, vc12, vc12, h2
+
+    beq $t0, $zero, .MTXApply4x4StoreResult // Store result if we're done here
+    nop
+
+    addiu $a0, 0x10 // Go to next half of the matrix
+
+        vmov vc14, 0, vc12, 0 // Store results from first half
+        vmov vc14, 1, vc12, 4
+        
+        vmov vc15, 0, vc13, 0
+    b .MTXApply4x4Half
+        vmov vc15, 1, vc13, 4
+
+.MTXApply4x4StoreResult:
+        vmov vc14, 2, vc12, 0 // Store results from first half
+        vmov vc14, 3, vc12, 4
+        
+        vmov vc15, 2, vc13, 0
+        vmov vc15, 3, vc13, 4
+
+    jr $ra
+    nop

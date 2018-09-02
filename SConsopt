@@ -19,3 +19,10 @@ AddOption(
     metavar = 'CC_PREFIX',
     help = 'MIPS cross compiler prefix'
 )
+
+AddOption(
+    '--oslib-debug', 
+    dest = 'oslib_debug',
+    action = 'store_true',
+    help = 'Generate debug version of os library'
+)

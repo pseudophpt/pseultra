@@ -1,0 +1,98 @@
+/*
+ * pseultra/n64/ucode/src/dma.sx
+ * PSM3D microcode DMA functions
+ * 
+ * (C) pseudophpt 2018
+ */
+
+//
+// DMA Functions (Read = from RDRAM, Write = to RDRAM)
+// 
+// a0 = DRAM address
+// a1 = MEM address
+// a2 = Length
+// 
+
+#define DMA_READ 0
+#define DMA_WRITE 1
+
+#define dma_type $t1
+
+// The only difference between these two DMA functions are the value of dma_type
+DMARead:
+    ori dma_type, $zero, DMA_READ
+    b .DMA
+    nop
+
+DMAWrite:
+    ori dma_type, $zero, DMA_WRITE
+
+#define dram_addr $a0
+#define spmem_addr $a1
+#define dma_len $a2
+
+// Main DMA routine, assumes $at is either DMA_READ or DMA_WRITE
+.DMA:
+
+// The DMA semaphore is not used.
+/* 
+// Acquire the DMA semaphore
+
+#define semaphore $t0
+
+.DMAAcquireSemaphore:
+    mfc0 semaphore, SP_RESERVED
+    bnez semaphore, .DMAAcquireSemaphore
+    nop
+
+#undef semaphore
+*/
+
+// Wait until DMA
+
+#define busy_state $t0
+
+.DMAWait:
+    mfc0 busy_state, DMA_BUSY
+    bnez busy_state, .DMAWait
+    nop
+
+#undef busy_state
+
+// Write attributes for DMA
+
+.DMAAttributes:
+    mtc0 spmem_addr, DMA_CACHE
+    mtc0 dram_addr, DMA_DRAM
+    beq dma_type, DMA_READ, .DMARead
+    nop
+
+.DMAWrite:
+    mtc0 dma_len, DMA_WRITE_LENGTH
+    b .DMAWaitDone
+    nop
+
+.DMARead:
+    mtc0 dma_len, DMA_READ_LENGTH
+
+// Wait until DMA is done
+
+#define busy_state $t0
+
+.DMAWaitDone:
+    mfc0 busy_state, DMA_BUSY
+    bnez busy_state, .DMAWaitDone
+    nop
+
+#undef busy_state
+
+// Finished DMA
+
+.DMADone:
+    jr $ra
+    nop
+
+#undef dma_len 
+#undef spmem_addr
+#undef dram_addr
+#undef dma_type

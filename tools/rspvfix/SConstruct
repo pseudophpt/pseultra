@@ -1,0 +1,4 @@
+SConscript('../SConsnative')
+
+SConscript('../../SConsopt')
+SConscript('./SConscript')

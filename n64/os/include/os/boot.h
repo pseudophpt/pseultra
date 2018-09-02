@@ -15,3 +15,4 @@
  */
 
 #include <os/boot/boot.h>
+#include <os/boot/debug.h>

@@ -36,12 +36,19 @@ typedef unsigned long u32;
 /** @brief Signed 32 bit type */
 typedef signed long s32;
 
+/** @brief Unsigned 64 bit type */
+typedef unsigned long long u64;
+/** @brief Signed 64 bit type */
+typedef signed long long s64;
+
 #endif
 
 /** @brief Void pointer to 0 */
 #define NULL ((void *) 0)
 /** @brief Default OS stack size */
 #define OS_STACK_SIZE 0x4000
+
+#include <os/assert.h>
 
 #include <os/memory.h>
 #include <os/event.h>

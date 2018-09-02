@@ -1,0 +1,84 @@
+/*
+ * pseultra/n64/ucode/src/xbus.sx
+ * PSM3D microcode XBUS functions
+ * 
+ * (C) pseudophpt 2018
+ */
+
+//
+// Push RDP command to XBUS buffer
+// 
+// a0 = pointer to data to push
+// a1 = size of data to push
+//
+// NOTE: Do not push multiple commands at once. This is inefficient in using
+// the XBUS FiFo buffer. Sizes larger than 8 bytes should only be used if 
+// the RDP command being passed is larger than 8 bytes.
+// 
+
+#define data_ptr $a0
+#define data_size $a1
+
+#define xbus_pos $t0
+
+// Beginning of routine, where space in the buffer is checked
+
+#define xbus_max_pos $t1
+#define xbus_pos_after $t2
+
+XBUSPush:
+    mfc0 xbus_pos, CMD_END // Get last command position
+    addu xbus_pos_after, xbus_pos, data_size
+    ori xbus_max_pos, $zero, (xbus_buffer + PSM3D_XBUS_BUFFER_SIZE) // End of XBUS buffer
+    blt xbus_pos_after, xbus_max_pos, .XBUSPushCommand // If we're not at the end of the buffer yet, it's safe to push
+    nop
+
+#undef xbus_pos_after
+#undef xbus_max_pos
+
+// Wait for the RDP to finish processing up to the end of the XBUS buffer, then wrap around
+
+#define rdp_pos $t1
+#define xbus_start $t2
+
+.XBUSWaitBufferWrap:
+    mfc0 rdp_pos, CMD_CURRENT // Get current position
+    bne rdp_pos, xbus_pos, .XBUSWaitBufferWrap // Wait more if the current position is not advanced to the end of the buffer
+    nop
+
+    ori xbus_start, $zero, xbus_buffer // Re-set RDP command buffer positions
+    mtc0 xbus_start, CMD_START
+    mtc0 xbus_start, CMD_END
+
+    move xbus_pos, xbus_start // XBUS position is now at the start
+
+#undef xbus_start
+#undef rdp_pos
+
+// Push the actual command to xbus: assumes the RDP command buffer can be pushed to
+
+#define data $t1
+
+.XBUSPushCommand:
+    lw data, 0(data_ptr)
+    sw data, 0(xbus_pos) // Write command to XBUS buffer
+
+    addiu data_ptr, 4 // Advance positions
+    addiu data_size, -4 
+    bgtz data_size, .XBUSPushCommand // If we're not done pushing data, keep pushing
+    addiu xbus_pos, 4 
+
+#undef data
+
+// Write XBUS position to RDP command register
+
+.XBUSPushDone:
+    mtc0 xbus_pos, CMD_END
+
+#undef xbus_pos
+
+    jr $ra
+    nop
+
+#undef data_size 
+#undef data_ptr 

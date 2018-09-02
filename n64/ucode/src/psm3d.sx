@@ -1,0 +1,267 @@
+/*
+ * pseultra/n64/ucode/src/psm3d.sx
+ * PSM3D microcode - Pseultra Microcode 3D
+ * 
+ * (C) pseudophpt 2018
+ */
+
+/*
+ * NOTES ON THE STATUS WORD
+ *
+ * The PSM3D microcode, and any other microcodes for use with the pseultra lib-
+ * rary, assume the last word of DMEM, 0xFFC, to be zero-initialized on first
+ * run, and is used as a status word. In this microcode, the byte at 0xFFC is
+ * used to specify whether the XBUS buffer has been initialized or not, so
+ * that more tasks can be run while the RDP output produced by previous tasks
+ * are processed by the RDP
+ */
+
+// TODO: Fix pipeline stalls according to Mary Jo's Rules
+
+// N64 Definitions
+#include <n64.sx>
+#include <mips.sx>
+#include <ucode.sx>
+
+#define PSM3D_XBUS_BUFFER_SIZE 0x400
+
+#define PSM3D_STATUS_WORD 0xFFC // Location of the status word in SP DMEM
+#define PSM3D_STATUS_INIT_BYTE (PSM3D_STATUS_WORD + 0) // Has the ucode been initialized?
+#define PSM3D_STATUS_TX_BYTE (PSM3D_STATUS_WORD + 1) // What's the status of the texture engine?
+
+#define PSM3D_MTX_SIZE 4 * 16 * 2
+#define PSM3D_MTX_COUNT 8
+
+#define PSM3D_VTX_SIZE 16
+#define PSM3D_VTX_COUNT 16
+
+#define v2nconst vc0 // Contains powers of 2
+#define v2nconst2 vc1 // Contains powers of 2
+#define nullconst vc2 // Contains 0 
+#define vpsize vc3 // Contains width/2, height/2, 1
+#define vpoff vc4 // Contains x, y, 0
+
+#define v2n_1 e0
+#define v2n_2 e1
+#define v2n_4 e2
+#define v2n_8 e3
+#define v2n_16 e4
+#define v2n_32 e5
+#define v2n_64 e6
+#define v2n_128 e7
+
+#define v2n2_256 e0
+#define v2n2_512 e1
+#define v2n2_1024 e2
+#define v2n2_2048 e3
+#define v2n2_4096 e4
+#define v2n2_8192 e5
+#define v2n2_16384 e6
+#define v2n2_32768 e7
+
+
+#define op_ret b .ExecutionLoop
+
+.global uPSM3DTextStart
+.global uPSM3DTextEnd
+.global uPSM3DDataStart
+.global uPSM3DDataEnd
+
+.set noreorder
+
+//
+// Beginning of task execution
+//
+// At this point, the microcode assumes the header is stored in DMEM
+//
+.align 3 // Align to 64-bit boundaries
+.section .text
+
+uPSM3DTextStart:
+
+//
+// Test if the microcode has been initialized 
+//
+
+#define initialized $t0
+
+.TestInit:
+    lb initialized, PSM3D_STATUS_INIT_BYTE($zero)
+    bnez initialized, .BeginExecution
+
+#undef initialized
+
+//
+// Initialize the XBUS buffer
+//
+
+// TODO: If CMD_CUR == CMD_END, we can reset them both to 0 to prevent the need to do a FiFo wrap-around
+
+.XBUSInit:
+
+#define set_xbus_dmem_dma $t0
+
+    ori set_xbus_dmem_dma, $zero, 0x2 // Use XBUS as a command buffer 
+    mtc0 set_xbus_dmem_dma, CMD_STATUS
+
+#undef set_xbus_dmem_dma
+
+#define xbus_buffer_start $t0
+
+    ori xbus_buffer_start, $zero, %lo(xbus_buffer) // Initialize command buffer positions
+    mtc0 xbus_buffer_start, CMD_START // CMD_START is written to first, since CMD_END begins actual processing
+    mtc0 xbus_buffer_start, CMD_END
+
+#undef xbus_buffer_start
+
+    ori $t0, $zero, 1 // Store 1 to XBUS initialized byte to signify that it has been initialized
+    sb $t0, PSM3D_STATUS_INIT_BYTE($zero)
+
+//
+// Initialize vector unit
+//
+
+.VectorInit:
+        lqv v2nconst, 0, v2n, $zero // Initialize constants
+    
+    ori $t0, $zero, mtx_stack // Store matrix stack pointer
+    sw $t0, %lo(mtx_stack_ptr)($zero)
+    
+        lqv v2nconst2, 0, v2n2, $zero
+        vxor nullconst, v2nconst, v2nconst, f
+
+//
+// Begin execution
+//
+
+#define dl_dram_ptr $s0
+
+.BeginExecution:
+    lw dl_dram_ptr, %lo(header)($zero) // Initialize pointer to the current DRAM location
+
+//
+// Main execution loop
+//
+
+// TODO: Load more than 1 command at a time
+
+.ExecutionLoop:
+    move $a0, dl_dram_ptr // Load display list command
+    ori $a1, $zero, %lo(cmd)
+    jal DMARead // DMA command
+    ori $a2, $zero, 7
+
+    addiu dl_dram_ptr, 8 // Advance display list counter
+
+#define dl_cmd $t0
+#define dl_cmd_handler $t1
+
+    lb dl_cmd, %lo(cmd)($zero) // Get display list command
+
+    bgez dl_cmd, .NormalCommand // If it's not an RDP throughput command (negative), go to the jump table
+    nop
+
+#define cmd_ptr $a0
+#define cmd_len $a1
+
+    andi dl_cmd, 0x3F // Remove 0x80 bit
+    sb dl_cmd, %lo(cmd)($zero)
+
+    ori cmd_ptr, $zero, cmd // Push command
+    jal XBUSPush
+    ori cmd_len, $zero, 8
+
+    op_ret // Back to normal loop
+
+#undef cmd_len
+#undef cmd_ptr
+
+.NormalCommand:
+
+    addu dl_cmd, dl_cmd // Shift left 2
+    addu dl_cmd, dl_cmd 
+
+    lw dl_cmd_handler, %lo(jump_tbl)(dl_cmd) // Get address of handler
+
+    jr dl_cmd_handler // Jump to handler
+    nop
+
+#undef dl_cmd_handler
+#undef dl_cmd
+
+#include "dma.sx"
+#include "xbus.sx"
+#include "mtx.sx"
+
+#include "psm3d/noop.sx"
+#include "psm3d/enddl.sx"
+#include "psm3d/setothermode.sx"
+#include "psm3d/settxmode.sx"
+#include "psm3d/rect.sx"
+#include "psm3d/loadvtx.sx"
+#include "psm3d/loadmtx.sx"
+#include "psm3d/tri.sx"
+#include "psm3d/setvp.sx"
+
+#undef dl_dram_ptr
+
+uPSM3DTextEnd:
+
+.set reorder
+
+//
+// BSS
+//
+
+.section .bss
+
+.align 3
+
+// Current display list command: also used as temp memory for subroutines
+.lcomm cmd, 0x80
+// Vertex cache
+.lcomm vtx_cache, PSM3D_VTX_SIZE * PSM3D_VTX_COUNT
+// Projection matrix
+.lcomm mtx_proj, PSM3D_MTX_SIZE
+// Modeling matrix stack
+.lcomm mtx_stack, PSM3D_MTX_SIZE * PSM3D_MTX_COUNT
+// XBUS buffer
+.lcomm xbus_buffer, PSM3D_XBUS_BUFFER_SIZE
+// Mtx stack pointer
+.lcomm mtx_stack_ptr, 4
+
+//
+// Data
+//
+
+.section .data
+
+uPSM3DDataStart:
+
+// 0x10 bytes of header written to by the task executor
+header: .dword 0, 0
+// OtherMode value
+othermode: .dword 0
+// Jump table
+
+.align 1
+
+jump_tbl:
+.word OPNoop 
+.word OPEndDL
+.word OPSetOtherMode
+.word OPSetTxMode
+.word OPRect
+.word OPLoadVtx
+.word OPLoadMtx
+.word OPTri
+.word OPSetVp
+
+.align 4
+
+v2n:
+.hword 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80
+v2n2:
+.hword 0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000
+
+uPSM3DDataEnd:

@@ -1,0 +1,114 @@
+/*
+ * pseultra/n64/ucode/src/psm3d/loadvtx.sx
+ * PSM3D microcode LoadVtx function
+ * 
+ * (C) pseudophpt 2018
+ */
+
+//////////////////////////////////////////////////////////////////////////////
+//                                                                          // 
+// LoadVtx                                                                  // 
+//                                                                          // 
+// Loads a vertex into the vertex cache                                     // 
+//                                                                          // 
+////////////////////////////////////////////////////////////////////////////// 
+//                                                                          // 
+// FORMAT:                                                                  // 
+//                                                                          // 
+// 05 -- PP CC -- DD DD DD                                                  // 
+//                                                                          // 
+// P: Position in vertex cache to load                                      // 
+// C: Count of vertices to load                                             // 
+// D: DRAM address of vertices                                              // 
+//                                                                          // 
+//////////////////////////////////////////////////////////////////////////////
+
+// Stored vertex format:
+// Xi, Yi, Zi, 0, Xf, Yf, Zf, 0
+
+// TODO: Pre-multiply projection and model matrices
+
+.global OPLoadVtx
+
+OPLoadVtx:
+
+    lb $s4, (%lo(cmd) + 3)($zero) // Load count
+    lb $s5, (%lo(cmd) + 2)($zero) // Load position
+    sll $s5, $s5, 4
+    addiu $s5, %lo(vtx_cache)
+    lw $s6, (%lo(cmd) + 4)($zero) // Load DRAM address
+    
+.VertexLoop:
+
+    move $a0, $s6 // Load from DRAM address
+    ori $a1, $zero, %lo(cmd) // Load into command 
+    jal DMARead 
+    ori $a2, $zero, 15 // Read vertex
+
+/*
+ * Actual shading should be performed here by calculating the dot product of 
+ * the supplied vector normal with the light unit vector to get shading 
+ * values. Here, we're going to assume light unit vector <0, 0, 1>, so that
+ * we can just take the Z component of the normal and use it as a shade value
+ */
+
+        ldv vc8, 0, cmd, $zero // Load integral part into vc8
+        ldv vc8, 8, cmd, $zero
+
+        vmov vc8, 3, v2nconst, 0 // Load 1 into w coordinate
+        vmov vc8, 7, v2nconst, 0
+
+        ldv vc9, 0, cmd + 8, $zero // Load fractional part into vc9
+        ldv vc9, 8, cmd + 8, $zero
+
+        vmov vc9, 3, nullconst, 0 // Load 0 into w coordinate fractopm
+        vmov vc9, 7, nullconst, 0
+    
+    lw $a0, (%lo(mtx_stack_ptr))($zero) // Model matrix multiply 
+    jal MTXApply4x4
+    addiu $a0, -PSM3D_MTX_SIZE
+
+        vor vc8, nullconst, vc14, f // Use output as input to projection
+        vor vc9, nullconst, vc15, f
+
+        sdv vc8, 0, cmd, $zero // Copy second halves
+        ldv vc8, 8, cmd, $zero
+
+        sdv vc9, 0, cmd, $zero
+        ldv vc9, 8, cmd, $zero
+    
+    jal MTXApply4x4
+    ori $a0, $zero, %lo(mtx_proj) // Projection matrix multiply 
+
+        vrcph vc18, 3, vc14, 3 // Get 1/w 
+        vrcpl vc19, 3, vc15, 3
+        vrcph vc18, 3, vc14, 3
+
+        vmudn vc17, vc19, v2nconst, v2n_2 // Shift left 1 for correct 1/w value
+        vmadh vc16, vc18, v2nconst, v2n_2
+        vmadn vc17, nullconst, nullconst, f
+
+        vmudl vc18, vc15, vc17, h3 // Calculate NDC (Normalized Device Coordinates) by multiplying <x, y, z> by 1/w
+        vmadm vc18, vc14, vc17, h3
+        vmadn vc19, vc15, vc16, h3
+        vmadh vc18, vc14, vc16, h3
+
+        vmudn vc17, vc19, vpsize, f // Calculate device coordinates by apply viewport transformations
+        vmadh vc16, vc18, vpsize, f 
+        vmadn vc17, nullconst, nullconst, f 
+
+        vadd vc16, vc16, vpsize, f
+        vadd vc16, vc16, vpoff, f
+
+        sdv vc16, 0, 0, $s5 // Store into vertex cache
+        sdv vc17, 0, 8, $s5
+
+    addiu $s4, -1 // Decrement count left
+
+    addiu $s6, 16
+    bne $s4, $zero, .VertexLoop // Jump back if we're not done 
+    addiu $s5, 16
+
+    op_ret
+    nop
+

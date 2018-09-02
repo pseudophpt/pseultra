@@ -14,5 +14,6 @@
  * This file includes all interface related OS headers
  */
 
+#include <os/interfaces/rsp.h>
 #include <os/interfaces/vi.h>
 #include <os/interfaces/pi.h>
