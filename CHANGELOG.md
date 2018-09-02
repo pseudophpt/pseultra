@@ -2,6 +2,8 @@
 
 ## [Unreleased](https://github.com/pseudophpt/pseultra/compare/master...develop)
 
+## [1.2.0](https://github.com/pseudophpt/pseultra/compare/v1.1.0...v1.2.0) - 2018-09-02
+
 ### Added
 - Debug functionality
 - RSP vector load/store fixer
