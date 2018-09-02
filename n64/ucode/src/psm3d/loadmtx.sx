@@ -43,9 +43,8 @@ OPLoadMtx:
     move $s7, $s6 // Projection matrix pointer as source
 
 .MtxModel:
-    lw $s6, %lo(mtx_stack_ptr)($zero) // Matrix stack pointer as destination
-    addiu $s7, $s6, PSM3D_MTX_SIZE // Make stack space
-    sw $s7, %lo(mtx_stack_ptr)($zero) // Save new stack pointer
+    move $s6, mtx_stack_ptr // Matrix stack pointer as destination
+    addu mtx_stack_ptr, PSM3D_MTX_SIZE // Make stack space
 
     addiu $s7, $s6, -PSM3D_MTX_SIZE // Matrix below as source
 

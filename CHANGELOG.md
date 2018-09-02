@@ -2,6 +2,9 @@
 
 ## [Unreleased](https://github.com/pseudophpt/pseultra/compare/master...develop)
 
+### Changed
+- PSM3D matrix stack pointer to be stored in register instead of DMEM
+
 ## [1.2.0](https://github.com/pseudophpt/pseultra/compare/v1.1.0...v1.2.0) - 2018-09-02
 
 ### Added

@@ -59,6 +59,7 @@
 #define v2n2_16384 e6
 #define v2n2_32768 e7
 
+#define mtx_stack_ptr $s1
 
 #define op_ret b .ExecutionLoop
 
@@ -124,8 +125,7 @@ uPSM3DTextStart:
 .VectorInit:
         lqv v2nconst, 0, v2n, $zero // Initialize constants
     
-    ori $t0, $zero, mtx_stack // Store matrix stack pointer
-    sw $t0, %lo(mtx_stack_ptr)($zero)
+    ori mtx_stack_ptr, $zero, %lo(mtx_stack) // Store matrix stack pointer
     
         lqv v2nconst2, 0, v2n2, $zero
         vxor nullconst, v2nconst, v2nconst, f
@@ -227,8 +227,6 @@ uPSM3DTextEnd:
 .lcomm mtx_stack, PSM3D_MTX_SIZE * PSM3D_MTX_COUNT
 // XBUS buffer
 .lcomm xbus_buffer, PSM3D_XBUS_BUFFER_SIZE
-// Mtx stack pointer
-.lcomm mtx_stack_ptr, 4
 
 //
 // Data
