@@ -61,6 +61,18 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DMtx_t {
     u16 frac [4][4];
 } uPSM3DMtx;
 
+/** @brief Viewport for PSM3D */
+typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
+    /** @brief Half the viewport width */
+    u16 hwidth;
+    /** @brief Half the viewport height */
+    u16 hheight;
+    /** @brief Viewport X offset */
+    u16 xoff;
+    /** @brief Viewport Y offset */
+    u16 yoff;
+} uPSM3DVp;
+
 
 #endif
 
@@ -79,6 +91,8 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DMtx_t {
 #define UCODE_PSM3D_OP_RECT 0x04
 #define UCODE_PSM3D_OP_LOAD_VTX 0x05
 #define UCODE_PSM3D_OP_LOAD_MTX 0x06
+#define UCODE_PSM3D_OP_TRI 0x07
+#define UCODE_PSM3D_OP_SET_VP 0x08
 
 /*
  * Operation macros
@@ -206,6 +220,37 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DMtx_t {
         _FMT(addr, 0, 24)\
     }
 
+#define usPSM3DTri(vtx1, vtx2, vtx3) \
+    {\
+        _FMT(UCODE_PSM3D_OP_TRI, 24, 8) |\
+        _FMT(vtx1, 16, 8) |\
+        _FMT(vtx2, 8, 8) |\
+        _FMT(vtx3, 0, 8)\
+            ,\
+        0\
+    }
+#define uPSM3DTri(dl, vtx1, vtx2, vtx3) \
+    *((dl) ++) = (uPSM3DDispCmd) {\
+        _FMT(UCODE_PSM3D_OP_TRI, 24, 8) |\
+        _FMT(vtx1, 16, 8) |\
+        _FMT(vtx2, 8, 8) |\
+        _FMT(vtx3, 0, 8)\
+            ,\
+        0\
+    }
+
+#define usPSM3DSetVp(vp) \
+    {\
+        _FMT(UCODE_PSM3D_OP_SET_VP, 24, 8),\
+            \
+        _FMT(vp, 0, 24)\
+    }
+#define uPSM3DSetVp(dl, vp) \
+    *((dl) ++) = (uPSM3DDispCmd) {\
+        _FMT(UCODE_PSM3D_OP_SET_VP, 24, 8),\
+            \
+        _FMT(vp, 0, 24)\
+    }
 
 #define UCODE_PSM3D_BLEND_MODE_M1A_IN 0
 #define UCODE_PSM3D_BLEND_MODE_M1A_MEM 1

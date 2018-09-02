@@ -1,0 +1,42 @@
+/*
+ * pseultra/n64/ucode/src/psm3d/SetVp.sx
+ * PSM3D microcode SetVp function
+ * 
+ * (C) pseudophpt 2018
+ */
+
+//////////////////////////////////////////////////////////////////////////////
+//                                                                          // 
+// SetVp                                                                    // 
+//                                                                          // 
+// Sets the viewport parameters                                             // 
+//                                                                          // 
+////////////////////////////////////////////////////////////////////////////// 
+//                                                                          // 
+// FORMAT:                                                                  // 
+//                                                                          // 
+// 05 -- -- -- -- DD DD DD                                                  // 
+//                                                                          // 
+// D: DRAM address of viewport                                              // 
+//                                                                          // 
+//////////////////////////////////////////////////////////////////////////////
+
+
+.global OPSetVp
+
+OPSetVp:
+
+    lw $a0, (%lo(cmd) + 4)($zero) // Load DRAM address
+    ori $a1, $zero, %lo(cmd) // Load into command 
+    jal DMARead 
+    ori $a2, $zero, 7 // Read viewport info
+
+        llv vpsize, 0, cmd, $zero // VpSize = hwidth, hheight, 1
+        vmov vpsize, 2, v2nconst, v2n_1
+        
+        llv vpoff, 0, cmd + 4, $zero // VpOff = x, y, 0
+        vmov vpoff, 2, nullconst, 0
+
+    op_ret
+    nop
+

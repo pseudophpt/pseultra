@@ -23,6 +23,11 @@
 //                                                                          // 
 //////////////////////////////////////////////////////////////////////////////
 
+// Stored vertex format:
+// Xi, Yi, Zi, 0, Xf, Yf, Zf, 0
+
+// TODO: Pre-multiply projection and model matrices
+
 .global OPLoadVtx
 
 OPLoadVtx:
@@ -30,6 +35,7 @@ OPLoadVtx:
     lb $s4, (%lo(cmd) + 3)($zero) // Load count
     lb $s5, (%lo(cmd) + 2)($zero) // Load position
     sll $s5, $s5, 4
+    addiu $s5, %lo(vtx_cache)
     lw $s6, (%lo(cmd) + 4)($zero) // Load DRAM address
     
 .VertexLoop:
@@ -74,6 +80,29 @@ OPLoadVtx:
     jal MTXApply4x4
     ori $a0, $zero, %lo(mtx_proj) // Projection matrix multiply 
 
+        vrcph vc18, 3, vc14, 3 // Get 1/w 
+        vrcpl vc19, 3, vc15, 3
+        vrcph vc18, 3, vc14, 3
+
+        vmudn vc17, vc19, v2nconst, v2n_2 // Shift left 1 for correct 1/w value
+        vmadh vc16, vc18, v2nconst, v2n_2
+        vmadn vc17, nullconst, nullconst, f
+
+        vmudl vc18, vc15, vc17, h3 // Calculate NDC (Normalized Device Coordinates) by multiplying <x, y, z> by 1/w
+        vmadm vc18, vc14, vc17, h3
+        vmadn vc19, vc15, vc16, h3
+        vmadh vc18, vc14, vc16, h3
+
+        vmudn vc17, vc19, vpsize, f // Calculate device coordinates by apply viewport transformations
+        vmadh vc16, vc18, vpsize, f 
+        vmadn vc17, nullconst, nullconst, f 
+
+        vadd vc16, vc16, vpsize, f
+        vadd vc16, vc16, vpoff, f
+
+        sdv vc16, 0, 0, $s5 // Store into vertex cache
+        sdv vc17, 0, 8, $s5
+
     addiu $s4, -1 // Decrement count left
 
     addiu $s6, 16
@@ -82,5 +111,4 @@ OPLoadVtx:
 
     op_ret
     nop
-
 
