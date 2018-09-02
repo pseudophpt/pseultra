@@ -64,7 +64,7 @@ OPLoadVtx:
         vmov vc9, 3, nullconst, 0 // Load 0 into w coordinate fractopm
         vmov vc9, 7, nullconst, 0
     
-    lw $a0, (%lo(mtx_stack_ptr))($zero) // Model matrix multiply 
+    move $a0, mtx_stack_ptr // Model matrix multiply 
     jal MTXApply4x4
     addiu $a0, -PSM3D_MTX_SIZE
 
