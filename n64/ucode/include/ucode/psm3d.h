@@ -93,6 +93,7 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
 #define UCODE_PSM3D_OP_LOAD_MTX 0x06
 #define UCODE_PSM3D_OP_TRI 0x07
 #define UCODE_PSM3D_OP_SET_VP 0x08
+#define UCODE_PSM3D_OP_POP_MTX 0x09
 
 /*
  * Operation macros
