@@ -1,0 +1,28 @@
+/*
+ * pseultra/n64/ucode/src/psm3d/loadmtx.sx
+ * PSM3D microcode PopMtx functions
+ * 
+ * (C) pseudophpt 2018
+ */
+
+//////////////////////////////////////////////////////////////////////////////
+//                                                                          // 
+// PopMtx                                                                   // 
+//                                                                          // 
+// Pops a matrix from the modelview stack                                   // 
+//                                                                          // 
+////////////////////////////////////////////////////////////////////////////// 
+//                                                                          // 
+// FORMAT:                                                                  // 
+//                                                                          // 
+// 08 -- -- -- -- -- -- --                                                  // 
+//                                                                          // 
+//////////////////////////////////////////////////////////////////////////////
+
+
+.global OPPopMtx
+
+OPPopMtx:
+
+    op_ret // Return
+    addiu mtx_stack_ptr, -PSM3D_MTX_SIZE    

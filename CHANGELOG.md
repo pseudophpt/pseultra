@@ -2,6 +2,9 @@
 
 ## [Unreleased](https://github.com/pseudophpt/pseultra/compare/master...develop)
 
+### Added
+- PSM3D PopMtx command
+
 ### Changed
 - PSM3D matrix stack pointer to be stored in register instead of DMEM
 

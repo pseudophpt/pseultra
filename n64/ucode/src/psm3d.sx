@@ -202,6 +202,7 @@ uPSM3DTextStart:
 #include "psm3d/loadmtx.sx"
 #include "psm3d/tri.sx"
 #include "psm3d/setvp.sx"
+#include "psm3d/popmtx.sx"
 
 #undef dl_dram_ptr
 
@@ -254,6 +255,7 @@ jump_tbl:
 .word OPLoadMtx
 .word OPTri
 .word OPSetVp
+.word OPPopMtx
 
 .align 4
 

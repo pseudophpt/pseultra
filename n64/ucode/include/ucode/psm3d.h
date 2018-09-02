@@ -253,6 +253,9 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
         _FMT(vp, 0, 24)\
     }
 
+#define usPSM3DPopMtx() { (UCODE_PSM3D_OP_POP_MTX << 24), 0 } 
+#define uPSM3DPopMtx(dl) *((dl) ++) = (uPSM3DDispCmd) { _FMT(UCODE_PSM3D_OP_POP_MTX, 24, 8), 0 } 
+
 #define UCODE_PSM3D_BLEND_MODE_M1A_IN 0
 #define UCODE_PSM3D_BLEND_MODE_M1A_MEM 1
 #define UCODE_PSM3D_BLEND_MODE_M1A_BLEND 2
