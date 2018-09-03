@@ -522,6 +522,7 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
 
 #define usPSM3DSyncFull() \
     usPSM3DRdpThrough(\
+        dl,\
         UCODE_RDP_OPC_Sync_Full,\
         0,\
         0\
@@ -541,6 +542,7 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
     )
 #define uPSM3DSyncPipe(dl) \
     uPSM3DRdpThrough(\
+        dl,\
         UCODE_RDP_OPC_Sync_Pipe,\
         0,\
         0\
@@ -554,6 +556,7 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
     )
 #define uPSM3DSyncLoad(dl) \
     uPSM3DRdpThrough(dl, \
+        dl,\
         UCODE_RDP_OPC_Sync_Load,\
         0,\
         0\
