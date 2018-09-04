@@ -1,6 +1,6 @@
 /*
- event related OS headers* pseultra/n64/math/src/mathf.c
- * Floation point operations
+ * pseultra/n64/math/src/mathf.c
+ * Floating point operations
  * 
  * (C) pseudophpt 2018 
  */

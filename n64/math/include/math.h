@@ -18,5 +18,6 @@
 #define MATH_H_GUARD
 
 #include <math/mathf.h>
+#include <math/maths.h>
 
 #endif

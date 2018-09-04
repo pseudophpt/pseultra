@@ -8,11 +8,13 @@ mips_env.Append(CPPPATH = ['./include', './../../include'])
 
 includes = [
     './include/math.h',
-    './include/math/mathf.h'
+    './include/math/mathf.h',
+    './include/math/maths.h'
 ]
 
 sources = [
-    './src/mathf.c'
+    './src/mathf.c',
+    './src/maths.c'
 ] + includes
 
 psemath = mips_env.Library(
