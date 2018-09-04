@@ -5,6 +5,7 @@
 ### Added
 - PSM3D PopMtx command
 - Newton-Raphson iteration for triangle edge coefficients 
+- Math library
 
 ### Changed
 - PSM3D matrix stack pointer to be stored in register instead of DMEM
