@@ -19,29 +19,7 @@
 
 #include <n64.h>
 
-#ifndef __asm__
-
-/** @brief Unsigned 8 bit type */
-typedef unsigned char u8;
-/** @brief Signed 8 bit type */
-typedef signed char s8;
-
-/** @brief Unsigned 16 bit type */
-typedef unsigned short u16;
-/** @brief Signed 16 bit type */
-typedef signed short s16;
-
-/** @brief Unsigned 32 bit type */
-typedef unsigned long u32;
-/** @brief Signed 32 bit type */
-typedef signed long s32;
-
-/** @brief Unsigned 64 bit type */
-typedef unsigned long long u64;
-/** @brief Signed 64 bit type */
-typedef signed long long s64;
-
-#endif
+#include <ints.h>
 
 /** @brief Void pointer to 0 */
 #define NULL ((void *) 0)
