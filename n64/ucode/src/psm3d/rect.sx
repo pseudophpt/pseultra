@@ -44,9 +44,6 @@
 //                                                                          // 
 //////////////////////////////////////////////////////////////////////////////
 
-#define TXRECT_NEWTRAPH 0 // Perform Newton-Raphson iteration on reciprocal result. This wastes IMEM and some cycles but creates more accurate rectangles. WARNING: WILL BE REMOVED SOON
-#define TXRECT_NEWTRAPH_ITERATIONS 1 // How many Newton-Raphson iterations to perform
-
 .global OPRect
 
 OPRect:
