@@ -11,7 +11,7 @@
  * @date 2 Sep 2018
  * @author pseudophpt
  *
- * This file includes all event related OS headers
+ * This file includes all floating point operation headers 
  */
 
 #ifndef MATH_MATHF_H_GUARD
@@ -29,5 +29,10 @@ extern float mathFMod (float in, float mod);
 extern float mathFSin (float in);
 #endif
 
+#ifdef __asm__
+.extern mathFCos
+#else
+extern float mathFCos (float in);
+#endif
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * pseultra/n64/math/src/mathf.c
+ event related OS headers* pseultra/n64/math/src/mathf.c
  * Floation point operations
  * 
  * (C) pseudophpt 2018 
@@ -20,6 +20,8 @@
 #define MATH_MATHF_4_BY_PI 1.27323954474
 /** @brief Constant describing 4 divided by pi squared */
 #define MATH_MATHF_4_BY_PI_SQUARED 0.40528473456
+/** @brief Constant describing pi */
+#define MATH_MATHF_PI 3.14159265359 
 
 /**
  * @brief Performs a modulo operation on two floating point numbers 
@@ -45,13 +47,39 @@ mathFMod
  * @date 2 Sep 2018
  * @author pseudophpt
  *
- * This function performs a fast sine calculation on a floating point number number in the range [-PI, PI] in radians, and returns the floating point result. It uses a polynomial to quickly approinimate the value of sine.
+ * This function performs a fast sine calculation on a floating point number number in the range [-PI, PI] in radians, and returns the floating point result. It uses a polynomial to quickly approximate the value of sine.
  *
  * @note Using this function with a number out of the range [-PI, PI] will be inaccurate due to the polynomial calculation
  */
 float
 mathFSin
 (float in) {
+    // Quadratic approximation, symmetric across origin
     return (MATH_MATHF_4_BY_PI * in) + (((in < 0.0) ? 1 : -1) * MATH_MATHF_4_BY_PI_SQUARED * in * in);
 }
 
+/**
+ * @brief Performs a cosine calculation on a floating point number 
+ * @param[in] in Floating point number to calculate cosine of (in radians)
+ * @return Result of cosine calculation
+ * @date 4 Sep 2018
+ * @author pseudophpt
+ *
+ * This function performs a fast cosine calculation on a floating point number number in the range [-PI, PI] in radians, and returns the floating point result. It uses a polynomial to quickly approximate the value of cosine.
+ *
+ * @note Using this function with a number out of the range [-PI, PI] will be inaccurate due to the polynomial calculation
+ */
+float
+mathFCos
+(float in) {
+    // Change to sine input
+    in = (MATH_MATHF_PI / 2) - in;
+    
+    // Wrap around if necessary
+    if (in > MATH_MATHF_PI) {
+        in -= (MATH_MATHF_PI * 2);
+    }
+
+    // Return sine approximation
+    return mathFSin(in);
+}
