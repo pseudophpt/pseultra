@@ -35,7 +35,7 @@ OPSetVp:
         vmov vpsize, 2, v2nconst, v2n_1
         
         llv vpoff, 0, cmd + 4, $zero // VpOff = x, y, 0
-        vmov vpoff, 2, nullconst, 0
+        vmov vpoff, 2, nullconst, e0
 
     op_ret
     nop

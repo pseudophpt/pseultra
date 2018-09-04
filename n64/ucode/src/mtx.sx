@@ -104,19 +104,19 @@ MTXApply4x4:
 
     addiu $a0, 0x10 // Go to next half of the matrix
 
-        vmov vc14, 0, vc12, 0 // Store results from first half
-        vmov vc14, 1, vc12, 4
+        vmov vc14, 0, vc12, e0 // Store results from first half
+        vmov vc14, 1, vc12, e4
         
-        vmov vc15, 0, vc13, 0
+        vmov vc15, 0, vc13, e0
     b .MTXApply4x4Half
-        vmov vc15, 1, vc13, 4
+        vmov vc15, 1, vc13, e4
 
 .MTXApply4x4StoreResult:
-        vmov vc14, 2, vc12, 0 // Store results from first half
-        vmov vc14, 3, vc12, 4
+        vmov vc14, 2, vc12, e0 // Store results from first half
+        vmov vc14, 3, vc12, e4
         
-        vmov vc15, 2, vc13, 0
-        vmov vc15, 3, vc13, 4
+        vmov vc15, 2, vc13, e0
+        vmov vc15, 3, vc13, e4
 
     jr $ra
     nop

@@ -10,6 +10,7 @@
 
 ### Fixed
 - Bug in sign extension of RSP load/store offsets
+- Bug in VMOV instructions using incorrect element index type
 
 ## [1.2.0](https://github.com/pseudophpt/pseultra/compare/v1.1.0...v1.2.0) - 2018-09-02
 

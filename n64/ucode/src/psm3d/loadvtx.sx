@@ -56,13 +56,13 @@ OPLoadVtx:
         ldv vc8, 8, cmd, $zero
 
         vmov vc8, 3, v2nconst, 0 // Load 1 into w coordinate
-        vmov vc8, 7, v2nconst, 0
-
+        vmov vc8, 7, v2nconst, 0 
+        
         ldv vc9, 0, cmd + 8, $zero // Load fractional part into vc9
         ldv vc9, 8, cmd + 8, $zero
 
-        vmov vc9, 3, nullconst, 0 // Load 0 into w coordinate fractopm
-        vmov vc9, 7, nullconst, 0
+        vmov vc9, 3, nullconst, e0 // Load 0 into w coordinate fractopm
+        vmov vc9, 7, nullconst, e0
     
     move $a0, mtx_stack_ptr // Model matrix multiply 
     jal MTXApply4x4
