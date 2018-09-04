@@ -4,4 +4,6 @@ SConscript('./SConsnative')
 # Call build scripts
 SConscript('./makerom/SConscript')
 SConscript('./bootcsum/SConscript')
+SConscript('./rspvfix/SConscript')
+SConscript('./genlut/SConscript')
 SConscript('./bootcsumr/SConscript')

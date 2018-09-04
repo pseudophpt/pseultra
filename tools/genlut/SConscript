@@ -1,0 +1,29 @@
+Import('native_env')
+
+path = Dir('.').abspath
+
+native_env.Append(CCFLAGS = '-lm', CPPPATH = [path + '/include', path + '/../../include'])
+
+genlut = native_env.Program(
+    target = path + '/bin/genlut', 
+    source = [
+        path + '/src/genlut.c'
+    ],
+    LIBS = 'm'
+)
+
+prefix = native_env.GetOption('prefix')
+
+prefix_bin = prefix + '/bin'
+prefix_include = prefix + '/include'
+prefix_lib = prefix + '/lib'
+
+native_env.Install(prefix_bin, [genlut])
+native_env.Install(prefix_include, [])
+native_env.Install(prefix_lib, [])
+
+install_bin = native_env.Alias('install-bin', prefix_bin)
+install_lib = native_env.Alias('install-lib', prefix_lib)
+install_include = native_env.Alias('install-include', prefix_include)
+
+native_env.Alias('install', [install_bin, install_lib, install_include])
