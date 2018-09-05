@@ -21,9 +21,6 @@
 //                                                                          // 
 //////////////////////////////////////////////////////////////////////////////
 
-#define TRI_NEWTRAPH 0 // Perform Newton-Raphson iteration on reciprocal result. This wastes IMEM and some cycles but creates more accurate triangles.
-#define TRI_NEWTRAPH_ITERATIONS 4 // How many Newton-Raphson iterations to perform
-
 .global OPTri
 
 // There has to be a way to improve this, it's so fucking long.
@@ -178,6 +175,7 @@ OPTri:
     nop
 
 // Little subroutine to calculate Dx/Dy
+
 CalcTriDxDy:
         vrcph vc24, 1, vc22, 1
         vrcpl vc25, 1, nullconst, 1 // Calculate 1 / dy (dx stays in this register)
@@ -187,35 +185,6 @@ CalcTriDxDy:
         vmadh vc28, vc24, v2nconst, v2n_2        
         vmadn vc29, nullconst, nullconst, f 
 
-/*#if TRI_NEWTRAPH
-    ori $t0, $zero, TRI_NEWTRAPH_ITERATIONS // Perform iterations
-    vor vc30, nullconst, v2nconst, v2n_2 // Save 2
-
-
-.TriNewtraph:
-        vmudl vc27, vc29, vc23, f // Calculate XR
-        vmadm vc27, vc28, vc23, f
-        vmadn vc27, vc29, vc22, f
-        vmadh vc26, vc28, vc22, f
-
-        vsubc vc27, nullconst, vc27, f // Get 2 - XR
-        vsub vc26, vc30, vc26, f 
-
-        vmudl vc25, vc27, vc29, f // Calculate R(2 - XR)
-        vmadm vc25, vc26, vc29, f
-        vmadn vc25, vc27, vc28, f
-        vmadh vc24, vc26, vc28, f
-
-//        vmudn vc29, vc25, v2nconst, v2n_2 // Shift left 1 for correct point position 
-//        vmadm vc28, vc24, v2nconst, v2n_2        
-//        vmadn vc29, nullconst, nullconst, f 
-    
-    addiu $t0, -1 // Decrement counter
-    bnez $t0, .TriNewtraph // Branch back if we're done
-    nop
-
-#endif
-*/
         vmudm vc26, vc22, vc29, h1 // Calculate DxLDy
         vmadh vc26, vc22, vc28, h1 
         vmadn vc27, nullconst, nullconst, f
