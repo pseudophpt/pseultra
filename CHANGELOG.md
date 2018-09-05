@@ -9,6 +9,7 @@
 
 ### Changed
 - PSM3D matrix stack pointer to be stored in register instead of DMEM
+- Vertex cache (x, y) pair is now aligned to the integer, saving calculation time
 
 ### Fixed
 - Bug in sign extension of RSP load/store offsets

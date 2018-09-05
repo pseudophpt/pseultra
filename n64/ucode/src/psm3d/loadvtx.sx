@@ -24,7 +24,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 // Stored vertex format:
-// Xi, Yi, Zi, 0, Xf, Yf, Zf, 0
+// X, Y, Zi, Zf
 
 // TODO: Pre-multiply projection and model matrices
 
@@ -34,7 +34,7 @@ OPLoadVtx:
 
     lb $s4, (%lo(cmd) + 3)($zero) // Load count
     lb $s5, (%lo(cmd) + 2)($zero) // Load position
-    sll $s5, $s5, 4
+    sll $s5, 3
     addiu $s5, %lo(vtx_cache)
     lw $s6, (%lo(cmd) + 4)($zero) // Load DRAM address
     
@@ -55,8 +55,8 @@ OPLoadVtx:
         ldv vc8, 0, cmd, $zero // Load integral part into vc8
         ldv vc8, 8, cmd, $zero
 
-        vmov vc8, 3, v2nconst, 0 // Load 1 into w coordinate
-        vmov vc8, 7, v2nconst, 0 
+        vmov vc8, 3, v2nconst, e0 // Load 1 into w coordinate
+        vmov vc8, 7, v2nconst, e0 
         
         ldv vc9, 0, cmd + 8, $zero // Load fractional part into vc9
         ldv vc9, 8, cmd + 8, $zero
@@ -97,17 +97,22 @@ OPLoadVtx:
         vmadh vc16, vc18, vpsize, f 
         vmadn vc17, nullconst, nullconst, f 
 
+        vmudn vc18, vc17, v2nconst, v2n_2 // Get high bit for rounding
+        vmadm vc18, nullconst, nullconst, f
+
+        vadd vc16, vc16, vc18, f // Add rounded bit
         vadd vc16, vc16, vpsize, f
         vadd vc16, vc16, vpoff, f
 
-        sdv vc16, 0, 0, $s5 // Store into vertex cache
-        sdv vc17, 0, 8, $s5
+        slv vc16, 0, 0, $s5 // Store into vertex cache
+        ssv vc16, 2, 4, $s5
+        ssv vc17, 2, 6, $s5
 
     addiu $s4, -1 // Decrement count left
 
     addiu $s6, 16
     bne $s4, $zero, .VertexLoop // Jump back if we're not done 
-    addiu $s5, 16
+    addiu $s5, 8
 
     op_ret
     nop

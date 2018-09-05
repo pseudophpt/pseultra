@@ -119,7 +119,7 @@ OPRect:
     sll $t2, $t1, 4 // Shift left 4 to correct boundary
     and $t2, $t0 // Mask to remove 0x04 command byte
     
-        vsubc vc16, vc17, vc16, f // Calculate dt, ds
+        vsub vc16, vc17, vc16, f // Calculate dt, ds
     
     sw $t2, (%lo(cmd) + 12)($zero) // Store in now unused part of cmd block
     andi $t1, 0x0fff // Mask out additional x nibble
@@ -127,7 +127,7 @@ OPRect:
     
         llv vc18, 0, cmd + 12, $zero // Load top left x, y
 
-        vsubc vc18, vc19, vc18, f // Calculate dx, dy
+        vsub vc18, vc19, vc18, f // Calculate dx, dy
 
 #if TXRECT_NEWTRAPH   
     ori $t0, $zero, TXRECT_NEWTRAPH_ITERATIONS // Load amount of iterations

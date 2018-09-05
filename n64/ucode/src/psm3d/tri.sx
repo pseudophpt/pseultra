@@ -21,7 +21,7 @@
 //                                                                          // 
 //////////////////////////////////////////////////////////////////////////////
 
-#define TRI_NEWTRAPH 1 // Perform Newton-Raphson iteration on reciprocal result. This wastes IMEM and some cycles but creates more accurate triangles.
+#define TRI_NEWTRAPH 0 // Perform Newton-Raphson iteration on reciprocal result. This wastes IMEM and some cycles but creates more accurate triangles.
 #define TRI_NEWTRAPH_ITERATIONS 4 // How many Newton-Raphson iterations to perform
 
 .global OPTri
@@ -31,62 +31,35 @@
 
 OPTri:
     lb $t0, (%lo(cmd) + 1)($zero) // Get vertex cache offset
-    sll $t0, $t0, 4 
-        
-        ldv vc16, 0, vtx_cache, $t0 // Load integral and fractional parts of vtx 1
+    sll $t0, 3 
+    lh $t1, (%lo(vtx_cache) + 2)($t0) // Get y coordinate
 
-    lh $t1, (%lo(vtx_cache) + 2)($t0) // Load y coordinate integer 1
-    sll $t1, $t1, 16 
-    lh $t4, (%lo(vtx_cache) + 10)($t0) // Load y coordinate fraction 1
-        
-        ldv vc17, 0, vtx_cache + 8, $t0
+        ldv vc16, 0, vtx_cache, $t0 // Load vertex
 
-    andi $t4, 0xffff
-    addu $t1, $t1, $t4 // Combine integer and fraction
     lb $t0, (%lo(cmd) + 2)($zero) // Get vertex cache offset
-    sll $t0, $t0, 4 
-        
-        ldv vc18, 0, vtx_cache, $t0 // Load integral and fractional parts of vtx 2
-    
-    lh $t2, (%lo(vtx_cache) + 2)($t0) // Load y coordinate integer 2
-    sll $t2, $t2, 16 
-    lh $t4, (%lo(vtx_cache) + 10)($t0) // Load y coordinate fraction 2
-   
-        ldv vc19, 0, vtx_cache + 8, $t0
+    sll $t0, 3 
+    lh $t2, (%lo(vtx_cache) + 2)($t0) // Get y coordinate
 
-    andi $t4, 0xffff
-    addu $t2, $t2, $t4 // Combine integer and fraction
+        ldv vc18, 0, vtx_cache, $t0 // Load vertex
+
     lb $t0, (%lo(cmd) + 3)($zero) // Get vertex cache offset
-    sll $t0, $t0, 4 
-        
-        ldv vc20, 0, vtx_cache, $t0 // Load integral and fractional parts of vtx 3
+    sll $t0, 3 
+    lh $t3, (%lo(vtx_cache) + 2)($t0) // Get y coordinate
 
-    lh $t3, (%lo(vtx_cache) + 2)($t0) // Load y coordinate integer 3
-    sll $t3, $t3, 16 
-    lh $t4, (%lo(vtx_cache) + 10)($t0) // Load y coordinate fraction 3
-    
-        ldv vc21, 0, vtx_cache + 8, $t0
-
-    andi $t4, 0xffff
-    addu $t3, $t3, $t4 // Combine integer and fraction
-    
-        vnop 0, 0, 0, 0
+        ldv vc20, 0, vtx_cache, $t0 // Load vertex
 
     bge $t3, $t1, .NoSwapXZ // if (x > z) swap(x, z)
     nop
 
         vor vc22, nullconst, vc16, f // Swap X and Z
-        vor vc23, nullconst, vc17, f 
     
     or $t4, $zero, $t1 // disgosten
 
         vor vc16, nullconst, vc20, f 
-        vor vc17, nullconst, vc21, f 
         
     or $t1, $zero, $t3
     
         vor vc20, nullconst, vc22, f 
-        vor vc21, nullconst, vc23, f 
 
     or $t3, $zero, $t4
 
@@ -96,17 +69,14 @@ OPTri:
     nop
     
         vor vc22, nullconst, vc16, f // Swap X and Y
-        vor vc23, nullconst, vc17, f 
 
     or $t4, $zero, $t1
 
         vor vc16, nullconst, vc18, f 
-        vor vc17, nullconst, vc19, f 
         
     or $t1, $zero, $t2
     
         vor vc18, nullconst, vc22, f 
-        vor vc19, nullconst, vc23, f 
 
     or $t2, $zero, $t4
 
@@ -116,17 +86,14 @@ OPTri:
     nop
     
         vor vc22, nullconst, vc20, f // Swap Y and Z
-        vor vc23, nullconst, vc21, f 
 
     or $t4, $zero, $t2
 
         vor vc20, nullconst, vc18, f 
-        vor vc21, nullconst, vc19, f 
         
     or $t2, $zero, $t3
 
         vor vc18, nullconst, vc22, f 
-        vor vc19, nullconst, vc23, f 
 
     or $t3, $zero, $t4
 
@@ -136,15 +103,14 @@ OPTri:
     sb $t0, (%lo(cmd))($zero)
 
         ssv vc18, 0, cmd + 0x8, $zero // Store XL, int
-        ssv vc19, 0, cmd + 0xa, $zero // Store XL, frac
+        ssv nullconst, 0, cmd + 0xa, $zero // Store XL, frac
         
         ssv vc16, 0, cmd + 0x10, $zero // Store XH, int
-        ssv vc17, 0, cmd + 0x12, $zero // Store XH, frac
+        ssv nullconst, 0, cmd + 0x12, $zero // Store XH, frac
         
         ssv vc16, 0, cmd + 0x18, $zero // Store XM, int
-        ssv vc17, 0, cmd + 0x1a, $zero // Store XM, frac
+        ssv nullconst, 0, cmd + 0x1a, $zero // Store XM, frac
 
-        vsubc vc23, vc21, vc19, f // Calculate v3 - v2
         vsub vc22, vc20, vc18, f
         
     jal CalcTriDxDy // Calculate DxLDy
@@ -153,7 +119,6 @@ OPTri:
         ssv vc26, 0, cmd + 0xc, $zero // Store int
         ssv vc27, 0, cmd + 0xe, $zero // Store frac
 
-        vsubc vc23, vc21, vc17, f // Calculate v3 - v1
         vsub vc22, vc20, vc16, f
 
     jal CalcTriDxDy // Calculate DxHDy
@@ -162,7 +127,6 @@ OPTri:
         ssv vc26, 0, cmd + 0x14, $zero // Store int
         ssv vc27, 0, cmd + 0x16, $zero // Store frac
 
-        vsubc vc23, vc19, vc17, f // Calculate v2 - v1
         vsub vc22, vc18, vc16, f
         
     jal CalcTriDxDy // Calculate DxMDy
@@ -171,16 +135,13 @@ OPTri:
         ssv vc26, 0, cmd + 0x1c, $zero // Store int
         ssv vc27, 0, cmd + 0x1e, $zero // Store frac
 
+        // TODO: Make it 1 operation
+
         vmov vc26, 0, vc16, e1 // Load Y coordinates into one vector
         vmov vc26, 1, vc18, e1 
         vmov vc26, 2, vc20, e1 
 
-        vmov vc27, 0, vc17, e1 
-        vmov vc27, 1, vc19, e1 
-        vmov vc27, 2, vc21, e1 
-
-        vmudn vc27, vc27, v2nconst, v2n_4 // Shift left 2 into s11.2 form
-        vmadh vc26, vc26, v2nconst, v2n_4
+        vmudh vc26, vc26, v2nconst, v2n_4
 
         vadd vc27, nullconst, v2nconst2, v2n2_16384 // vc27 = 0x3FFF
         vsub vc27, vc27, v2nconst, v2n_1
@@ -218,15 +179,15 @@ OPTri:
 
 // Little subroutine to calculate Dx/Dy
 CalcTriDxDy:
-        vrcph vc24, 1, vc22, 1 // Calculate 1 / dy (dx stays in this register)
-        vrcpl vc25, 1, vc23, 1
         vrcph vc24, 1, vc22, 1
+        vrcpl vc25, 1, nullconst, 1 // Calculate 1 / dy (dx stays in this register)
+        vrcph vc24, 1, nullconst, 0 
 
         vmudn vc29, vc25, v2nconst, v2n_2 // Shift left 1 for correct point position 
-        vmadm vc28, vc24, v2nconst, v2n_2        
+        vmadh vc28, vc24, v2nconst, v2n_2        
         vmadn vc29, nullconst, nullconst, f 
 
-#if TRI_NEWTRAPH
+/*#if TRI_NEWTRAPH
     ori $t0, $zero, TRI_NEWTRAPH_ITERATIONS // Perform iterations
     vor vc30, nullconst, v2nconst, v2n_2 // Save 2
 
@@ -254,11 +215,10 @@ CalcTriDxDy:
     nop
 
 #endif
- 
-        vmudl vc26, vc23, vc29, h1 // Calculate DxLDy
-        vmadm vc26, vc22, vc29, h1 
-        vmadn vc27, vc23, vc28, h1 
+*/
+        vmudm vc26, vc22, vc29, h1 // Calculate DxLDy
         vmadh vc26, vc22, vc28, h1 
+        vmadn vc27, nullconst, nullconst, f
 
     jr $ra
     nop
