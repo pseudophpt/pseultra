@@ -16,7 +16,7 @@
 //
 MTXMult4x4:
 
-    ori $t0, $zero, 4 // Row count + 1
+    ori $v0, $zero, 4 // Row count + 1
 
 .MTXMult4x4Row:
 
@@ -26,17 +26,17 @@ MTXMult4x4:
         ldv vc9, 0, 32, $a1 // Load the fractional part
         ldv vc9, 8, 32, $a1
 
-    ori $t1, $zero, 2 // Column halves left
-    move $t2, $a2 // Matrix B current column half pointer
+    ori $v1, $zero, 2 // Column halves left
+    move $a3, $a2 // Matrix B current column half pointer
 
 .MTXMult4x4ColHalf:
     
-    addiu $t1, -1
+    addiu $v1, -1
 
-        lqv vc10, 0, 0, $t2 // Load first and second columns and their fractional parts
-        lqv vc11, 0, 32, $t2
+        lqv vc10, 0, 0, $a3 // Load first and second columns and their fractional parts
+        lqv vc11, 0, 32, $a3
 
-    addiu $t2, 16 // Move to next column half
+    addiu $a3, 16 // Move to next column half
     
         vmudl vc12, vc9, vc11, f // Multiply double precision
         vmadm vc12, vc8, vc11, f
@@ -54,12 +54,12 @@ MTXMult4x4:
         ssv vc13, 0, 32, $a0 
         ssv vc13, 8, 34, $a0 
 
-    bnez $t1, .MTXMult4x4ColHalf
+    bnez $v1, .MTXMult4x4ColHalf
     addiu $a0, 4 // Increment C matrix pointer
 
-    addiu $t0, -1 // Decrement row count
+    addiu $v0, -1 // Decrement row count
 
-    bnez $t0, .MTXMult4x4Row
+    bnez $v0, .MTXMult4x4Row
     addiu $a1, 8 // Go to next row
 
     jr $ra
@@ -79,7 +79,7 @@ MTXMult4x4:
 //
 MTXApply4x4:
 
-    ori $t0, $zero, 2 // Halves left
+    ori $v0, $zero, 2 // Halves left
 
 .MTXApply4x4Half:
 
@@ -91,7 +91,7 @@ MTXApply4x4:
         vmadn vc13, vc9, vc10, f
         vmadh vc12, vc8, vc10, f
 
-    addiu $t0, -1 // Decrement "halves left"
+    addiu $v0, -1 // Decrement "halves left"
 
         vaddc vc13, vc13, vc13, q1 // Accumulate results
         vadd vc12, vc12, vc12, q1
@@ -99,7 +99,7 @@ MTXApply4x4:
         vaddc vc13, vc13, vc13, h2
         vadd vc12, vc12, vc12, h2
 
-    beq $t0, $zero, .MTXApply4x4StoreResult // Store result if we're done here
+    beq $v0, $zero, .MTXApply4x4StoreResult // Store result if we're done here
     nop
 
     addiu $a0, 0x10 // Go to next half of the matrix

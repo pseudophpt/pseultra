@@ -19,12 +19,12 @@
 #define data_ptr $a0
 #define data_size $a1
 
-#define xbus_pos $t0
+#define xbus_pos $a2
 
 // Beginning of routine, where space in the buffer is checked
 
-#define xbus_max_pos $t1
-#define xbus_pos_after $t2
+#define xbus_max_pos $v0
+#define xbus_pos_after $v1
 
 XBUSPush:
     mfc0 xbus_pos, CMD_END // Get last command position
@@ -38,8 +38,8 @@ XBUSPush:
 
 // Wait for the RDP to finish processing up to the end of the XBUS buffer, then wrap around
 
-#define rdp_pos $t1
-#define xbus_start $t2
+#define rdp_pos $v0
+#define xbus_start $v1
 
 .XBUSWaitBufferWrap:
     mfc0 rdp_pos, CMD_CURRENT // Get current position
@@ -57,7 +57,7 @@ XBUSPush:
 
 // Push the actual command to xbus: assumes the RDP command buffer can be pushed to
 
-#define data $t1
+#define data $v0
 
 .XBUSPushCommand:
     lw data, 0(data_ptr)
