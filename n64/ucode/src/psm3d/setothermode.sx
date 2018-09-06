@@ -30,7 +30,7 @@ OPSetOtherMode:
 #define mask $t0
 #define data $t1
 #define mode $t2
-#define modeword_ptr $s4
+#define modeword_ptr $t3
 
     or modeword_ptr, $zero, $zero
 

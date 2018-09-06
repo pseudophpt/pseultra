@@ -32,24 +32,24 @@
 
 OPLoadMtx:
 
-    lb $s4, (%lo(cmd) + 3)($zero) // Get stack to push to
-    bnez $s4, .MtxModel // Branch to model matrix actions if that's where we're pushing
-    lb $s5, (%lo(cmd) + 2)($zero) // Get push type
+    lb $t2, (%lo(cmd) + 3)($zero) // Get stack to push to
+    bnez $t2, .MtxModel // Branch to model matrix actions if that's where we're pushing
+    lb $t3, (%lo(cmd) + 2)($zero) // Get push type
 
 .MtxProj:
-    ori $s6, $zero, %lo(mtx_proj) // Projection matrix pointer as destination
+    ori $t4, $zero, %lo(mtx_proj) // Projection matrix pointer as destination
 
     b .MtxAction // Go to matrix's action
-    move $s7, $s6 // Projection matrix pointer as source
+    move $t5, $t4 // Projection matrix pointer as source
 
 .MtxModel:
-    move $s6, mtx_stack_ptr // Matrix stack pointer as destination
+    move $t4, mtx_stack_ptr // Matrix stack pointer as destination
     addu mtx_stack_ptr, PSM3D_MTX_SIZE // Make stack space
 
-    addiu $s7, $s6, -PSM3D_MTX_SIZE // Matrix below as source
+    addiu $t5, $t4, -PSM3D_MTX_SIZE // Matrix below as source
 
 .MtxAction:
-    bnez $s5, .MtxLoad // Branch to push type
+    bnez $t3, .MtxLoad // Branch to push type
     lw $a0, (%lo(cmd) + 4)($zero) // Get matrix DRAM address
 
 .MtxMultiply:
@@ -58,7 +58,7 @@ OPLoadMtx:
     ori $a2, $zero, PSM3D_MTX_SIZE - 1 // DMA matrix
 
     ori $a0, $zero, %lo(cmd) + 0x40 // Result stored
-    move $a1, $s7 // A matrix as source
+    move $a1, $t5 // A matrix as source
     jal MTXMult4x4
     ori $a2, $zero, %lo(cmd) // B matrix as passed
 
@@ -72,16 +72,16 @@ OPLoadMtx:
     addiu $t0, -1 // One less matrix qword
     addiu $t1, 0x10 // Increment source
 
-        sqv vc16, 0, 0, $s6
+        sqv vc16, 0, 0, $t4
 
     bnez $t0, .MtxCopy // Branch back if not done copying
-    addiu $s6, 0x10 // Increment destination
+    addiu $t4, 0x10 // Increment destination
         
     op_ret
     nop
 
 .MtxLoad:
-    move $a1, $s6 // DMA directly into destination
+    move $a1, $t4 // DMA directly into destination
     jal DMARead
     ori $a2, $zero, PSM3D_MTX_SIZE - 1 // DMA matrix
 

@@ -32,15 +32,15 @@
 
 OPLoadVtx:
 
-    lb $s4, (%lo(cmd) + 3)($zero) // Load count
-    lb $s5, (%lo(cmd) + 2)($zero) // Load position
-    sll $s5, 3
-    addiu $s5, %lo(vtx_cache)
-    lw $s6, (%lo(cmd) + 4)($zero) // Load DRAM address
+    lb $t0, (%lo(cmd) + 3)($zero) // Load count
+    lb $t1, (%lo(cmd) + 2)($zero) // Load position
+    sll $t1, 3
+    addiu $t1, %lo(vtx_cache)
+    lw $t2, (%lo(cmd) + 4)($zero) // Load DRAM address
     
 .VertexLoop:
 
-    move $a0, $s6 // Load from DRAM address
+    move $a0, $t2 // Load from DRAM address
     ori $a1, $zero, %lo(cmd) // Load into command 
     jal DMARead 
     ori $a2, $zero, 15 // Read vertex
@@ -104,15 +104,15 @@ OPLoadVtx:
         vadd vc16, vc16, vpsize, f
         vadd vc16, vc16, vpoff, f
 
-        slv vc16, 0, 0, $s5 // Store into vertex cache
-        ssv vc16, 2, 4, $s5
-        ssv vc17, 2, 6, $s5
+        slv vc16, 0, 0, $t1 // Store into vertex cache
+        ssv vc16, 2, 4, $t1
+        ssv vc17, 2, 6, $t1
 
-    addiu $s4, -1 // Decrement count left
+    addiu $t0, -1 // Decrement count left
 
-    addiu $s6, 16
-    bne $s4, $zero, .VertexLoop // Jump back if we're not done 
-    addiu $s5, 8
+    addiu $t2, 16
+    bne $t0, $zero, .VertexLoop // Jump back if we're not done 
+    addiu $t1, 8
 
     op_ret
     nop
