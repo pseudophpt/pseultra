@@ -27,10 +27,10 @@ OPSetOtherMode:
 
 // Set high word
 
-#define mask $t0
-#define data $t1
-#define mode $t2
-#define modeword_ptr $t3
+#define mask r16
+#define data r17
+#define mode r18
+#define modeword_ptr r19
 
     or modeword_ptr, $zero, $zero
 
@@ -49,10 +49,10 @@ OPSetOtherMode:
     bnez modeword_ptr, .WriteCommand // If we're on the second word, we're ready to write the command
     sw mode, %lo(othermode)(modeword_ptr)
 
-    move $a0, dl_dram_ptr // Load display list command
-    ori $a1, $zero, %lo(cmd)
+    move r24, dl_dram_ptr // Load display list command
+    ori r25, $zero, %lo(cmd)
     jal DMARead // DMA command
-    ori $a2, $zero, 7
+    ori r26, $zero, 7
 
     addiu dl_dram_ptr, 8 // Advance display list counter and modeword pointer
     b .SetWord
@@ -64,14 +64,14 @@ OPSetOtherMode:
 
 // Actually write the command
 
-#define cmd_ptr $a0
-#define cmd_len $a1
+#define cmd_ptr r24
+#define cmd_len r25
 
 .WriteCommand:
     ori cmd_ptr, $zero, othermode
     ori cmd_len, $zero, 8
 
-#define set_other_mode_cmd $t0
+#define set_other_mode_cmd r16
 
     ori set_other_mode_cmd, $zero, UCODE_RDP_OPC_Set_Other_Modes 
     jal XBUSPush // push command to xbus

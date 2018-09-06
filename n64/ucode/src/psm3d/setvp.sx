@@ -26,10 +26,10 @@
 
 OPSetVp:
 
-    lw $a0, (%lo(cmd) + 4)($zero) // Load DRAM address
-    ori $a1, $zero, %lo(cmd) // Load into command 
+    lw r24, (%lo(cmd) + 4)($zero) // Load DRAM address
+    ori r25, $zero, %lo(cmd) // Load into command 
     jal DMARead 
-    ori $a2, $zero, 7 // Read viewport info
+    ori r26, $zero, 7 // Read viewport info
 
         llv vpsize, 0, cmd, $zero // VpSize = hwidth, hheight, 1
         vmov vpsize, 2, v2nconst, v2n_1

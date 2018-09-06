@@ -32,18 +32,18 @@
 
 OPLoadVtx:
 
-    lb $t0, (%lo(cmd) + 3)($zero) // Load count
-    lb $t1, (%lo(cmd) + 2)($zero) // Load position
-    sll $t1, 3
-    addiu $t1, %lo(vtx_cache)
-    lw $t2, (%lo(cmd) + 4)($zero) // Load DRAM address
+    lb r16, (%lo(cmd) + 3)($zero) // Load count
+    lb r17, (%lo(cmd) + 2)($zero) // Load position
+    sll r17, 3
+    addiu r17, %lo(vtx_cache)
+    lw r18, (%lo(cmd) + 4)($zero) // Load DRAM address
     
 .VertexLoop:
 
-    move $a0, $t2 // Load from DRAM address
-    ori $a1, $zero, %lo(cmd) // Load into command 
+    move r24, r18 // Load from DRAM address
+    ori r25, $zero, %lo(cmd) // Load into command 
     jal DMARead 
-    ori $a2, $zero, 15 // Read vertex
+    ori r26, $zero, 15 // Read vertex
 
 /*
  * Actual shading should be performed here by calculating the dot product of 
@@ -64,9 +64,9 @@ OPLoadVtx:
         vmov vc9, 3, nullconst, e0 // Load 0 into w coordinate fractopm
         vmov vc9, 7, nullconst, e0
     
-    move $a0, mtx_stack_ptr // Model matrix multiply 
+    move r24, mtx_stack_ptr // Model matrix multiply 
     jal MTXApply4x4
-    addiu $a0, -PSM3D_MTX_SIZE
+    addiu r24, -PSM3D_MTX_SIZE
 
         vor vc8, nullconst, vc14, f // Use output as input to projection
         vor vc9, nullconst, vc15, f
@@ -78,7 +78,7 @@ OPLoadVtx:
         ldv vc9, 8, cmd, $zero
     
     jal MTXApply4x4
-    ori $a0, $zero, %lo(mtx_proj) // Projection matrix multiply 
+    ori r24, $zero, %lo(mtx_proj) // Projection matrix multiply 
 
         vrcph vc18, 3, vc14, 3 // Get 1/w 
         vrcpl vc19, 3, vc15, 3
@@ -104,15 +104,15 @@ OPLoadVtx:
         vadd vc16, vc16, vpsize, f
         vadd vc16, vc16, vpoff, f
 
-        slv vc16, 0, 0, $t1 // Store into vertex cache
-        ssv vc16, 2, 4, $t1
-        ssv vc17, 2, 6, $t1
+        slv vc16, 0, 0, r17 // Store into vertex cache
+        ssv vc16, 2, 4, r17
+        ssv vc17, 2, 6, r17
 
-    addiu $t0, -1 // Decrement count left
+    addiu r16, -1 // Decrement count left
 
-    addiu $t2, 16
-    bne $t0, $zero, .VertexLoop // Jump back if we're not done 
-    addiu $t1, 8
+    addiu r18, 16
+    bne r16, $zero, .VertexLoop // Jump back if we're not done 
+    addiu r17, 8
 
     op_ret
     nop

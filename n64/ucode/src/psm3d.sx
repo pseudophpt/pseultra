@@ -59,7 +59,7 @@
 #define v2n2_16384 e6
 #define v2n2_32768 e7
 
-#define mtx_stack_ptr $s1
+#define mtx_stack_ptr r3
 
 #define op_ret b .ExecutionLoop
 
@@ -84,7 +84,7 @@ uPSM3DTextStart:
 // Test if the microcode has been initialized 
 //
 
-#define initialized $t0
+#define initialized r16
 
 .TestInit:
     lb initialized, PSM3D_STATUS_INIT_BYTE($zero)
@@ -100,14 +100,14 @@ uPSM3DTextStart:
 
 .XBUSInit:
 
-#define set_xbus_dmem_dma $t0
+#define set_xbus_dmem_dma r16
 
     ori set_xbus_dmem_dma, $zero, 0x2 // Use XBUS as a command buffer 
     mtc0 set_xbus_dmem_dma, CMD_STATUS
 
 #undef set_xbus_dmem_dma
 
-#define xbus_buffer_start $t0
+#define xbus_buffer_start r16
 
     ori xbus_buffer_start, $zero, %lo(xbus_buffer) // Initialize command buffer positions
     mtc0 xbus_buffer_start, CMD_START // CMD_START is written to first, since CMD_END begins actual processing
@@ -115,8 +115,8 @@ uPSM3DTextStart:
 
 #undef xbus_buffer_start
 
-    ori $t0, $zero, 1 // Store 1 to XBUS initialized byte to signify that it has been initialized
-    sb $t0, PSM3D_STATUS_INIT_BYTE($zero)
+    ori r16, $zero, 1 // Store 1 to XBUS initialized byte to signify that it has been initialized
+    sb r16, PSM3D_STATUS_INIT_BYTE($zero)
 
 //
 // Initialize vector unit
@@ -134,7 +134,7 @@ uPSM3DTextStart:
 // Begin execution
 //
 
-#define dl_dram_ptr $s0
+#define dl_dram_ptr r2
 
 .BeginExecution:
     lw dl_dram_ptr, %lo(header)($zero) // Initialize pointer to the current DRAM location
@@ -146,23 +146,23 @@ uPSM3DTextStart:
 // TODO: Load more than 1 command at a time
 
 .ExecutionLoop:
-    move $a0, dl_dram_ptr // Load display list command
-    ori $a1, $zero, %lo(cmd)
+    move r24, dl_dram_ptr // Load display list command
+    ori r25, $zero, %lo(cmd)
     jal DMARead // DMA command
-    ori $a2, $zero, 7
+    ori r26, $zero, 7
 
     addiu dl_dram_ptr, 8 // Advance display list counter
 
-#define dl_cmd $t0
-#define dl_cmd_handler $t1
+#define dl_cmd r16
+#define dl_cmd_handler r17
 
     lb dl_cmd, %lo(cmd)($zero) // Get display list command
 
     bgez dl_cmd, .NormalCommand // If it's not an RDP throughput command (negative), go to the jump table
     nop
 
-#define cmd_ptr $a0
-#define cmd_len $a1
+#define cmd_ptr r24
+#define cmd_len r25
 
     andi dl_cmd, 0x3F // Remove 0x80 bit
     sb dl_cmd, %lo(cmd)($zero)

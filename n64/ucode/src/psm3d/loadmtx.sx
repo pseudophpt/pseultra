@@ -32,58 +32,58 @@
 
 OPLoadMtx:
 
-    lb $t2, (%lo(cmd) + 3)($zero) // Get stack to push to
-    bnez $t2, .MtxModel // Branch to model matrix actions if that's where we're pushing
-    lb $t3, (%lo(cmd) + 2)($zero) // Get push type
+    lb r18, (%lo(cmd) + 3)($zero) // Get stack to push to
+    bnez r18, .MtxModel // Branch to model matrix actions if that's where we're pushing
+    lb r19, (%lo(cmd) + 2)($zero) // Get push type
 
 .MtxProj:
-    ori $t4, $zero, %lo(mtx_proj) // Projection matrix pointer as destination
+    ori r20, $zero, %lo(mtx_proj) // Projection matrix pointer as destination
 
     b .MtxAction // Go to matrix's action
-    move $t5, $t4 // Projection matrix pointer as source
+    move r21, r20 // Projection matrix pointer as source
 
 .MtxModel:
-    move $t4, mtx_stack_ptr // Matrix stack pointer as destination
+    move r20, mtx_stack_ptr // Matrix stack pointer as destination
     addu mtx_stack_ptr, PSM3D_MTX_SIZE // Make stack space
 
-    addiu $t5, $t4, -PSM3D_MTX_SIZE // Matrix below as source
+    addiu r21, r20, -PSM3D_MTX_SIZE // Matrix below as source
 
 .MtxAction:
-    bnez $t3, .MtxLoad // Branch to push type
-    lw $a0, (%lo(cmd) + 4)($zero) // Get matrix DRAM address
+    bnez r19, .MtxLoad // Branch to push type
+    lw r24, (%lo(cmd) + 4)($zero) // Get matrix DRAM address
 
 .MtxMultiply:
-    ori $a1, $zero, %lo(cmd) // Load into temp memory low
+    ori r25, $zero, %lo(cmd) // Load into temp memory low
     jal DMARead
-    ori $a2, $zero, PSM3D_MTX_SIZE - 1 // DMA matrix
+    ori r26, $zero, PSM3D_MTX_SIZE - 1 // DMA matrix
 
-    ori $a0, $zero, %lo(cmd) + 0x40 // Result stored
-    move $a1, $t5 // A matrix as source
+    ori r24, $zero, %lo(cmd) + 0x40 // Result stored
+    move r25, r21 // A matrix as source
     jal MTXMult4x4
-    ori $a2, $zero, %lo(cmd) // B matrix as passed
+    ori r26, $zero, %lo(cmd) // B matrix as passed
 
-    ori $t0, $zero, 4 // Matrix parts left
-    ori $t1, $zero, %lo(cmd) + 0x40 // Source
+    ori r16, $zero, 4 // Matrix parts left
+    ori r17, $zero, %lo(cmd) + 0x40 // Source
 
 .MtxCopy:
         
-        lqv vc16, 0, 0, $t1 // Read from source
+        lqv vc16, 0, 0, r17 // Read from source
 
-    addiu $t0, -1 // One less matrix qword
-    addiu $t1, 0x10 // Increment source
+    addiu r16, -1 // One less matrix qword
+    addiu r17, 0x10 // Increment source
 
-        sqv vc16, 0, 0, $t4
+        sqv vc16, 0, 0, r20
 
-    bnez $t0, .MtxCopy // Branch back if not done copying
-    addiu $t4, 0x10 // Increment destination
+    bnez r16, .MtxCopy // Branch back if not done copying
+    addiu r20, 0x10 // Increment destination
         
     op_ret
     nop
 
 .MtxLoad:
-    move $a1, $t4 // DMA directly into destination
+    move r25, r20 // DMA directly into destination
     jal DMARead
-    ori $a2, $zero, PSM3D_MTX_SIZE - 1 // DMA matrix
+    ori r26, $zero, PSM3D_MTX_SIZE - 1 // DMA matrix
 
     op_ret // Return
     nop

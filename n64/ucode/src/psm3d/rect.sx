@@ -48,7 +48,7 @@
 
 OPRect:
 
-#define tx_status $t0
+#define tx_status r16
 
     lb tx_status, PSM3D_STATUS_TX_BYTE($zero)
     bltz tx_status, .TextureRect // Branch to TextureRect if the texture enable bit is set
@@ -59,15 +59,15 @@ OPRect:
 
 .FillRect:
 
-#define fill_rect_cmd $t0
+#define fill_rect_cmd r16
     
     ori fill_rect_cmd, $zero, UCODE_RDP_OPC_Fill_Rectangle
     sb fill_rect_cmd, %lo(cmd)($zero)
 
 #undef fill_rect_cmd
 
-#define cmd_ptr $a0
-#define cmd_len $a1
+#define cmd_ptr r24
+#define cmd_len r25
 
     ori cmd_ptr, $zero, %lo(cmd)
     jal XBUSPush
@@ -84,7 +84,7 @@ OPRect:
 
 .TextureRect:
 
-#define text_rect_cmd $t0
+#define text_rect_cmd r16
     
     ori text_rect_cmd, $zero, UCODE_RDP_OPC_Texture_Rectangle // Write texture rectangle command
     sb text_rect_cmd, %lo(cmd)($zero)
@@ -93,37 +93,37 @@ OPRect:
 
 // DMA second part of command  
 
-    move $a0, dl_dram_ptr
-    ori $a1, $zero, %lo(cmd) + 8
+    move r24, dl_dram_ptr
+    ori r25, $zero, %lo(cmd) + 8
     jal DMARead
-    ori $a2, $zero, 7
+    ori r26, $zero, 7
 
-    lui $t0, 0xf000 // Mask to remove unwanted bytes
-    nor $t0, $t0
+    lui r16, 0xf000 // Mask to remove unwanted bytes
+    nor r16, $t0
 
         llv vc17, 0, cmd + 12, $zero // Load bottom right t, s coords
     
-    lw $t1, (%lo(cmd))($zero) // Get bottom right x, y
-    sll $t2, $t1, 4 // Shift left 4 to correct boundary
-    and $t2, $t0 // Mask to remove 0x04 command byte
+    lw r17, (%lo(cmd))($zero) // Get bottom right x, y
+    sll r18, r17, 4 // Shift left 4 to correct boundary
+    and r18, r16 // Mask to remove 0x04 command byte
     
         llv vc16, 0, cmd + 8, $zero // Load top left t, s coords
     
-    sw $t2, (%lo(cmd) + 12)($zero) // Store in now unused part of cmd block
-    andi $t1, 0x0fff // Mask out additional x nibble
-    sh $t1, (%lo(cmd) + 14)($zero) // Overwrite second halfword with unshifted, masked y coordinate
+    sw r18, (%lo(cmd) + 12)($zero) // Store in now unused part of cmd block
+    andi r17, 0x0fff // Mask out additional x nibble
+    sh r17, (%lo(cmd) + 14)($zero) // Overwrite second halfword with unshifted, masked y coordinate
 
         llv vc19, 0, cmd + 12, $zero // Load bottom right x, y
 
-    lw $t1, (%lo(cmd) + 4)($zero) // Get top left x, y
-    sll $t2, $t1, 4 // Shift left 4 to correct boundary
-    and $t2, $t0 // Mask to remove 0x04 command byte
+    lw r17, (%lo(cmd) + 4)($zero) // Get top left x, y
+    sll r18, r17, 4 // Shift left 4 to correct boundary
+    and r18, r16 // Mask to remove 0x04 command byte
     
         vsub vc16, vc17, vc16, f // Calculate dt, ds
     
-    sw $t2, (%lo(cmd) + 12)($zero) // Store in now unused part of cmd block
-    andi $t1, 0x0fff // Mask out additional x nibble
-    sh $t1, (%lo(cmd) + 14)($zero) // Overwrite second halfword with unshifted, masked y coordinate
+    sw r18, (%lo(cmd) + 12)($zero) // Store in now unused part of cmd block
+    andi r17, 0x0fff // Mask out additional x nibble
+    sh r17, (%lo(cmd) + 14)($zero) // Overwrite second halfword with unshifted, masked y coordinate
     
         llv vc18, 0, cmd + 12, $zero // Load top left x, y
 
@@ -146,9 +146,9 @@ OPRect:
 
 // Push to xbus
 
-    ori $a0, $zero, %lo(cmd)
+    ori r24, $zero, %lo(cmd)
     jal XBUSPush
-    ori $a1, $zero, 16
+    ori r25, $zero, 16
 
 
     op_ret

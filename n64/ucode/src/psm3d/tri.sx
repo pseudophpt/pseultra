@@ -27,77 +27,77 @@
 // Maybe improve sorting code, then perform the calculation cyclically?
 
 OPTri:
-    lb $t0, (%lo(cmd) + 1)($zero) // Get vertex cache offset
-    sll $t0, 3 
-    lh $t1, (%lo(vtx_cache) + 2)($t0) // Get y coordinate
+    lb r16, (%lo(cmd) + 1)($zero) // Get vertex cache offset
+    sll r16, 3 
+    lh r17, (%lo(vtx_cache) + 2)(r16) // Get y coordinate
 
-        ldv vc16, 0, vtx_cache, $t0 // Load vertex
+        ldv vc16, 0, vtx_cache, r16 // Load vertex
 
-    lb $t0, (%lo(cmd) + 2)($zero) // Get vertex cache offset
-    sll $t0, 3 
-    lh $t2, (%lo(vtx_cache) + 2)($t0) // Get y coordinate
+    lb r16, (%lo(cmd) + 2)($zero) // Get vertex cache offset
+    sll r16, 3 
+    lh r18, (%lo(vtx_cache) + 2)(r16) // Get y coordinate
 
-        ldv vc18, 0, vtx_cache, $t0 // Load vertex
+        ldv vc18, 0, vtx_cache, r16 // Load vertex
 
-    lb $t0, (%lo(cmd) + 3)($zero) // Get vertex cache offset
-    sll $t0, 3 
-    lh $t3, (%lo(vtx_cache) + 2)($t0) // Get y coordinate
+    lb r16, (%lo(cmd) + 3)($zero) // Get vertex cache offset
+    sll r16, 3 
+    lh r19, (%lo(vtx_cache) + 2)(r16) // Get y coordinate
 
-        ldv vc20, 0, vtx_cache, $t0 // Load vertex
+        ldv vc20, 0, vtx_cache, r16 // Load vertex
 
-    bge $t3, $t1, .NoSwapXZ // if (x > z) swap(x, z)
+    bge r19, r17, .NoSwapXZ // if (x > z) swap(x, z)
     nop
 
         vor vc22, nullconst, vc16, f // Swap X and Z
     
-    or $t4, $zero, $t1 // disgosten
+    or r20, $zero, r17 // disgosten
 
         vor vc16, nullconst, vc20, f 
         
-    or $t1, $zero, $t3
+    or r17, $zero, r19
     
         vor vc20, nullconst, vc22, f 
 
-    or $t3, $zero, $t4
+    or r19, $zero, r20
 
 .NoSwapXZ:
 
-    bge $t2, $t1, .NoSwapXY // if (x > y) swap(x, y)
+    bge r18, r17, .NoSwapXY // if (x > y) swap(x, y)
     nop
     
         vor vc22, nullconst, vc16, f // Swap X and Y
 
-    or $t4, $zero, $t1
+    or r20, $zero, r17
 
         vor vc16, nullconst, vc18, f 
         
-    or $t1, $zero, $t2
+    or r17, $zero, r18
     
         vor vc18, nullconst, vc22, f 
 
-    or $t2, $zero, $t4
+    or r18, $zero, r20
 
 .NoSwapXY:
     
-    bge $t3, $t2, .NoSwapYZ // if (y > z) swap(y, z)
+    bge r19, r18, .NoSwapYZ // if (y > z) swap(y, z)
     nop
     
         vor vc22, nullconst, vc20, f // Swap Y and Z
 
-    or $t4, $zero, $t2
+    or r20, $zero, r18
 
         vor vc20, nullconst, vc18, f 
         
-    or $t2, $zero, $t3
+    or r18, $zero, r19
 
         vor vc18, nullconst, vc22, f 
 
-    or $t3, $zero, $t4
+    or r19, $zero, r20
 
 .NoSwapYZ:
     
-    ori $t0, $zero, 0x08 // Store triangle command
-    sb $t0, (%lo(cmd))($zero)
+    ori r16, $zero, 0x08 // Store triangle command
+    sb r16, (%lo(cmd))($zero)
 
         ssv vc18, 0, cmd + 0x8, $zero // Store XL, int
         ssv nullconst, 0, cmd + 0xa, $zero // Store XL, frac
@@ -150,26 +150,26 @@ OPTri:
         ssv vc26, 4, cmd + 0x2, $zero
 
     
-    lw $t1, (%lo(cmd) + 0x14)($zero) // Load DxHDy
-    lw $t2, (%lo(cmd) + 0x1c)($zero) // Load DxMDy
+    lw r17, (%lo(cmd) + 0x14)($zero) // Load DxHDy
+    lw r18, (%lo(cmd) + 0x1c)($zero) // Load DxMDy
 
-    bge $t1, $t2, .LeftMajor 
-    ori $t0, $zero, 0
+    bge r17, r18, .LeftMajor 
+    ori r16, $zero, 0
 
 .RightMajor:
-    ori $t0, $zero, 0x80
+    ori r16, $zero, 0x80
 
 .LeftMajor:
-    sb $t0, (%lo(cmd) + 1)($zero)
+    sb r16, (%lo(cmd) + 1)($zero)
 
         lqv vc30, 0, cmd, $zero
         lqv vc31, 0, cmd + 0x10, $zero
 
         vnop 0, 0, 0, 0
 
-    ori $a0, $zero, %lo(cmd) // Push command
+    ori r24, $zero, %lo(cmd) // Push command
     jal XBUSPush
-    ori $a1, $zero, 32
+    ori r25, $zero, 32
 
     op_ret // Return operation
     nop

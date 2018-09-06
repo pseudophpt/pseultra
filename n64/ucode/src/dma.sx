@@ -16,7 +16,7 @@
 #define DMA_READ 0
 #define DMA_WRITE 1
 
-#define dma_type $v0
+#define dma_type r28
 
 // The only difference between these two DMA functions are the value of dma_type
 DMARead:
@@ -27,9 +27,9 @@ DMARead:
 DMAWrite:
     ori dma_type, $zero, DMA_WRITE
 
-#define dram_addr $a0
-#define spmem_addr $a1
-#define dma_len $a2
+#define dram_addr r24
+#define spmem_addr r25
+#define dma_len r26
 
 // Main DMA routine, assumes $at is either DMA_READ or DMA_WRITE
 .DMA:
@@ -38,7 +38,7 @@ DMAWrite:
 /* 
 // Acquire the DMA semaphore
 
-#define semaphore $v1
+#define semaphore r29
 
 .DMAAcquireSemaphore:
     mfc0 semaphore, SP_RESERVED
@@ -50,7 +50,7 @@ DMAWrite:
 
 // Wait until DMA
 
-#define busy_state $v1
+#define busy_state r29
 
 .DMAWait:
     mfc0 busy_state, DMA_BUSY
@@ -77,7 +77,7 @@ DMAWrite:
 
 // Wait until DMA is done
 
-#define busy_state $v1
+#define busy_state r29
 
 .DMAWaitDone:
     mfc0 busy_state, DMA_BUSY

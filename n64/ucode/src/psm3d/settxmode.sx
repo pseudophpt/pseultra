@@ -27,9 +27,9 @@
 
 OPSetTxMode:
 
-#define mask $t0
-#define data $t1
-#define mode $t2
+#define mask r16
+#define data r17
+#define mode r18
 
     lb mask, (%lo(cmd) + 6)($zero) // Load mask, data, and current mode for high word
     lb data, (%lo(cmd) + 7)($zero)
