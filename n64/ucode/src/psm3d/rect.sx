@@ -48,12 +48,7 @@
 
 OPRect:
 
-#define tx_status r16
-
-    lb tx_status, PSM3D_STATUS_TX_BYTE($zero)
-    bltz tx_status, .TextureRect // Branch to TextureRect if the texture enable bit is set
-
-#undef tx_status
+    bltz tx_mode, .TextureRect // Branch to TextureRect if the texture enable bit is set
 
 // Draw rectangle by filling
 

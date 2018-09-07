@@ -29,22 +29,17 @@ OPSetTxMode:
 
 #define mask r16
 #define data r17
-#define mode r18
 
     lb mask, (%lo(cmd) + 6)($zero) // Load mask, data, and current mode for high word
     lb data, (%lo(cmd) + 7)($zero)
-    lb mode, PSM3D_STATUS_TX_BYTE($zero)
 
     and data, mask // Mask data
 
     nor mask, mask // Invert mask to mask mode
-    and mode, mask 
+    and tx_mode, data 
 
-    or mode, data // Put data together
+    or tx_mode, data // Put data together
 
-    sb mode, PSM3D_STATUS_TX_BYTE($zero)
-
-#undef mode
 #undef data
 #undef mask
 

@@ -59,7 +59,9 @@
 #define v2n2_16384 e6
 #define v2n2_32768 e7
 
+#define dl_dram_ptr r2
 #define mtx_stack_ptr r3
+#define tx_mode r4
 
 #define op_ret b .ExecutionLoop
 
@@ -130,11 +132,15 @@ uPSM3DTextStart:
         lqv v2nconst2, 0, v2n2, $zero
         vxor nullconst, v2nconst, v2nconst, f
 
+// 
+// Initialize scalar unit
+//
+
+.ScalarInit:
+    or tx_mode, r0, r0 // Texture mode = 0
 //
 // Begin execution
 //
-
-#define dl_dram_ptr r2
 
 .BeginExecution:
     lw dl_dram_ptr, %lo(header)($zero) // Initialize pointer to the current DRAM location
