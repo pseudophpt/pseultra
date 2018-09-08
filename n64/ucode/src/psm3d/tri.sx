@@ -45,6 +45,10 @@ OPTri:
 
         ldv vc20, 0, vtx_cache, r16 // Load vertex
 
+    ori r21, $zero, 0x08 // Triangle command
+    ori r22, $zero, %lo(cmd) // Command pointer
+    ori r23, $zero, 0x20 // Command length
+
     bge r19, r17, .NoSwapXZ // if (x > z) swap(x, z)
     nop
 
@@ -148,7 +152,6 @@ OPTri:
         ssv vc26, 0, cmd + 0x6, $zero // Store y coords
         ssv vc26, 2, cmd + 0x4, $zero
         ssv vc26, 4, cmd + 0x2, $zero
-
     
     lw r17, (%lo(cmd) + 0x14)($zero) // Load DxHDy
     lw r18, (%lo(cmd) + 0x1c)($zero) // Load DxMDy
@@ -162,14 +165,14 @@ OPTri:
 .LeftMajor:
     sb r16, (%lo(cmd) + 1)($zero)
 
-        lqv vc30, 0, cmd, $zero
+        lqv vc30, 0, cmd, $zero // DELET THIS
         lqv vc31, 0, cmd + 0x10, $zero
 
         vnop 0, 0, 0, 0
 
     ori r24, $zero, %lo(cmd) // Push command
     jal XBUSPush
-    ori r25, $zero, 32
+    move r25, r23 // Get length
 
     op_ret // Return operation
     nop
