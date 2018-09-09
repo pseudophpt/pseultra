@@ -362,6 +362,21 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
         dram_addr\
     )
 
+#define usPSM3DSetZImg(dram_addr) \
+    usPSM3DRdpThrough(\
+        UCODE_RDP_OPC_Set_Z_Image,\
+        0, \
+            \
+        dram_addr\
+    )
+#define uPSM3DSetZImg(dl, dram_addr) \
+    uPSM3DRdpThrough(dl, \
+        UCODE_RDP_OPC_Set_Z_Image,\
+        0, \
+            \
+        dram_addr\
+    )
+
 #define UCODE_PSM3D_SET_TILE_FMT_RGBA 0
 #define UCODE_PSM3D_SET_TILE_FMT_YUV 1
 #define UCODE_PSM3D_SET_TILE_FMT_CI 2
@@ -717,7 +732,31 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
         (UCODE_PSM3D_AC_D_##acd1)\
     )
 
+#define UCODE_PSM3D_Z_SRC_PRIM 0x4
+#define UCODE_PSM3D_Z_SRC_PIXEL 0x0
 
+#define UCODE_PSM3D_Z_WRITE_ON 0x20
+#define UCODE_PSM3D_Z_WRITE_OFF 0x0
+
+#define UCODE_PSM3D_Z_COMPARE_ON 0x10
+#define UCODE_PSM3D_Z_COMPARE_OFF 0x0
+
+#define usPSM3DSetZMode(src, write, compare) \
+    usPSM3DSetOtherMode(\
+        0x0, 0x34,\
+        0x0,\
+        UCODE_PSM3D_Z_SRC_##src |\
+        UCODE_PSM3D_Z_WRITE_##write |\
+        UCODE_PSM3D_Z_COMPARE_##compare\
+    )
+#define uPSM3DSetZMode(dl, src, write, compare) \
+    uPSM3DSetOtherMode(dl, \
+        0x0, 0x34,\
+        0x0,\
+        UCODE_PSM3D_Z_SRC_##src |\
+        UCODE_PSM3D_Z_WRITE_##write |\
+        UCODE_PSM3D_Z_COMPARE_##compare\
+    )
 
 /*
  * Microcode locations
