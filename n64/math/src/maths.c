@@ -32,7 +32,10 @@ s32
 mathSSin
 (s16 in) {
     // Sine is an odd function
-    s32 ret = (in >= 0) ? 1 : -1;
+    s32 ret = (in > 0) ? 1 : -1;
+    if (in == 0) {
+        return 0;
+    }
 
     // Round towards 0
     in -= ret;
