@@ -166,7 +166,6 @@ OPTri:
 
     addiu r23, 0x10 // Command size
 
-
         ssv vc16, 4, 0, r22 // Store depth
         ssv vc17, 4, 2, r22 
         
@@ -261,10 +260,6 @@ OPTri:
 
 .LeftMajor:
     sb r16, (%lo(cmd) + 1)($zero)
-
-        lqv vc30, 0, cmd + 0x20, $zero // DELET THIS
-
-        vnop 0, 0, 0, 0
 
     sb r21, (%lo(cmd))($zero) // Store triangle command
    
