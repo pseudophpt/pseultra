@@ -41,6 +41,13 @@
 #define CMD_TMEM_BUSY $15
 
 /*
+ * RSP COP2 Registers
+ */
+#define VCO 0
+#define VCC 1
+#define VCE 2
+
+/*
  * Instructions not defined
  */
 
