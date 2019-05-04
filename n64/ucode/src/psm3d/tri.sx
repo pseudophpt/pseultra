@@ -24,6 +24,7 @@
 .global OPTri
 
 // TODO: Culling
+// TODO: Separate tri coefficient calculations in diff files
 
 // There has to be a way to improve this, it's so fucking long.
 // Maybe improve sorting code, then perform the calculation cyclically?
@@ -165,6 +166,30 @@ OPTri:
     ori r21, 0x1 // Z-Buffering command
 
     addiu r23, 0x10 // Command size
+
+        // Scaling operation
+
+        vmov vc22, 0, vc16, e2 // Load parallel zi's
+        vmov vc22, 1, vc18, e2
+        vmov vc22, 2, vc20, e2
+    
+        vmov vc23, 0, vc17, e2 // Load parallel zf's
+        vmov vc23, 1, vc19, e2
+        vmov vc23, 2, vc21, e2
+
+        vadd vc22, vc22, v2nconst, v2n_1 // Add 1 to z integer part, range is now [0, 2]
+
+        vmudn vc23, vc23, v2nconst2, v2n2_256 // Shift z left 1 byte for max precision with floating point 
+        vmadh vc22, vc22, v2nconst2, v2n2_256        
+        vmadn vc23, nullconst, nullconst, f 
+        
+        vmov vc16, 2, vc22, e0 // Store parallel zi's
+        vmov vc18, 2, vc22, e1 
+        vmov vc20, 2, vc22, e2 
+    
+        vmov vc17, 2, vc23, e0 // Store parallel zf's
+        vmov vc19, 2, vc23, e1 
+        vmov vc23, 2, vc21, e2
 
         ssv vc16, 4, 0, r22 // Store depth
         ssv vc17, 4, 2, r22 

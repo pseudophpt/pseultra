@@ -27,6 +27,7 @@
 // X, Y, Zi, Zf
 
 // TODO: Pre-multiply projection and model matrices
+// TODO: Two vertices at a time
 
 .global OPLoadVtx
 
@@ -78,7 +79,7 @@ OPLoadVtx:
         ldv vc9, 8, cmd, $zero
     
     jal MTXApply4x4
-    ori r24, $zero, %lo(mtx_proj) // Projection matrix multiply 
+    ori r24, $zero, %lo(mtx_proj) // Projection matrix multiply         
 
         vrcph vc18, 3, vc14, 3 // Get 1/w 
         vrcpl vc19, 3, vc15, 3
@@ -92,15 +93,9 @@ OPLoadVtx:
         vmadm vc18, vc14, vc17, h3
         vmadn vc19, vc15, vc16, h3
         vmadh vc18, vc14, vc16, h3
-
-        vadd vc22, vc18, v2nconst, v2n_1 // Add 1 to z integer part, range is now [0, 2]
-
-        vmudn vc23, vc19, v2nconst2, v2n2_256 // Shift z left 1 byte for max precision with floating point 
-        vmadh vc22, vc22, v2nconst2, v2n2_256        
-        vmadn vc23, nullconst, nullconst, f 
       
-        ssv vc22, 4, 4, r17 // Store (zi, zf) into vertex cache
-        ssv vc23, 4, 6, r17
+        ssv vc18, 4, 4, r17 // Store (zi, zf) into vertex cache
+        ssv vc19, 4, 6, r17
         
         vmudn vc17, vc19, vpsize, f // Calculate device coordinates by apply viewport transformations
         vmadh vc16, vc18, vpsize, f 
