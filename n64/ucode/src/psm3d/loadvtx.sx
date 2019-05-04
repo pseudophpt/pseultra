@@ -93,6 +93,18 @@ OPLoadVtx:
         vmadn vc19, vc15, vc16, h3
         vmadh vc18, vc14, vc16, h3
 
+//        vadd vc22, vc18, v2nconst, v2n_1 // Add 1 to z integer part, range is now [0, 2]
+
+//        vmudn vc23, vc19, v2nconst2, v2n2_256 // Shift z left 1 byte for max precision with floating point 
+//        vmadh vc22, vc22, v2nconst2, v2n2_256        
+//        vmadn vc23, nullconst, nullconst, f 
+        
+//        ssv vc22, 4, 4, r17 // Store (zi, zf) into vertex cache
+//        ssv vc23, 4, 6, r17
+
+        ssv vc18, 4, 4, r17 // Store (zi, zf) into vertex cache
+        ssv vc19, 4, 6, r17
+        
         vmudn vc17, vc19, vpsize, f // Calculate device coordinates by apply viewport transformations
         vmadh vc16, vc18, vpsize, f 
         vmadn vc17, nullconst, nullconst, f 
@@ -104,9 +116,7 @@ OPLoadVtx:
         vadd vc16, vc16, vpsize, f
         vadd vc16, vc16, vpoff, f
 
-        slv vc16, 0, 0, r17 // Store into vertex cache
-        ssv vc16, 2, 4, r17
-        ssv vc17, 2, 6, r17
+        slv vc16, 0, 0, r17 // Store (x, y) into vertex cache
 
     addiu r16, -1 // Decrement count left
 

@@ -5,6 +5,7 @@
 ### Added
 - PSM3D PopMtx command
 - Math library
+- PSM3D Z-buffered triangles
 
 ### Changed
 - PSM3D matrix stack pointer to be stored in register instead of DMEM

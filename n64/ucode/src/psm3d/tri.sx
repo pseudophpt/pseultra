@@ -23,6 +23,8 @@
 
 .global OPTri
 
+// TODO: Culling
+
 // There has to be a way to improve this, it's so fucking long.
 // Maybe improve sorting code, then perform the calculation cyclically?
 
@@ -99,9 +101,13 @@ OPTri:
     or r19, $zero, r20
 
 .NoSwapYZ:
-    
-    ori r16, $zero, 0x08 // Store triangle command
-    sb r16, (%lo(cmd))($zero)
+        vor vc17, nullconst, nullconst, f // Make fractional registers
+        vor vc19, nullconst, nullconst, f
+        vor vc21, nullconst, nullconst, f
+
+        vmov vc17, 2, vc16, e3 // Load z frac
+        vmov vc19, 2, vc18, e3 
+        vmov vc21, 2, vc20, e3 
 
         ssv vc18, 0, cmd + 0x8, $zero // Store XL, int
         ssv nullconst, 0, cmd + 0xa, $zero // Store XL, frac
@@ -152,12 +158,103 @@ OPTri:
         ssv vc26, 0, cmd + 0x6, $zero // Store y coords
         ssv vc26, 2, cmd + 0x4, $zero
         ssv vc26, 4, cmd + 0x2, $zero
-    
-    lw r17, (%lo(cmd) + 0x14)($zero) // Load DxHDy
-    lw r18, (%lo(cmd) + 0x1c)($zero) // Load DxMDy
 
-    bge r17, r18, .LeftMajor 
-    ori r16, $zero, 0
+    addiu r22, 0x20 // Add to command pointer
+
+.ZBuffer: // Make sure to check if z buffering is enabled in the RSP options
+    ori r21, 0x1 // Z-Buffering command
+
+    addiu r23, 0x10 // Command size
+
+
+        ssv vc16, 4, 0, r22 // Store depth
+        ssv vc17, 4, 2, r22 
+        
+        vsubc vc23, vc17, vc21, f // Calculate v3-v1
+        vsub vc22, vc16, vc20, f
+        
+        vrcph vc24, 1, vc22, 1 // Get 1/(y3-y1) 
+        vrcpl vc25, 1, vc23, 1
+        vrcph vc24, 1, nullconst, 0
+        
+        vmudn vc25, vc25, v2nconst, v2n_2 // Shift left 1 for correct point position 
+        vmadh vc24, vc24, v2nconst, v2n_2        
+        vmadn vc25, nullconst, nullconst, f 
+        
+        vmudl vc26, vc23, vc25, e1 // Calculate DzDe = (z3-z1)/(y3-y1)
+        vmadm vc26, vc22, vc25, e1
+        vmadn vc27, vc23, vc24, e1
+        vmadh vc26, vc22, vc24, e1
+        
+        ssv vc26, 4, 8, r22 // Store DzDe
+        ssv vc27, 4, 10, r22 // Store DzDe, frac
+
+        vsubc vc25, vc19, vc17, f // Calculate v2-v1
+        vsub vc24, vc18, vc16, f
+
+        vor vc27, nullconst, nullconst, f // Clear vc27, vc29
+        vor vc29, nullconst, nullconst, f
+        
+        // The z-buffer code has to calculate dz/dx and dz/dy. This is done by
+        // performing a cross product of the two edges (v2-v1) and (v3-v1) to
+        // obtain a normal vector <a, b, c>, converting that to a plane 
+        // equation, and then taking the partial derivatives -a/c and -b/c 
+        // respectively.
+
+        vmov vc26, 0, vc22, e1 // Load cross product coefficients
+        vmov vc26, 1, vc22, e2
+        vmov vc27, 1, vc23, e2
+        vmov vc26, 2, vc22, e2
+        vmov vc27, 2, vc23, e2
+        vmov vc26, 3, vc22, e0
+        vmov vc26, 4, vc22, e0
+        vmov vc26, 5, vc22, e1
+
+        vmov vc28, 0, vc24, e2
+        vmov vc29, 0, vc25, e2
+        vmov vc28, 1, vc24, e1
+        vmov vc28, 2, vc24, e0
+        vmov vc28, 3, vc24, e2
+        vmov vc29, 3, vc25, e2
+        vmov vc28, 4, vc24, e1
+        vmov vc28, 5, vc24, e0
+
+        vmudl vc24, vc27, vc29, f // Calculate cross product (v2-v1) x (v3-v1)
+        vmadm vc24, vc26, vc29, f
+        vmadn vc25, vc27, vc28, f
+        vmadh vc24, vc26, vc28, f
+
+        vsubc vc23, vc25, vc25, q0
+        vsub vc22, vc24, vc24, q0
+
+        vrcph vc22, 5, vc22, 5 // Calculate 1/c
+        vrcpl vc23, 5, vc23, 5
+        vrcph vc22, 5, nullconst, f
+
+        vmudn vc25, vc23, v2nconst, v2n_2 // Shift left 1 for correct point position 
+        vmadh vc24, vc22, v2nconst, v2n_2        
+        vmadn vc25, nullconst, nullconst, f 
+
+        vmudl vc26, vc23, vc25, e5 // Calculate a/c, b/c 
+        vmadm vc26, vc22, vc25, e5
+        vmadn vc27, vc23, vc24, e5
+        vmadh vc26, vc22, vc24, e5
+
+        vsubc vc25, nullconst, vc27, f // Calculate -a/c, -b/c (dz/dx, dz/dy)
+        vsub vc24, nullconst, vc26, f
+
+        ssv vc24, 2, 4, r22 // Store DzDx
+        ssv vc25, 2, 6, r22 // Store DzDx, frac
+        
+        ssv vc24, 6, 12, r22 // Store DzDy
+        ssv vc25, 6, 14, r22 // Store DzDy, frac
+
+.NoZBuffer:
+        lw r17, (%lo(cmd) + 0x14)($zero) // Load DxHDy
+        lw r18, (%lo(cmd) + 0x1c)($zero) // Load DxMDy
+
+        bge r17, r18, .LeftMajor 
+        ori r16, $zero, 0
 
 .RightMajor:
     ori r16, $zero, 0x80
@@ -165,11 +262,12 @@ OPTri:
 .LeftMajor:
     sb r16, (%lo(cmd) + 1)($zero)
 
-        lqv vc30, 0, cmd, $zero // DELET THIS
-        lqv vc31, 0, cmd + 0x10, $zero
+        lqv vc30, 0, cmd + 0x20, $zero // DELET THIS
 
         vnop 0, 0, 0, 0
 
+    sb r21, (%lo(cmd))($zero) // Store triangle command
+   
     ori r24, $zero, %lo(cmd) // Push command
     jal XBUSPush
     move r25, r23 // Get length

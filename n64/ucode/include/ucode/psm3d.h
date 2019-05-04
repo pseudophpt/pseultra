@@ -178,7 +178,7 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
     }
 
 #define UCODE_PSM3D_LOAD_MTX_PUSH_MULTIPLY 0
-#define UCODE_PSM3D_LOAD_MTX_PUSH_LOAD 1
+#define UCODE_PSM3D_LOAD_MTX_PUSH_LOAD 1 // Transposed
 
 #define UCODE_PSM3D_LOAD_MTX_STACK_PROJECTION 0
 #define UCODE_PSM3D_LOAD_MTX_STACK_MODEL 1
@@ -732,30 +732,64 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
         (UCODE_PSM3D_AC_D_##acd1)\
     )
 
-#define UCODE_PSM3D_Z_SRC_PRIM 0x4
-#define UCODE_PSM3D_Z_SRC_PIXEL 0x0
+#define UCODE_PSM3D_Z_SRC_PRIM 1
+#define UCODE_PSM3D_Z_SRC_PIXEL 0
 
-#define UCODE_PSM3D_Z_WRITE_ON 0x20
-#define UCODE_PSM3D_Z_WRITE_OFF 0x0
+#define UCODE_PSM3D_Z_WRITE_ON 1
+#define UCODE_PSM3D_Z_WRITE_OFF 0
 
-#define UCODE_PSM3D_Z_COMPARE_ON 0x10
-#define UCODE_PSM3D_Z_COMPARE_OFF 0x0
+#define UCODE_PSM3D_Z_COMPARE_ON 1
+#define UCODE_PSM3D_Z_COMPARE_OFF 0
 
 #define usPSM3DSetZMode(src, write, compare) \
     usPSM3DSetOtherMode(\
         0x0, 0x34,\
         0x0,\
-        UCODE_PSM3D_Z_SRC_##src |\
-        UCODE_PSM3D_Z_WRITE_##write |\
-        UCODE_PSM3D_Z_COMPARE_##compare\
+        (UCODE_PSM3D_Z_SRC_##src << 2)|\
+        (UCODE_PSM3D_Z_WRITE_##write << 5)|\
+        (UCODE_PSM3D_Z_COMPARE_##compare << 4)\
     )
 #define uPSM3DSetZMode(dl, src, write, compare) \
     uPSM3DSetOtherMode(dl, \
         0x0, 0x34,\
         0x0,\
-        UCODE_PSM3D_Z_SRC_##src |\
-        UCODE_PSM3D_Z_WRITE_##write |\
-        UCODE_PSM3D_Z_COMPARE_##compare\
+        (UCODE_PSM3D_Z_SRC_##src << 2)|\
+        (UCODE_PSM3D_Z_WRITE_##write << 5)|\
+        (UCODE_PSM3D_Z_COMPARE_##compare << 4)\
+    )
+
+#define UCODE_PSM3D_IMAGE_READ_ON 1
+#define UCODE_PSM3D_IMAGE_READ_OFF 0
+
+#define usPSM3DSetImageReadMode(mode) \
+    usPSM3DSetOtherMode(\
+        0x0, 0x40,\
+        0x0,\
+        (UCODE_PSM3D_IMAGE_READ_##mode << 6)\
+    )
+#define uPSM3DSetImageReadMode(dl, mode) \
+    uPSM3DSetOtherMode(dl, \
+        0x0, 0x40,\
+        0x0,\
+        (UCODE_PSM3D_IMAGE_READ_##mode << 6)\
+    )
+
+#define UCODE_PSM3D_CYCLE_TYPE_1CYC 0
+#define UCODE_PSM3D_CYCLE_TYPE_2CYC 1
+#define UCODE_PSM3D_CYCLE_TYPE_COPY 2
+#define UCODE_PSM3D_CYCLE_TYPE_FILL 3
+
+#define usPSM3DSetCycleType(type)\
+    usPSM3DSetOtherMode(\
+        0x300000, 0x0,\
+        UCODE_PSM3D_CYCLE_TYPE_##type << 20,\
+        0x0\
+    )
+#define uPSM3DSetCycleType(dl, type)\
+    uPSM3DSetOtherMode(dl, \
+        0x300000, 0x0,\
+        UCODE_PSM3D_CYCLE_TYPE_##type << 20,\
+        0x0\
     )
 
 /*

@@ -29,7 +29,7 @@
 #define PSM3D_STATUS_INIT_BYTE (PSM3D_STATUS_WORD + 0) // Has the ucode been initialized?
 #define PSM3D_STATUS_TX_BYTE (PSM3D_STATUS_WORD + 1) // What's the status of the texture engine?
 
-#define PSM3D_MTX_SIZE 4 * 16 * 2
+#define PSM3D_MTX_SIZE 2 * 16 * 2
 #define PSM3D_MTX_COUNT 8
 
 #define PSM3D_VTX_SIZE 8
