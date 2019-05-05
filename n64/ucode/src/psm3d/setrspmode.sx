@@ -1,44 +1,47 @@
 /*
- * pseultra/n64/ucode/src/psm3d/settxmode.sx
- * PSM3D microcode SetTxMode function
+ * pseultra/n64/ucode/src/psm3d/setrspmode.sx
+ * PSM3D microcode SetRSPMode function
  * 
  * (C) pseudophpt 2018
  */
 
 //////////////////////////////////////////////////////////////////////////////
 //                                                                          // 
-// SetTxMode                                                                // 
+// SetRSPMode                                                               // 
 //                                                                          // 
-// Sets the PSM3D texturing mode                                            // 
+// Sets the PSM3D RSP modes                                                 // 
 //                                                                          // 
 // FORMAT:                                                                  // 
 //                                                                          // 
-// 03 -- -- -- -- -- MM DD                                                  // 
+// 03 MM MM MM 00 DD DD DD                                                  // 
 //                                                                          // 
 // M: Mask for D bits                                                       // 
 //                                                                          // 
-// D: E--- -TTT                                                             // 
+// D: ---- ---- ---- -ZcC E--- -TTT                                         // 
 //     E: Textures enabled                                                  // 
 //     T: Tile to use                                                       // 
+//     c: Clockwise culling                                                 // 
+//     C: Counterclockwise culling                                          //
+//     Z: Z buffering calculations for tris                                 // 
 //                                                                          // 
 //////////////////////////////////////////////////////////////////////////////
 
-.global OPSetTxMode
+.global OPSetRSPMode
 
-OPSetTxMode:
+OPSetRSPMode:
 
 #define mask r16
 #define data r17
 
-    lb mask, (%lo(cmd) + 6)($zero) // Load mask, data, and current mode for high word
-    lb data, (%lo(cmd) + 7)($zero)
+    lw mask, (%lo(cmd) + 0)($zero) // Load mask, data, and current mode for high word
+    lw data, (%lo(cmd) + 4)($zero)
 
     and data, mask // Mask data
 
     nor mask, mask // Invert mask to mask mode
-    and tx_mode, data 
+    and rsp_mode, mask
 
-    or tx_mode, data // Put data together
+    or rsp_mode, data // Put data together
 
 #undef data
 #undef mask

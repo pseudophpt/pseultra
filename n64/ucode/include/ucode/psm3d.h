@@ -14,6 +14,9 @@
  * This file defines macros related to the PSM3D microcode 
  */
 
+// TODO: Make SetOtherMode combinable by providing a way to list which bits
+// are being edited, and their values
+
 #ifndef UCODE_PSM3D_H_GUARD
 #define UCODE_PSM3D_H_GUARD
 
@@ -87,7 +90,7 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
 #define UCODE_PSM3D_OP_NOOP 0x00
 #define UCODE_PSM3D_OP_END_DL 0x01
 #define UCODE_PSM3D_OP_SET_OTHER_MODE 0x02
-#define UCODE_PSM3D_OP_SET_TX_MODE 0x03
+#define UCODE_PSM3D_OP_SET_RSP_MODE 0x03
 #define UCODE_PSM3D_OP_RECT 0x04
 #define UCODE_PSM3D_OP_LOAD_VTX 0x05
 #define UCODE_PSM3D_OP_LOAD_MTX 0x06
@@ -108,22 +111,49 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
 #define usPSM3DSetOtherMode(maskh, maskl, datah, datal) { _FMT(UCODE_PSM3D_OP_SET_OTHER_MODE, 24, 8) | _FMT(maskh, 0, 24) , _FMT(datah, 0, 24) } , { maskl , datal }
 #define uPSM3DSetOtherMode(dl, maskh, maskl, datah, datal) *((dl) ++) = (uPSM3DDispCmd) { _FMT(UCODE_PSM3D_OP_SET_OTHER_MODE, 24, 8) | _FMT(maskh, 0, 24) , _FMT(datah, 0, 24) }; *((dl) ++) = (uPSM3DDispCmd) {  maskl , datal }
 
-#define UCODE_PSM3D_TXMODE_TEXTURING_KEEP 0
-#define UCODE_PSM3D_TXMODE_TEXTURING_ON 0x8080
-#define UCODE_PSM3D_TXMODE_TEXTURING_OFF 0x8000
 
-#define usPSM3DSetTextureMode(texturing) \
+#define UCODE_PSM3D_RSPMODE_TEXTURING 0x80
+#define UCODE_PSM3D_RSPMODE_TEXTURING_ON 0x80
+#define UCODE_PSM3D_RSPMODE_TEXTURING_OFF 0
+
+#define UCODE_PSM3D_RSPMODE_TEXTURE_TILE 0x07
+#define UCODE_PSM3D_RSPMODE_TEXTURE_TILENO(x) (x & 0x07)
+
+#define UCODE_PSM3D_RSPMODE_CULL 0x300
+#define UCODE_PSM3D_RSPMODE_CULL_CLOCK 0x200
+#define UCODE_PSM3D_RSPMODE_CULL_COUNTER 0x100
+#define UCODE_PSM3D_RSPMODE_CULL_NONE 0x000
+
+#define UCODE_PSM3D_RSPMODE_ZBUF 0x400
+#define UCODE_PSM3D_RSPMODE_ZBUF_OFF 0
+#define UCODE_PSM3D_RSPMODE_ZBUF_ON 0x400
+
+#define usPSM3DSetRSPMode(mask, data) \
+    {\
+        _FMT(UCODE_PSM3D_OP_SET_RSP_MODE, 24, 8) | _FMT(mask, 0, 24)\
+            ,\
+        _FMT(data, 0, 24)\
+    }
+#define uPSM3DSetRSPMode(dl, mask, data) \
+    *((dl) ++) = (uPSM3DDispCmd) {\
+        _FMT(UCODE_PSM3D_OP_SET_RSP_MODE, 24, 8) | _FMT(mask, 0, 24)\
+            ,\
+        _FMT(data, 0, 24)\
+    }
+
+#define usPSM3DSetGeomMode(cull) \
     {\
         _FMT(UCODE_PSM3D_OP_SET_TX_MODE, 24, 8)\
             ,\
         UCODE_PSM3D_TXMODE_TEXTURING_##texturing\
     }
-#define uPSM3DSetTextureMode(dl, texturing) \
+#define uPSM3DSetGeomMode(dl, texturing) \
     *((dl) ++) = (uPSM3DDispCmd) {\
         _FMT(UCODE_PSM3D_OP_SET_TX_MODE, 24, 8)\
             ,\
         UCODE_PSM3D_TXMODE_TEXTURING_##texturing\
     }
+
 
 #define usPSM3DFillRectangle(xh, yh, xl, yl) \
     {\

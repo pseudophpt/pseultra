@@ -181,7 +181,9 @@ OPTri:
         ssv vc26, 2, cmd + 0x4, $zero
         ssv vc26, 4, cmd + 0x2, $zero
 
-    addiu r22, 0x20 // Add to command pointer
+    andi r24, rsp_mode, PSM3D_MODE_ZBUF
+    beq r24, r0, .NoZBuffer
+    addiu r22, 0x20 // Add to command pointer     
 
 .ZBuffer: // Make sure to check if z buffering is enabled in the RSP options
     ori r21, 0x1 // Z-Buffering command

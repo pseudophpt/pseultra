@@ -47,8 +47,8 @@
 .global OPRect
 
 OPRect:
-
-    bltz tx_mode, .TextureRect // Branch to TextureRect if the texture enable bit is set
+    andi r24, rsp_mode, PSM3D_MODE_TEXTURING
+    bltz r24, .TextureRect // Branch to TextureRect if the texture enable bit is set
 
 // Draw rectangle by filling
 

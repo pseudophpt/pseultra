@@ -6,6 +6,7 @@
 - PSM3D PopMtx command
 - Math library
 - PSM3D Z-buffered triangles
+- Triangle culling
 
 ### Changed
 - PSM3D matrix stack pointer to be stored in register instead of DMEM
@@ -14,6 +15,7 @@
 ### Fixed
 - Bug in sign extension of RSP load/store offsets
 - Bug in VMOV instructions using incorrect element index type
+- Fix matrix size
 
 ### Removed
 - Newton-Raphson iteration for textured rectangles

@@ -27,7 +27,6 @@
 
 #define PSM3D_STATUS_WORD 0xFFC // Location of the status word in SP DMEM
 #define PSM3D_STATUS_INIT_BYTE (PSM3D_STATUS_WORD + 0) // Has the ucode been initialized?
-#define PSM3D_STATUS_TX_BYTE (PSM3D_STATUS_WORD + 1) // What's the status of the texture engine?
 
 #define PSM3D_MTX_SIZE 2 * 16 * 2
 #define PSM3D_MTX_COUNT 8
@@ -61,7 +60,14 @@
 
 #define dl_dram_ptr r2
 #define mtx_stack_ptr r3
-#define tx_mode r4
+ 
+#define PSM3D_MODE_TEXTURE_TILE 0x07 // Which texture tile
+#define PSM3D_MODE_TEXTURING 0x80 // Texturing on?
+#define PSM3D_MODE_CLOCK_CULL 0x200 // Clockwise culling?
+#define PSM3D_MODE_COUNTER_CULL 0x200 // Counter-clockwise culling?
+#define PSM3D_MODE_ZBUF 0x400 // Z buffering tri calculations enabled 
+
+#define rsp_mode r4
 
 #define op_ret b .ExecutionLoop
 
@@ -137,7 +143,7 @@ uPSM3DTextStart:
 //
 
 .ScalarInit:
-    or tx_mode, r0, r0 // Texture mode = 0
+    or rsp_mode, r0, r0 // Mode = 0
 //
 // Begin execution
 //
@@ -202,7 +208,7 @@ uPSM3DTextStart:
 #include "psm3d/noop.sx"
 #include "psm3d/enddl.sx"
 #include "psm3d/setothermode.sx"
-#include "psm3d/settxmode.sx"
+#include "psm3d/setrspmode.sx"
 #include "psm3d/rect.sx"
 #include "psm3d/loadvtx.sx"
 #include "psm3d/loadmtx.sx"
@@ -255,7 +261,7 @@ jump_tbl:
 .word OPNoop 
 .word OPEndDL
 .word OPSetOtherMode
-.word OPSetTxMode
+.word OPSetRSPMode
 .word OPRect
 .word OPLoadVtx
 .word OPLoadMtx
