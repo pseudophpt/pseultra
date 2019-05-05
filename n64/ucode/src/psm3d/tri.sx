@@ -59,22 +59,33 @@ OPTri:
 
         ldv vc20, 0, vtx_cache, r16 // Load vertex
 
-    bnez r20, .Cull // Cull if all vertices are outside clip bounds
+    bnez r20, .Clip // Cull if all vertices are outside clip bounds
     andi r21, 0x04 // Only care about Z for OR
-    bnez r21, .Cull // Cull if any vertex outside Z clip bounds
+    bnez r21, .Clip // Cull if any vertex outside Z clip bounds
     
     ori r21, $zero, 0x08 // Triangle command
     ori r22, $zero, %lo(cmd) // Command pointer
-    b .NoCull
+    b .NoClip
     ori r23, $zero, 0x20 // Command length
 
-.Cull:
+.Clip:
     op_ret // Return if triangle culled
     nop
 
-.NoCull:
+.NoClip:
+    /*
+     * Register 24 will hold the switch parity. Since the cross product is 
+     * performed on sorted vectors, we keep track of the parity of the
+     * swaps; an odd number negates the clockwise/counterclockwise order,
+     * while an even maintains it. This is required so the cross product
+     * calculation doesnt need to be repeated. 0 = even, 0x8000 = odd
+     */
+    ori r24, r0, 0 
+
     bge r19, r17, .NoSwapXZ // if (x > z) swap(x, z)
     nop
+
+    xori r24, 0x8000 // Swap parity update
 
         vor vc22, nullconst, vc16, f // Swap X and Z
     
@@ -93,6 +104,8 @@ OPTri:
     bge r18, r17, .NoSwapXY // if (x > y) swap(x, y)
     nop
     
+    xori r24, 0x8000 // Swap parity update
+    
         vor vc22, nullconst, vc16, f // Swap X and Y
 
     or r20, $zero, r17
@@ -109,6 +122,8 @@ OPTri:
     
     bge r19, r18, .NoSwapYZ // if (y > z) swap(y, z)
     nop
+    
+    xori r24, 0x8000 // Swap parity update
     
         vor vc22, nullconst, vc20, f // Swap Y and Z
 
@@ -130,7 +145,63 @@ OPTri:
         vmov vc17, 2, vc16, e3 // Load z frac
         vmov vc19, 2, vc18, e3 
         vmov vc21, 2, vc20, e3 
+       
+        vsubc vc23, vc17, vc21, f // Calculate v3-v1
+        vsub vc22, vc16, vc20, f
         
+        vsubc vc25, vc19, vc17, f // Calculate v2-v1
+        vsub vc24, vc18, vc16, f
+
+        vmov vc26, 0, vc22, e1 // Load cross product coefficients
+        vmov vc26, 1, vc22, e2
+        vmov vc27, 1, vc23, e2
+        vmov vc26, 2, vc22, e2
+        vmov vc27, 2, vc23, e2
+        vmov vc26, 3, vc22, e0
+        vmov vc26, 4, vc22, e0
+        vmov vc26, 5, vc22, e1
+
+        vmov vc28, 0, vc24, e2
+        vmov vc29, 0, vc25, e2
+        vmov vc28, 1, vc24, e1
+        vmov vc28, 2, vc24, e0
+        vmov vc28, 3, vc24, e2
+        vmov vc29, 3, vc25, e2
+        vmov vc28, 4, vc24, e1
+        vmov vc28, 5, vc24, e0
+
+        vmudl vc24, vc27, vc29, f // Calculate cross product (v2-v1) x (v3-v1)
+        vmadm vc24, vc26, vc29, f
+        vmadn vc25, vc27, vc28, f
+        vmadh vc24, vc26, vc28, f
+
+        vsubc vc31, vc25, vc25, q0 // Store cross product in vc30/vc31
+        vsub vc30, vc24, vc24, q0
+
+        ssv vc30, 10, cmd + 0x8, $zero // Store z int in XL temporarily
+        lh r25, (%lo(cmd) + 0x8)($zero)
+        xor r24, r25 // XOR z int with parity
+        andi r24, 0x8000 // Just get short sign bit
+        beq r24, r0, .PosWinding // Check if winding is positive
+        nop
+
+.NegWinding:
+
+    andi r24, rsp_mode, PSM3D_MODE_CLOCK_CULL
+    beq r24, r0, .NoCull
+    nop
+    op_ret
+
+.PosWinding:
+
+    andi r24, rsp_mode, PSM3D_MODE_COUNTER_CULL
+    beq r24, r0, .NoCull
+    nop
+    op_ret
+    nop
+
+.NoCull:
+
         ssv vc18, 0, cmd + 0x8, $zero // Store XL, int
         ssv nullconst, 0, cmd + 0xa, $zero // Store XL, frac
         
@@ -212,9 +283,6 @@ OPTri:
         ssv vc26, 4, 8, r22 // Store DzDe
         ssv vc27, 4, 10, r22 // Store DzDe, frac
 
-        vsubc vc25, vc19, vc17, f // Calculate v2-v1
-        vsub vc24, vc18, vc16, f
-
         vor vc27, nullconst, nullconst, f // Clear vc27, vc29
         vor vc29, nullconst, nullconst, f
         
@@ -224,44 +292,18 @@ OPTri:
         // equation, and then taking the partial derivatives -a/c and -b/c 
         // respectively.
 
-        vmov vc26, 0, vc22, e1 // Load cross product coefficients
-        vmov vc26, 1, vc22, e2
-        vmov vc27, 1, vc23, e2
-        vmov vc26, 2, vc22, e2
-        vmov vc27, 2, vc23, e2
-        vmov vc26, 3, vc22, e0
-        vmov vc26, 4, vc22, e0
-        vmov vc26, 5, vc22, e1
-
-        vmov vc28, 0, vc24, e2
-        vmov vc29, 0, vc25, e2
-        vmov vc28, 1, vc24, e1
-        vmov vc28, 2, vc24, e0
-        vmov vc28, 3, vc24, e2
-        vmov vc29, 3, vc25, e2
-        vmov vc28, 4, vc24, e1
-        vmov vc28, 5, vc24, e0
-
-        vmudl vc24, vc27, vc29, f // Calculate cross product (v2-v1) x (v3-v1)
-        vmadm vc24, vc26, vc29, f
-        vmadn vc25, vc27, vc28, f
-        vmadh vc24, vc26, vc28, f
-
-        vsubc vc23, vc25, vc25, q0
-        vsub vc22, vc24, vc24, q0
-
-        vrcph vc22, 5, vc22, 5 // Calculate 1/c
-        vrcpl vc23, 5, vc23, 5
+        vrcph vc22, 5, vc30, 5 // Calculate 1/c
+        vrcpl vc23, 5, vc31, 5
         vrcph vc22, 5, nullconst, f
 
         vmudn vc25, vc23, v2nconst, v2n_2 // Shift left 1 for correct point position 
         vmadh vc24, vc22, v2nconst, v2n_2        
         vmadn vc25, nullconst, nullconst, f 
 
-        vmudl vc26, vc23, vc25, e5 // Calculate a/c, b/c 
-        vmadm vc26, vc22, vc25, e5
-        vmadn vc27, vc23, vc24, e5
-        vmadh vc26, vc22, vc24, e5
+        vmudl vc26, vc31, vc25, e5 // Calculate a/c, b/c 
+        vmadm vc26, vc30, vc25, e5
+        vmadn vc27, vc31, vc24, e5
+        vmadh vc26, vc30, vc24, e5
 
         vsubc vc25, nullconst, vc27, f // Calculate -a/c, -b/c (dz/dx, dz/dy)
         vsub vc24, nullconst, vc26, f

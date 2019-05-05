@@ -64,7 +64,7 @@
 #define PSM3D_MODE_TEXTURE_TILE 0x07 // Which texture tile
 #define PSM3D_MODE_TEXTURING 0x80 // Texturing on?
 #define PSM3D_MODE_CLOCK_CULL 0x200 // Clockwise culling?
-#define PSM3D_MODE_COUNTER_CULL 0x200 // Counter-clockwise culling?
+#define PSM3D_MODE_COUNTER_CULL 0x100 // Counter-clockwise culling?
 #define PSM3D_MODE_ZBUF 0x400 // Z buffering tri calculations enabled 
 
 #define rsp_mode r4

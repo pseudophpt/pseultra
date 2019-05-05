@@ -6,7 +6,8 @@
 - PSM3D PopMtx command
 - Math library
 - PSM3D Z-buffered triangles
-- Triangle culling
+- Triangle backface culling
+- Triangle clipping
 
 ### Changed
 - PSM3D matrix stack pointer to be stored in register instead of DMEM
