@@ -30,28 +30,49 @@
 // Maybe improve sorting code, then perform the calculation cyclically?
 
 OPTri:
+    // Load vertices and perform culling. ORs and ANDs all clip flags. If the 
+    // X or Y or Z AND results are 1, cull. If Z OR results are 1, cull.
+
     lb r16, (%lo(cmd) + 1)($zero) // Get vertex cache offset
     sll r16, 4 
     lh r17, (%lo(vtx_cache) + 2)(r16) // Get y coordinate
+    lb r20, (%lo(vtx_cache) + 9)(r16) // Get clip flags
+    or r21, r20, r0 // Duplicate for OR
 
         ldv vc16, 0, vtx_cache, r16 // Load vertex
 
     lb r16, (%lo(cmd) + 2)($zero) // Get vertex cache offset
     sll r16, 4 
     lh r18, (%lo(vtx_cache) + 2)(r16) // Get y coordinate
+    lb r22, (%lo(vtx_cache) + 9)(r16) // Get clip flags
+    and r20, r22 // Perform OR and AND
+    or r21, r22
 
         ldv vc18, 0, vtx_cache, r16 // Load vertex
 
     lb r16, (%lo(cmd) + 3)($zero) // Get vertex cache offset
     sll r16, 4 
     lh r19, (%lo(vtx_cache) + 2)(r16) // Get y coordinate
+    lb r22, (%lo(vtx_cache) + 9)(r16) // Get clip flags
+    and r20, r22 // Perform OR and AND
+    or r21, r22
 
         ldv vc20, 0, vtx_cache, r16 // Load vertex
 
+    bnez r20, .Cull // Cull if all vertices are outside clip bounds
+    andi r21, 0x04 // Only care about Z for OR
+    bnez r21, .Cull // Cull if any vertex outside Z clip bounds
+    
     ori r21, $zero, 0x08 // Triangle command
     ori r22, $zero, %lo(cmd) // Command pointer
+    b .NoCull
     ori r23, $zero, 0x20 // Command length
 
+.Cull:
+    op_ret // Return if triangle culled
+    nop
+
+.NoCull:
     bge r19, r17, .NoSwapXZ // if (x > z) swap(x, z)
     nop
 
