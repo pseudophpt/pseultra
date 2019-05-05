@@ -32,7 +32,7 @@
 #define PSM3D_MTX_SIZE 2 * 16 * 2
 #define PSM3D_MTX_COUNT 8
 
-#define PSM3D_VTX_SIZE 8
+#define PSM3D_VTX_SIZE 16
 #define PSM3D_VTX_COUNT 16
 
 #define v2nconst vc0 // Contains powers of 2

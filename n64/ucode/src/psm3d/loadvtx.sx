@@ -24,7 +24,15 @@
 //////////////////////////////////////////////////////////////////////////////
 
 // Stored vertex format:
-// X, Y, Zi, Zf
+// X, Y, Zi, Zf, F, 0, 0, 0
+// F: Flags
+// -------- --xyzXYZ 
+// x: outside of negative x clip space
+// y: outside of negative y clip space
+// z: outside of negative z clip space
+// X: outside of positive x clip space
+// Y: outside of positive y clip space
+// Z: outside of positive z clip space
 
 // TODO: Pre-multiply projection and model matrices
 // TODO: Two vertices at a time
@@ -35,7 +43,7 @@ OPLoadVtx:
 
     lb r16, (%lo(cmd) + 3)($zero) // Load count
     lb r17, (%lo(cmd) + 2)($zero) // Load position
-    sll r17, 3
+    sll r17, 4
     addiu r17, %lo(vtx_cache)
     lw r18, (%lo(cmd) + 4)($zero) // Load DRAM address
     
@@ -114,7 +122,7 @@ OPLoadVtx:
 
     addiu r18, 16
     bne r16, $zero, .VertexLoop // Jump back if we're not done 
-    addiu r17, 8
+    addiu r17, PSM3D_VTX_SIZE
 
     op_ret
     nop

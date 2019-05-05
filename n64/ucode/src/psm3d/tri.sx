@@ -31,19 +31,19 @@
 
 OPTri:
     lb r16, (%lo(cmd) + 1)($zero) // Get vertex cache offset
-    sll r16, 3 
+    sll r16, 4 
     lh r17, (%lo(vtx_cache) + 2)(r16) // Get y coordinate
 
         ldv vc16, 0, vtx_cache, r16 // Load vertex
 
     lb r16, (%lo(cmd) + 2)($zero) // Get vertex cache offset
-    sll r16, 3 
+    sll r16, 4 
     lh r18, (%lo(vtx_cache) + 2)(r16) // Get y coordinate
 
         ldv vc18, 0, vtx_cache, r16 // Load vertex
 
     lb r16, (%lo(cmd) + 3)($zero) // Get vertex cache offset
-    sll r16, 3 
+    sll r16, 4 
     lh r19, (%lo(vtx_cache) + 2)(r16) // Get y coordinate
 
         ldv vc20, 0, vtx_cache, r16 // Load vertex
