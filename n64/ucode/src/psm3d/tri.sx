@@ -152,31 +152,11 @@ OPTri:
         vsubc vc25, vc19, vc17, f // Calculate v2-v1
         vsub vc24, vc18, vc16, f
 
-        vmov vc26, 0, vc22, e1 // Load cross product coefficients
-        vmov vc26, 1, vc22, e2
-        vmov vc27, 1, vc23, e2
-        vmov vc26, 2, vc22, e2
-        vmov vc27, 2, vc23, e2
-        vmov vc26, 3, vc22, e0
-        vmov vc26, 4, vc22, e0
-        vmov vc26, 5, vc22, e1
+    jal CrossProduct
+    nop
 
-        vmov vc28, 0, vc24, e2
-        vmov vc29, 0, vc25, e2
-        vmov vc28, 1, vc24, e1
-        vmov vc28, 2, vc24, e0
-        vmov vc28, 3, vc24, e2
-        vmov vc29, 3, vc25, e2
-        vmov vc28, 4, vc24, e1
-        vmov vc28, 5, vc24, e0
-
-        vmudl vc24, vc27, vc29, f // Calculate cross product (v2-v1) x (v3-v1)
-        vmadm vc24, vc26, vc29, f
-        vmadn vc25, vc27, vc28, f
-        vmadh vc24, vc26, vc28, f
-
-        vsubc vc31, vc25, vc25, q0 // Store cross product in vc30/vc31
-        vsub vc30, vc24, vc24, q0
+        vor vc30, vc22, vc22, f // Store cross product
+        vor vc31, vc23, vc23, f
 
         ssv vc30, 10, cmd + 0x8, $zero // Store z int in XL temporarily
         lh r25, (%lo(cmd) + 0x8)($zero)
@@ -350,6 +330,38 @@ CalcTriDxDy:
         vmudm vc26, vc22, vc29, h1 // Calculate DxLDy
         vmadh vc26, vc22, vc28, h1 
         vmadn vc27, nullconst, nullconst, f
+
+    jr $ra
+    nop
+
+// Subroutine to calculate cross product
+// 
+CrossProduct:
+        vmov vc26, 0, vc22, e1 // Load cross product coefficients
+        vmov vc26, 1, vc22, e2
+        vmov vc27, 1, vc23, e2
+        vmov vc26, 2, vc22, e2
+        vmov vc27, 2, vc23, e2
+        vmov vc26, 3, vc22, e0
+        vmov vc26, 4, vc22, e0
+        vmov vc26, 5, vc22, e1
+
+        vmov vc28, 0, vc24, e2
+        vmov vc29, 0, vc25, e2
+        vmov vc28, 1, vc24, e1
+        vmov vc28, 2, vc24, e0
+        vmov vc28, 3, vc24, e2
+        vmov vc29, 3, vc25, e2
+        vmov vc28, 4, vc24, e1
+        vmov vc28, 5, vc24, e0
+
+        vmudl vc24, vc27, vc29, f // Calculate cross product (v2-v1) x (v3-v1)
+        vmadm vc24, vc26, vc29, f
+        vmadn vc25, vc27, vc28, f
+        vmadh vc24, vc26, vc28, f
+
+        vsubc vc23, vc25, vc25, q0 // Store cross product in vc30/vc31
+        vsub vc22, vc24, vc24, q0
 
     jr $ra
     nop
