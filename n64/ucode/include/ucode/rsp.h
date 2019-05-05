@@ -43,9 +43,9 @@
 /*
  * RSP COP2 Registers
  */
-#define VCO 0
-#define VCC 1
-#define VCE 2
+#define VCO $0
+#define VCC $1
+#define VCE $2
 
 /*
  * Instructions not defined

@@ -109,7 +109,7 @@ OPTri:
         vmov vc17, 2, vc16, e3 // Load z frac
         vmov vc19, 2, vc18, e3 
         vmov vc21, 2, vc20, e3 
-
+        
         ssv vc18, 0, cmd + 0x8, $zero // Store XL, int
         ssv nullconst, 0, cmd + 0xa, $zero // Store XL, frac
         
