@@ -24,7 +24,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 // Stored vertex format:
-// X, Y, Zi, Zf, F, 0, 0, 0
+// X, Y, Zi, Zf, F, 0, S, T
 // F: Flags
 // -------- --xyzXYZ 
 // x: outside of negative x clip space
@@ -52,7 +52,10 @@ OPLoadVtx:
     move r24, r18 // Load from DRAM address
     ori r25, $zero, %lo(cmd) // Load into command 
     jal DMARead 
-    ori r26, $zero, 15 // Read vertex
+    ori r26, $zero, 31 // Read vertex
+
+    lw r24, (%lo(cmd) + 16)($zero) // Load s and t
+    sw r24, 12(r17)
 
 /*
  * Actual shading should be performed here by calculating the dot product of 
@@ -137,7 +140,7 @@ OPLoadVtx:
 
     addiu r16, -1 // Decrement count left
 
-    addiu r18, 16
+    addiu r18, 32
     bne r16, $zero, .VertexLoop // Jump back if we're not done 
     addiu r17, PSM3D_VTX_SIZE
 

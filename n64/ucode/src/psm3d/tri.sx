@@ -30,6 +30,10 @@
 // Maybe improve sorting code, then perform the calculation cyclically?
 
 OPTri:
+    vor vc17, nullconst, nullconst, f // Make fractional registers
+    vor vc19, nullconst, nullconst, f
+    vor vc21, nullconst, nullconst, f
+    
     // Load vertices and perform culling. ORs and ANDs all clip flags. If the 
     // X or Y or Z AND results are 1, cull. If Z OR results are 1, cull.
 
@@ -40,6 +44,7 @@ OPTri:
     or r21, r20, r0 // Duplicate for OR
 
         ldv vc16, 0, vtx_cache, r16 // Load vertex
+        llv vc16, 8, vtx_cache + 12, r16 // Load s, t
 
     lb r16, (%lo(cmd) + 2)($zero) // Get vertex cache offset
     sll r16, 4 
@@ -49,6 +54,7 @@ OPTri:
     or r21, r22
 
         ldv vc18, 0, vtx_cache, r16 // Load vertex
+        llv vc18, 8, vtx_cache + 12, r16 // Load s, t
 
     lb r16, (%lo(cmd) + 3)($zero) // Get vertex cache offset
     sll r16, 4 
@@ -58,6 +64,7 @@ OPTri:
     or r21, r22
 
         ldv vc20, 0, vtx_cache, r16 // Load vertex
+        llv vc20, 8, vtx_cache + 12, r16 // Load s, t
 
     bnez r20, .Clip // Cull if all vertices are outside clip bounds
     andi r21, 0x04 // Only care about Z for OR
@@ -73,6 +80,45 @@ OPTri:
     nop
 
 .NoClip:
+    vmov vc17, 2, vc16, e3 // Load z frac
+    vmov vc19, 2, vc18, e3 
+    vmov vc21, 2, vc20, e3 
+
+    vsubc vc23, vc17, vc21, f // Calculate v3-v1
+    vsub vc22, vc16, vc20, f
+        
+    vsubc vc25, vc19, vc17, f // Calculate v2-v1
+    vsub vc24, vc18, vc16, f
+
+    ori r24, r0, 0 // Don't divide by -z
+
+    jal CrossProduct
+    nop
+
+        vor nullconst, nullconst, nullconst, f
+        ssv vc26, 10, cmd + 0x8, $zero // Store z int in XL temporarily
+    
+    lh r25, (%lo(cmd) + 0x8)($zero)
+    xor r24, r25 // XOR z int with parity
+    andi r24, 0x8000 // Just get short sign bit
+    beq r24, r0, .PosWinding // Check if winding is positive
+    nop
+
+.NegWinding:
+    andi r24, rsp_mode, PSM3D_MODE_CLOCK_CULL
+    beq r24, r0, .NoCull
+    nop
+    op_ret
+
+.PosWinding:
+    andi r24, rsp_mode, PSM3D_MODE_COUNTER_CULL
+    beq r24, r0, .NoCull
+    nop
+    op_ret
+    nop
+
+.NoCull:
+       
     /*
      * Register 24 will hold the switch parity. Since the cross product is 
      * performed on sorted vectors, we keep track of the parity of the
@@ -138,50 +184,25 @@ OPTri:
     or r19, $zero, r20
 
 .NoSwapYZ:
-        vor vc17, nullconst, nullconst, f // Make fractional registers
-        vor vc19, nullconst, nullconst, f
-        vor vc21, nullconst, nullconst, f
-
         vmov vc17, 2, vc16, e3 // Load z frac
         vmov vc19, 2, vc18, e3 
         vmov vc21, 2, vc20, e3 
        
-        vsubc vc23, vc17, vc21, f // Calculate v3-v1
-        vsub vc22, vc16, vc20, f
+        vmov vc17, 4, vc16, e4 // Store s, t in frac parts
+        vmov vc17, 5, vc16, e5
+        vmov vc16, 4, nullconst, f
+        vmov vc16, 5, nullconst, f
         
-        vsubc vc25, vc19, vc17, f // Calculate v2-v1
-        vsub vc24, vc18, vc16, f
+        vmov vc19, 4, vc18, e4 
+        vmov vc19, 5, vc18, e5
+        vmov vc18, 4, nullconst, f
+        vmov vc18, 5, nullconst, f
 
-    jal CrossProduct
-    nop
-
-        vor vc30, vc22, vc22, f // Store cross product
-        vor vc31, vc23, vc23, f
-
-        ssv vc30, 10, cmd + 0x8, $zero // Store z int in XL temporarily
-        lh r25, (%lo(cmd) + 0x8)($zero)
-        xor r24, r25 // XOR z int with parity
-        andi r24, 0x8000 // Just get short sign bit
-        beq r24, r0, .PosWinding // Check if winding is positive
-        nop
-
-.NegWinding:
-
-    andi r24, rsp_mode, PSM3D_MODE_CLOCK_CULL
-    beq r24, r0, .NoCull
-    nop
-    op_ret
-
-.PosWinding:
-
-    andi r24, rsp_mode, PSM3D_MODE_COUNTER_CULL
-    beq r24, r0, .NoCull
-    nop
-    op_ret
-    nop
-
-.NoCull:
-
+        vmov vc21, 4, vc20, e4 
+        vmov vc21, 5, vc20, e5
+        vmov vc20, 4, nullconst, f
+        vmov vc20, 5, nullconst, f
+        
         ssv vc18, 0, cmd + 0x8, $zero // Store XL, int
         ssv nullconst, 0, cmd + 0xa, $zero // Store XL, frac
         
@@ -232,18 +253,47 @@ OPTri:
         ssv vc26, 2, cmd + 0x4, $zero
         ssv vc26, 4, cmd + 0x2, $zero
 
-    andi r24, rsp_mode, PSM3D_MODE_ZBUF
-    beq r24, r0, .NoZBuffer
     addiu r22, 0x20 // Add to command pointer     
 
-.ZBuffer: // Make sure to check if z buffering is enabled in the RSP options
-    ori r21, 0x1 // Z-Buffering command
+    andi r24, rsp_mode, PSM3D_MODE_TEXTURING | PSM3D_MODE_ZBUF // Texturing and z buffer triangles use z coefficients
+    beq r24, r0, .NoCalcZ
+    nop
 
-    addiu r23, 0x10 // Command size
+// Calculates DzDe, DzDx, DzDy in format of z coeffs
+.CalcZ:
+        // The z-buffer code has to calculate dz/dx and dz/dy. This is done by
+        // performing a cross product of the two edges (v2-v1) and (v3-v1) to
+        // obtain a normal vector <a, b, c>, converting that to a plane 
+        // equation, and then taking the partial derivatives -a/c and -b/c 
+        // respectively.
 
-        ssv vc16, 4, 0, r22 // Store depth
-        ssv vc17, 4, 2, r22 
+        vsubc vc23, vc17, vc21, f // Calculate v3-v1
+        vsub vc22, vc16, vc20, f
         
+        vsubc vc25, vc19, vc17, f // Calculate v2-v1
+        vsub vc24, vc18, vc16, f
+        
+        ori r24, r0, 1 // Divide by -z
+
+    jal CrossProduct
+    nop
+        
+        vmov vc30, 2, vc26, e1 // Store DzDx
+        vmov vc30, 3, vc26, e1
+        
+        vmov vc30, 6, vc26, e1 // Store DzDy
+        vmov vc30, 7, vc26, e1
+/*
+        ssv vc26, 2, 4, r22 // Store DzDx
+        ssv vc27, 2, 6, r22 // Store DzDx, frac
+        
+        ssv vc26, 6, 12, r22 // Store DzDy
+        ssv vc27, 6, 14, r22 // Store DzDy, frac
+*/
+ 
+        vmov vc30, 0, vc16, e2
+        vmov vc30, 1, vc17, e2
+
         vsubc vc23, vc17, vc21, f // Calculate v3-v1
         vsub vc22, vc16, vc20, f
         
@@ -259,40 +309,118 @@ OPTri:
         vmadm vc26, vc22, vc25, e1
         vmadn vc27, vc23, vc24, e1
         vmadh vc26, vc22, vc24, e1
-        
+
+        vmov vc30, 4, vc26, e2
+        vmov vc30, 5, vc27, e2
+/*
         ssv vc26, 4, 8, r22 // Store DzDe
         ssv vc27, 4, 10, r22 // Store DzDe, frac
+*/ 
 
-        vor vc27, nullconst, nullconst, f // Clear vc27, vc29
-        vor vc29, nullconst, nullconst, f
+.NoCalcZ:
+
+    andi r24, rsp_mode, PSM3D_MODE_TEXTURING
+    beq r24, r0, .NoTex
+    nop
+
+.Tex:
+    ori r21, 0x2 // Texturing command
+
+    addiu r23, 0x40
+
+        sdv nullconst, 0, 0x0, r22
+        sdv nullconst, 0, 0x8, r22
+        sdv nullconst, 0, 0x10, r22
+        sdv nullconst, 0, 0x18, r22
+        sdv nullconst, 0, 0x20, r22
+        sdv nullconst, 0, 0x28, r22
+        sdv nullconst, 0, 0x30, r22
+        sdv nullconst, 0, 0x38, r22
+        ssv v2nconst, 0, 0x04, r22 
+        slv vc17, 8, 0, r22 // Store s, t int // 72C
+        slv nullconst, 0, 0x10, r22 // Store s, t frac (0)
+
+        vsubc vc23, vc17, vc21, f // Calculate v3-v1
+        vsub vc22, vc16, vc20, f
         
-        // The z-buffer code has to calculate dz/dx and dz/dy. This is done by
-        // performing a cross product of the two edges (v2-v1) and (v3-v1) to
-        // obtain a normal vector <a, b, c>, converting that to a plane 
-        // equation, and then taking the partial derivatives -a/c and -b/c 
-        // respectively.
-
-        vrcph vc22, 5, vc30, 5 // Calculate 1/c
-        vrcpl vc23, 5, vc31, 5
-        vrcph vc22, 5, nullconst, f
-
-        vmudn vc25, vc23, v2nconst, v2n_2 // Shift left 1 for correct point position 
-        vmadh vc24, vc22, v2nconst, v2n_2        
+        vrcph vc24, 1, vc22, 1 // Get 1/(y3-y1) 
+        vrcpl vc25, 1, vc23, 1
+        vrcph vc24, 1, nullconst, 0
+        
+        vmudn vc25, vc25, v2nconst, v2n_2 // Shift left 1 for correct point position 
+        vmadh vc24, vc24, v2nconst, v2n_2        
         vmadn vc25, nullconst, nullconst, f 
-
-        vmudl vc26, vc31, vc25, e5 // Calculate a/c, b/c 
-        vmadm vc26, vc30, vc25, e5
-        vmadn vc27, vc31, vc24, e5
-        vmadh vc26, vc30, vc24, e5
-
-        vsubc vc25, nullconst, vc27, f // Calculate -a/c, -b/c (dz/dx, dz/dy)
-        vsub vc24, nullconst, vc26, f
-
-        ssv vc24, 2, 4, r22 // Store DzDx
-        ssv vc25, 2, 6, r22 // Store DzDx, frac
         
-        ssv vc24, 6, 12, r22 // Store DzDy
-        ssv vc25, 6, 14, r22 // Store DzDy, frac
+        vmudl vc26, nullconst, vc25, e1 // Calculate Ds/tDe = (t3-t1)/(y3-y1)
+        vmadm vc26, vc23, vc25, e1
+        vmadn vc27, nullconst, vc24, e1
+        vmadh vc26, vc23, vc24, e1
+        
+        slv vc26, 8, 0x20, r22 // Store
+        slv vc27, 8, 0x30, r22
+        
+        vsubc vc23, vc17, vc21, f // Calculate v3-v1
+        vsub vc22, vc16, vc20, f
+        
+        vsubc vc25, vc19, vc17, f // Calculate v2-v1
+        vsub vc24, vc18, vc16, f
+
+        vmov vc22, 2, vc22, e4 // Move s into z 
+        vmov vc23, 2, vc23, e4 
+        
+        vmov vc24, 2, vc24, e4 
+        vmov vc25, 2, vc25, e4 
+
+        ori r24, r0, 1 // Divide by -z(-s/-t)
+
+    jal CrossProduct
+    nop
+        
+        ssv vc27, 2, 0x08, r22 // Store DsDx
+        ssv nullconst, 2, 0x18, r22
+        
+        ssv vc27, 6, 0x28, r22 // Store DsDy
+        ssv nullconst, 6, 0x38, r22
+        
+        vmov vc22, 2, vc22, e5 // Move t into z 
+        vmov vc23, 2, vc23, e5 
+        
+        vmov vc24, 2, vc24, e5 
+        vmov vc25, 2, vc25, e5 
+
+    jal CrossProduct
+    nop
+        
+        ssv vc27, 2, 0x0A, r22 // Store DtDx
+        ssv nullconst, 2, 0x1A, r22
+        
+        ssv vc27, 6, 0x2A, r22 // Store DtDy
+        ssv nullconst, 6, 0x3A, r22
+
+        ssv vc30, 0, 0x04, r22
+        ssv vc30, 1, 0x14, r22
+        ssv vc30, 2, 0x0C, r22
+        ssv vc30, 3, 0x1C, r22
+        ssv vc30, 4, 0x24, r22
+        ssv vc30, 5, 0x34, r22
+        ssv vc30, 6, 0x2C, r22
+        ssv vc30, 7, 0x3C, r22
+    
+    addiu r22, 0x40 // Add to command pointer
+
+.NoTex:
+    andi r24, rsp_mode, PSM3D_MODE_ZBUF
+    beq r24, r0, .NoZBuffer
+    nop
+
+.ZBuffer:
+    ori r21, 0x1 // Z-Buffering command
+
+    addiu r23, 0x10 // Command size
+
+        sqv vc30, 0, 0, r22 // Store calculated Z coeffs        
+
+    addiu r22, 0x10 // Add to command pointer
 
 .NoZBuffer:
         lw r17, (%lo(cmd) + 0x14)($zero) // Load DxHDy
@@ -334,8 +462,8 @@ CalcTriDxDy:
     jr $ra
     nop
 
-// Subroutine to calculate cross product
-// 
+// Subroutine to calculate cross product 
+// r24 = non-0 for Divide by -z 
 CrossProduct:
         vmov vc26, 0, vc22, e1 // Load cross product coefficients
         vmov vc26, 1, vc22, e2
@@ -355,13 +483,40 @@ CrossProduct:
         vmov vc28, 4, vc24, e1
         vmov vc28, 5, vc24, e0
 
-        vmudl vc24, vc27, vc29, f // Calculate cross product (v2-v1) x (v3-v1)
-        vmadm vc24, vc26, vc29, f
-        vmadn vc25, vc27, vc28, f
-        vmadh vc24, vc26, vc28, f
+        vmudl nullconst, vc27, vc29, f // Calculate cross product v1 x v2 
+        vmadm nullconst, vc26, vc29, f // In order to stay restricted to vc26-vc29 we must overwrite nullconst
+        vmadn vc27, vc27, vc28, f
+        vmadh vc26, vc26, vc28, f
 
-        vsubc vc23, vc25, vc25, q0 // Store cross product in vc30/vc31
-        vsub vc22, vc24, vc24, q0
+        vxor nullconst, nullconst, nullconst, f // Zero nullconst
+
+        vsubc vc27, vc27, vc27, q0 // Store cross product in vc27/vc26
+        vsub vc26, vc26, vc26, q0
+
+    beq r24, r0, .CrossProductDone
+    nop
+
+        vrcph vc28, 5, vc26, 5 // Calculate 1/c
+        vrcpl vc29, 5, vc27, 5
+        vrcph vc28, 5, nullconst, f
+
+        vmudn vc29, vc29, v2nconst, v2n_2 // Shift left 1 for correct point position 
+        vmadh vc28, vc28, v2nconst, v2n_2        
+        vmadn vc29, nullconst, nullconst, f 
+
+        vmudl nullconst, vc27, vc29, e5 // Calculate a/c, b/c. Again overwrite nullconst
+        vmadm nullconst, vc26, vc29, e5
+        vmadn vc29, vc27, vc28, e5
+        vmadh vc28, vc26, vc28, e5
+        
+        vxor nullconst, nullconst, nullconst, f // Zero nullconst
+
+        vsubc vc27, nullconst, vc29, f // Calculate -a/c, -b/c 
+        vsub vc26, nullconst, vc28, f
+
+.CrossProductDone:
 
     jr $ra
     nop
+
+

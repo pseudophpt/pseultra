@@ -54,6 +54,16 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVtx_t {
     u8 yn;
     /** @brief Z-Normal (s.7 fixed point) */
     u8 zn;
+    /** @brief S coordinate (s10.5) */
+    u16 s;
+    /** @brief T coordinate (s10.5) */
+    u16 t;
+    /** @brief Padding */
+    u32 pad2;
+    /** @brief Padding */
+    u32 pad3;
+    /** @brief Padding */
+    u32 pad4;
 } uPSM3DVtx;
 
 /** @brief Matrix for PSM3D */

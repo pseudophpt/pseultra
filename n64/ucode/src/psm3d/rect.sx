@@ -48,7 +48,7 @@
 
 OPRect:
     andi r24, rsp_mode, PSM3D_MODE_TEXTURING
-    bltz r24, .TextureRect // Branch to TextureRect if the texture enable bit is set
+    bne r24, r0, .TextureRect // Branch to TextureRect if the texture enable bit is set
 
 // Draw rectangle by filling
 
