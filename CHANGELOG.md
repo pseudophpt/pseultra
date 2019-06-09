@@ -2,6 +2,8 @@
 
 ## [Unreleased](https://github.com/pseudophpt/pseultra/compare/master...develop)
 
+## [1.3.0](https://github.com/pseudophpt/pseultra/compare/v1.2.0...v1.3.0) - 2016-06-09
+
 ### Added
 - PSM3D PopMtx command
 - Math library
@@ -9,6 +11,7 @@
 - PSM3D Textured triangles
 - Triangle backface culling
 - Triangle clipping
+
 ### Changed
 - PSM3D matrix stack pointer to be stored in register instead of DMEM
 - Vertex cache (x, y) pair is now aligned to the integer, saving calculation time
