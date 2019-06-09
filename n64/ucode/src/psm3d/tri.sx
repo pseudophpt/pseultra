@@ -186,7 +186,7 @@ OPTri:
         vmov vc17, 2, vc16, e3 // Load z frac
         vmov vc19, 2, vc18, e3 
         vmov vc21, 2, vc20, e3 
-       
+      /* 
         vmov vc17, 4, vc16, e4 // Store s, t in frac parts
         vmov vc17, 5, vc16, e5
         vmov vc16, 4, nullconst, f
@@ -201,7 +201,7 @@ OPTri:
         vmov vc21, 5, vc20, e5
         vmov vc20, 4, nullconst, f
         vmov vc20, 5, nullconst, f
-        
+        */
         ssv vc18, 0, cmd + 0x8, $zero // Store XL, int
         ssv nullconst, 0, cmd + 0xa, $zero // Store XL, frac
         
@@ -316,8 +316,8 @@ OPTri:
 
     addiu r23, 0x40
 
-        slv vc17, 8, 0, r22 // Store s, t int // 72C
-        slv nullconst, 0, 0x10, r22 // Store s, t frac (0)
+        slv vc16, 8, 0, r22 // Store s, t int // 72C
+        slv vc17, 0, 0x10, r22 // Store s, t frac (0)
 
         vsubc vc23, vc17, vc21, f // Calculate v3-v1
         vsub vc22, vc16, vc20, f
@@ -330,10 +330,10 @@ OPTri:
         vmadh vc24, vc24, v2nconst, v2n_2        
         vmadn vc25, nullconst, nullconst, f 
         
-        vmudl vc26, nullconst, vc25, e1 // Calculate Ds/tDe = (t3-t1)/(y3-y1)
-        vmadm vc26, vc23, vc25, e1
-        vmadn vc27, nullconst, vc24, e1
-        vmadh vc26, vc23, vc24, e1
+        vmudl vc26, vc23, vc25, e1 // Calculate Ds/tDe = (t3-t1)/(y3-y1)
+        vmadm vc26, vc22, vc25, e1
+        vmadn vc27, vc23, vc24, e1
+        vmadh vc26, vc22, vc24, e1
         
         slv vc26, 8, 0x20, r22 // Store
         slv vc27, 8, 0x30, r22 
@@ -344,49 +344,12 @@ OPTri:
         vsubc vc11, vc19, vc17, f // Calculate v2-v1
         vsub vc10, vc18, vc16, f 
         
-// START X AND Y SCALE THING
-
-        vmudm vc26, vc8, v2nconst2, v2n2_256 // >> 8
-        vmadn vc27, nullconst, nullconst, f
-
-        // CHange to slv
-        vmov vc8, 0, vc26, e0
-        vmov vc8, 1, vc26, e1
-        vmov vc9, 0, vc27, e0
-        vmov vc9, 1, vc27, e1
+        vmudm vc8, vc8, v2nconst2, v2n2_256 // >> 8
+        vmadn vc9, nullconst, nullconst, f
         
-        vmudm vc26, vc10, v2nconst2, v2n2_256 // >> 8
-        vmadn vc27, nullconst, nullconst, f
+        vmudm vc10, vc10, v2nconst2, v2n2_256 // >> 8
+        vmadn vc11, nullconst, nullconst, f
         
-        // CHange to slv
-        vmov vc10, 0, vc26, e0
-        vmov vc10, 1, vc26, e1
-        vmov vc11, 0, vc27, e0
-        vmov vc11, 1, vc27, e1
-
-// END 
-
-/*
-        vmudn vc13, vc9, v2nconst2, v2n2_256 // << 8 for precision
-        vmadh vc12, vc8, v2nconst2, v2n2_256        
-        vmadn vc13, nullconst, nullconst, f 
-        
-        // CHange to slv
-        vmov vc8, 4, vc12, e4
-        vmov vc8, 5, vc12, e5
-        vmov vc9, 4, vc13, e4
-        vmov vc9, 5, vc13, e5
-        
-        vmudn vc13, vc11, v2nconst2, v2n2_256 // << 8 for precision
-        vmadh vc12, vc10, v2nconst2, v2n2_256        
-        vmadn vc13, nullconst, nullconst, f 
-        
-        // CHange to slv
-        vmov vc10, 4, vc12, e4
-        vmov vc10, 5, vc12, e5
-        vmov vc11, 4, vc13, e4
-        vmov vc11, 5, vc13, e5
-*/
         vmov vc9, 2, vc9, e4  // Move s into z 
         vmov vc8, 2, vc8, e4 
         
@@ -397,18 +360,7 @@ OPTri:
 
     jal CrossProduct
     nop
-/*
-        ssv vc13, 2, 0x08, r22 // Store DsDx
-        ssv nullconst, 2, 0x18, r22
         
-        ssv vc13, 6, 0x28, r22 // Store DsDy
-        ssv nullconst, 6, 0x38, r22
-*/
-
-        vmudn vc13, vc13, v2nconst2, v2n2_256 // << 8 for alignment
-        vmadh vc12, vc12, v2nconst2, v2n2_256        
-        vmadn vc13, nullconst, nullconst, f 
-
         ssv vc12, 2, 0x08, r22 // Store DsDx
         ssv vc13, 2, 0x18, r22
         
@@ -423,16 +375,6 @@ OPTri:
 
     jal CrossProduct
     nop
-/*
-        ssv vc13, 2, 0x0A, r22 // Store DtDx
-        ssv nullconst, 2, 0x1A, r22
-        
-        ssv vc13, 6, 0x2A, r22 // Store DtDy
-        ssv nullconst, 6, 0x3A, r22
-*/
-        vmudn vc13, vc13, v2nconst2, v2n2_256 // << 8 for alignment
-        vmadh vc12, vc12, v2nconst2, v2n2_256        
-        vmadn vc13, nullconst, nullconst, f 
         
         ssv vc12, 2, 0x0A, r22 // Store DtDx
         ssv vc13, 2, 0x1A, r22
