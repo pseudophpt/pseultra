@@ -88,7 +88,7 @@ OPTri:
     vsub vc8, vc16, vc20, f
         
     vsubc vc11, vc19, vc17, f // Calculate v2-v1
-    vsub vc12, vc18, vc16, f
+    vsub vc10, vc18, vc16, f
 
     ori r24, r0, 0 // Don't divide by -z
 
@@ -338,11 +338,11 @@ OPTri:
         slv vc26, 8, 0x20, r22 // Store
         slv vc27, 8, 0x30, r22 
         
-        vsubc vc23, vc17, vc21, f // Calculate v1-v3
-        vsub vc22, vc16, vc20, f
+        vsubc vc9, vc17, vc21, f // Calculate v1-v3
+        vsub vc8, vc16, vc20, f
         
-        vsubc vc25, vc19, vc17, f // Calculate v2-v1
-        vsub vc24, vc18, vc16, f 
+        vsubc vc11, vc19, vc17, f // Calculate v2-v1
+        vsub vc10, vc18, vc16, f 
         
 // START X AND Y SCALE THING
 

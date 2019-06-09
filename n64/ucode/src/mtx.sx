@@ -185,7 +185,7 @@ CrossProduct:
         vmudl nullconst, vc13, vc15, e5 // Calculate a/c, b/c. Again overwrite nullconst
         vmadm nullconst, vc12, vc15, e5
         vmadn vc15, vc13, vc14, e5
-        vmadh vc14, vc22, vc14, e5
+        vmadh vc14, vc12, vc14, e5
         
         vxor nullconst, nullconst, nullconst, f // Zero nullconst
 
