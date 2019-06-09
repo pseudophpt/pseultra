@@ -84,19 +84,18 @@ OPTri:
     vmov vc19, 2, vc18, e3 
     vmov vc21, 2, vc20, e3 
 
-    vsubc vc23, vc17, vc21, f // Calculate v3-v1
-    vsub vc22, vc16, vc20, f
+    vsubc vc9, vc17, vc21, f // Calculate v3-v1
+    vsub vc8, vc16, vc20, f
         
-    vsubc vc25, vc19, vc17, f // Calculate v2-v1
-    vsub vc24, vc18, vc16, f
+    vsubc vc11, vc19, vc17, f // Calculate v2-v1
+    vsub vc12, vc18, vc16, f
 
     ori r24, r0, 0 // Don't divide by -z
 
     jal CrossProduct
     nop
 
-        vor nullconst, nullconst, nullconst, f
-        ssv vc26, 10, cmd + 0x8, $zero // Store z int in XL temporarily
+        ssv vc12, 10, cmd + 0x8, $zero // Store z int in XL temporarily to get winding
     
     lh r25, (%lo(cmd) + 0x8)($zero)
     xor r24, r25 // XOR z int with parity
@@ -267,22 +266,22 @@ OPTri:
         // equation, and then taking the partial derivatives -a/c and -b/c 
         // respectively.
 
-        vsubc vc23, vc17, vc21, f // Calculate v3-v1
-        vsub vc22, vc16, vc20, f
+        vsubc vc9, vc17, vc21, f // Calculate v3-v1
+        vsub vc8, vc16, vc20, f
         
-        vsubc vc25, vc19, vc17, f // Calculate v2-v1
-        vsub vc24, vc18, vc16, f
+        vsubc vc11, vc19, vc17, f // Calculate v2-v1
+        vsub vc10, vc18, vc16, f
         
         ori r24, r0, 1 // Divide by -z
 
     jal CrossProduct
     nop
         
-        vmov vc30, 2, vc26, e1 // Store DzDx
-        vmov vc30, 3, vc26, e1
+        vmov vc30, 2, vc12, e1 // Store DzDx
+        vmov vc30, 3, vc13, e1
         
-        vmov vc30, 6, vc26, e1 // Store DzDy
-        vmov vc30, 7, vc26, e1
+        vmov vc30, 6, vc12, e1 // Store DzDy
+        vmov vc30, 7, vc13, e1
 
         vmov vc30, 0, vc16, e2
         vmov vc30, 1, vc17, e2
@@ -347,99 +346,99 @@ OPTri:
         
 // START X AND Y SCALE THING
 
-        vmudm vc26, vc22, v2nconst2, v2n2_256 // >> 8
+        vmudm vc26, vc8, v2nconst2, v2n2_256 // >> 8
         vmadn vc27, nullconst, nullconst, f
 
         // CHange to slv
-        vmov vc22, 0, vc26, e0
-        vmov vc22, 1, vc26, e1
-        vmov vc23, 0, vc27, e0
-        vmov vc23, 1, vc27, e1
+        vmov vc8, 0, vc26, e0
+        vmov vc8, 1, vc26, e1
+        vmov vc9, 0, vc27, e0
+        vmov vc9, 1, vc27, e1
         
-        vmudm vc26, vc24, v2nconst2, v2n2_256 // >> 8
+        vmudm vc26, vc10, v2nconst2, v2n2_256 // >> 8
         vmadn vc27, nullconst, nullconst, f
         
         // CHange to slv
-        vmov vc24, 0, vc26, e0
-        vmov vc24, 1, vc26, e1
-        vmov vc25, 0, vc27, e0
-        vmov vc25, 1, vc27, e1
+        vmov vc10, 0, vc26, e0
+        vmov vc10, 1, vc26, e1
+        vmov vc11, 0, vc27, e0
+        vmov vc11, 1, vc27, e1
 
 // END 
 
 /*
-        vmudn vc27, vc23, v2nconst2, v2n2_256 // << 8 for precision
-        vmadh vc26, vc22, v2nconst2, v2n2_256        
-        vmadn vc27, nullconst, nullconst, f 
+        vmudn vc13, vc9, v2nconst2, v2n2_256 // << 8 for precision
+        vmadh vc12, vc8, v2nconst2, v2n2_256        
+        vmadn vc13, nullconst, nullconst, f 
         
         // CHange to slv
-        vmov vc22, 4, vc26, e4
-        vmov vc22, 5, vc26, e5
-        vmov vc23, 4, vc27, e4
-        vmov vc23, 5, vc27, e5
+        vmov vc8, 4, vc12, e4
+        vmov vc8, 5, vc12, e5
+        vmov vc9, 4, vc13, e4
+        vmov vc9, 5, vc13, e5
         
-        vmudn vc27, vc25, v2nconst2, v2n2_256 // << 8 for precision
-        vmadh vc26, vc24, v2nconst2, v2n2_256        
-        vmadn vc27, nullconst, nullconst, f 
+        vmudn vc13, vc11, v2nconst2, v2n2_256 // << 8 for precision
+        vmadh vc12, vc10, v2nconst2, v2n2_256        
+        vmadn vc13, nullconst, nullconst, f 
         
         // CHange to slv
-        vmov vc24, 4, vc26, e4
-        vmov vc24, 5, vc26, e5
-        vmov vc25, 4, vc27, e4
-        vmov vc25, 5, vc27, e5
+        vmov vc10, 4, vc12, e4
+        vmov vc10, 5, vc12, e5
+        vmov vc11, 4, vc13, e4
+        vmov vc11, 5, vc13, e5
 */
-        vmov vc23, 2, vc23, e4  // Move s into z 
-        vmov vc22, 2, vc22, e4 
+        vmov vc9, 2, vc9, e4  // Move s into z 
+        vmov vc8, 2, vc8, e4 
         
-        vmov vc25, 2, vc25, e4 
-        vmov vc24, 2, vc24, e4 
+        vmov vc11, 2, vc11, e4 
+        vmov vc10, 2, vc10, e4 
 
         ori r24, r0, 1 // Divide by -z(-s/-t)
 
     jal CrossProduct
     nop
 /*
-        ssv vc27, 2, 0x08, r22 // Store DsDx
+        ssv vc13, 2, 0x08, r22 // Store DsDx
         ssv nullconst, 2, 0x18, r22
         
-        ssv vc27, 6, 0x28, r22 // Store DsDy
+        ssv vc13, 6, 0x28, r22 // Store DsDy
         ssv nullconst, 6, 0x38, r22
 */
 
-        vmudn vc27, vc27, v2nconst2, v2n2_256 // << 8 for alignment
-        vmadh vc26, vc26, v2nconst2, v2n2_256        
-        vmadn vc27, nullconst, nullconst, f 
+        vmudn vc13, vc13, v2nconst2, v2n2_256 // << 8 for alignment
+        vmadh vc12, vc12, v2nconst2, v2n2_256        
+        vmadn vc13, nullconst, nullconst, f 
 
-        ssv vc26, 2, 0x08, r22 // Store DsDx
-        ssv vc27, 2, 0x18, r22
+        ssv vc12, 2, 0x08, r22 // Store DsDx
+        ssv vc13, 2, 0x18, r22
         
-        ssv vc26, 6, 0x28, r22 // Store DsDy
-        ssv vc27, 6, 0x38, r22
+        ssv vc12, 6, 0x28, r22 // Store DsDy
+        ssv vc13, 6, 0x38, r22
     
-        vmov vc23, 2, vc23, e5 // Move t into z 
-        vmov vc22, 2, vc22, e5
+        vmov vc9, 2, vc9, e5 // Move t into z 
+        vmov vc8, 2, vc8, e5
         
-        vmov vc25, 2, vc25, e5 
-        vmov vc24, 2, vc24, e5 
+        vmov vc11, 2, vc11, e5 
+        vmov vc10, 2, vc10, e5 
 
     jal CrossProduct
     nop
 /*
-        ssv vc27, 2, 0x0A, r22 // Store DtDx
+        ssv vc13, 2, 0x0A, r22 // Store DtDx
         ssv nullconst, 2, 0x1A, r22
         
-        ssv vc27, 6, 0x2A, r22 // Store DtDy
+        ssv vc13, 6, 0x2A, r22 // Store DtDy
         ssv nullconst, 6, 0x3A, r22
 */
-        vmudn vc27, vc27, v2nconst2, v2n2_256 // << 8 for alignment
-        vmadh vc26, vc26, v2nconst2, v2n2_256        
-        vmadn vc27, nullconst, nullconst, f 
+        vmudn vc13, vc13, v2nconst2, v2n2_256 // << 8 for alignment
+        vmadh vc12, vc12, v2nconst2, v2n2_256        
+        vmadn vc13, nullconst, nullconst, f 
         
-        ssv vc26, 2, 0x0A, r22 // Store DtDx
-        ssv vc27, 2, 0x1A, r22
+        ssv vc12, 2, 0x0A, r22 // Store DtDx
+        ssv vc13, 2, 0x1A, r22
         
-        ssv vc26, 6, 0x2A, r22 // Store DtDy
-        ssv vc27, 6, 0x3A, r22
+        ssv vc12, 6, 0x2A, r22 // Store DtDy
+        ssv vc13, 6, 0x3A, r22
       
         ssv vc30, 0, 0x04, r22
         ssv vc30, 1, 0x14, r22
@@ -505,73 +504,3 @@ CalcTriDxDy:
 
     jr $ra
     nop
-
-// Subroutine to calculate cross product 
-// r24 = non-0 for Divide by -z 
-CrossProduct:
-        vor vc27, nullconst, nullconst, f
-        vor vc29, nullconst, nullconst, f
-
-        vmov vc26, 0, vc22, e1 // Load cross product coefficients
-        vmov vc27, 0, vc23, e1 
-        vmov vc26, 1, vc22, e2
-        vmov vc27, 1, vc23, e2
-        vmov vc26, 2, vc22, e2
-        vmov vc27, 2, vc23, e2
-        vmov vc26, 3, vc22, e0
-        vmov vc27, 3, vc23, e0
-        vmov vc26, 4, vc22, e0
-        vmov vc27, 4, vc23, e0
-        vmov vc26, 5, vc22, e1
-        vmov vc27, 5, vc23, e1
-
-        vmov vc28, 0, vc24, e2
-        vmov vc29, 0, vc25, e2
-        vmov vc28, 1, vc24, e1
-        vmov vc29, 1, vc25, e1
-        vmov vc28, 2, vc24, e0
-        vmov vc29, 2, vc25, e0
-        vmov vc28, 3, vc24, e2
-        vmov vc29, 3, vc25, e2
-        vmov vc28, 4, vc24, e1
-        vmov vc29, 4, vc25, e1
-        vmov vc28, 5, vc24, e0
-        vmov vc29, 5, vc25, e0
-
-        vmudl nullconst, vc27, vc29, f // Calculate cross product v1 x v2 
-        vmadm nullconst, vc26, vc29, f // In order to stay restricted to vc26-vc29 we must overwrite nullconst
-        vmadn vc27, vc27, vc28, f
-        vmadh vc26, vc26, vc28, f
-
-        vxor nullconst, nullconst, nullconst, f // Zero nullconst
-
-        vsubc vc27, vc27, vc27, q0 // Store cross product in vc27/vc26
-        vsub vc26, vc26, vc26, q0
-
-    beq r24, r0, .CrossProductDone
-    nop
-
-        vrcph vc28, 5, vc26, 5 // Calculate 1/c
-        vrcpl vc29, 5, vc27, 5
-        vrcph vc28, 5, nullconst, f
-
-        vmudn vc29, vc29, v2nconst, v2n_2 // Shift left 1 for correct point position 
-        vmadh vc28, vc28, v2nconst, v2n_2        
-        vmadn vc29, nullconst, nullconst, f 
-
-        vmudl nullconst, vc27, vc29, e5 // Calculate a/c, b/c. Again overwrite nullconst
-        vmadm nullconst, vc26, vc29, e5
-        vmadn vc29, vc27, vc28, e5
-        vmadh vc28, vc26, vc28, e5
-        
-        vxor nullconst, nullconst, nullconst, f // Zero nullconst
-
-        vsubc vc27, nullconst, vc29, f // Calculate -a/c, -b/c 
-        vsub vc26, nullconst, vc28, f
-
-.CrossProductDone:
-
-    jr $ra
-    nop
-
-
