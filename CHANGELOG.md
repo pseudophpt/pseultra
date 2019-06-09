@@ -2,7 +2,7 @@
 
 ## [Unreleased](https://github.com/pseudophpt/pseultra/compare/master...develop)
 
-## [1.3.0](https://github.com/pseudophpt/pseultra/compare/v1.2.0...v1.3.0) - 2016-06-09
+## [1.3.0](https://github.com/pseudophpt/pseultra/compare/v1.2.0...v1.3.0) - 2019-06-09
 
 ### Added
 - PSM3D PopMtx command
