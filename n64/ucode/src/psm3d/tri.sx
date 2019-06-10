@@ -280,8 +280,8 @@ OPTri:
         vmov vc30, 2, vc12, e1 // Store DzDx
         vmov vc30, 3, vc13, e1
         
-        vmov vc30, 6, vc12, e1 // Store DzDy
-        vmov vc30, 7, vc13, e1
+        vmov vc30, 6, vc12, e3 // Store DzDy
+        vmov vc30, 7, vc13, e3
 
         vmov vc30, 0, vc16, e2
         vmov vc30, 1, vc17, e2

@@ -2,6 +2,9 @@
 
 ## [Unreleased](https://github.com/pseudophpt/pseultra/compare/master...develop)
 
+### Fixed
+- Bug in which DzDx was written to DzDy
+
 ## [1.3.0](https://github.com/pseudophpt/pseultra/compare/v1.2.0...v1.3.0) - 2019-06-09
 
 ### Added
