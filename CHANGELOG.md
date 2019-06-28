@@ -2,6 +2,9 @@
 
 ## [Unreleased](https://github.com/pseudophpt/pseultra/compare/master...develop)
 
+### Added
+- Shaded triangles
+
 ### Fixed
 - Bug in which DzDx was written to DzDy
 

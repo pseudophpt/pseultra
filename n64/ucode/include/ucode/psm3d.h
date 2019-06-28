@@ -40,19 +40,19 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVtx_t {
     u16 yi;
     /** @brief Z-Coordinate Integral (s15.16 fixed point) */
     u16 zi;
-    /** @brief Padding */
-    u8 pad;
-    /** @brief X-Normal (s.7 fixed point) */
+    /** @brief X-Normal (s.7 fixed point) / R Shading */
     u8 xn;
+    /** @brief Padding (this padding must be zero) */
+    u8 pad;
     /** @brief X-Coordinate Fractional (s15.16 fixed point) */
     u16 xf;
     /** @brief Y-Coordinate Fractional (s15.16 fixed point) */
     u16 yf;
     /** @brief Z-Coordinate Fractional (s15.16 fixed point) */
     u16 zf;
-    /** @brief Y-Normal (s.7 fixed point) */
+    /** @brief Y-Normal (s.7 fixed point) / G Shading */
     u8 yn;
-    /** @brief Z-Normal (s.7 fixed point) */
+    /** @brief Z-Normal (s.7 fixed point) / B Shading */
     u8 zn;
     /** @brief S coordinate (s10.5) */
     u16 s;
@@ -137,6 +137,14 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
 #define UCODE_PSM3D_RSPMODE_ZBUF 0x400
 #define UCODE_PSM3D_RSPMODE_ZBUF_OFF 0
 #define UCODE_PSM3D_RSPMODE_ZBUF_ON 0x400
+
+#define UCODE_PSM3D_RSPMODE_LIGHT 0x800
+#define UCODE_PSM3D_RSPMODE_LIGHT_OFF 0
+#define UCODE_PSM3D_RSPMODE_LIGHT_ON 0x800
+
+#define UCODE_PSM3D_RSPMODE_SHADE 0x1000
+#define UCODE_PSM3D_RSPMODE_SHADE_OFF 0
+#define UCODE_PSM3D_RSPMODE_SHADE_ON 0x1000
 
 #define usPSM3DSetRSPMode(mask, data) \
     {\
