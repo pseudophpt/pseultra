@@ -86,6 +86,45 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
     u16 yoff;
 } uPSM3DVp;
 
+/** @brief Ambient light structure for PSM3D */
+typedef struct uPSM3DAmbientLight_t {
+    /** @brief Red value (8 bit) of ambient light color */
+    u16 r;
+    /** @brief Green value (8 bit) of ambient light color */
+    u16 g;
+    /** @brief Blue value of (8 bit) ambient light color */
+    u16 b;
+    /** @brief Padding */
+    u16 pad;
+} uPSM3DAmbientLight;
+
+/** @brief Point light structure for PSM3D */
+typedef struct uPSM3DPointLight_t {
+    /** @brief Red value of point light color */
+    u8 r;
+    /** @brief Green value of point light color */
+    u8 g;
+    /** @brief Blue value of point light color */
+    u8 b;
+    /** @brief Attenuation factor */
+    u8 att;
+    /** @brief X value of point light in current coordinate system (MODELVIEW) */
+    u8 x;
+    /** @brief Y value of point light in current coordinate system (MODELVIEW) */
+    u8 y;
+    /** @brief Z value of point light in current coordinate system (MODELVIEW) */
+    u8 z;
+    /** @brief Padding */
+    u8 pad;
+} uPSM3DPointLight;
+
+/** @brief Light structure for PSM3D */
+typedef struct __attribute__((packed, aligned(8))) uPSM3DLights_t {
+    /** @brief Ambient light */
+    uPSM3DAmbientLight ambient;
+    /** @brief Point lights */
+    uPSM3DPointLight point_lights [];
+} uPSM3DLights;
 
 #endif
 
@@ -107,6 +146,7 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
 #define UCODE_PSM3D_OP_TRI 0x07
 #define UCODE_PSM3D_OP_SET_VP 0x08
 #define UCODE_PSM3D_OP_POP_MTX 0x09
+#define UCODE_PSM3D_OP_LOAD_LIGHTS 0x0A
 
 /*
  * Operation macros
@@ -300,6 +340,22 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
             \
         _FMT(vp, 0, 24)\
     }
+
+#define usPSM3DLoadLights(lights, count) \
+    {\
+        _FMT(UCODE_PSM3D_OP_LOAD_LIGHTS, 24, 8) |\
+        _FMT(count, 0, 8),\
+            \
+        _FMT(lights, 0, 24)\
+    }
+#define uPSM3DLoadLights(dl, lights, count) \
+    *((dl) ++) = (uPSM3DDispCmd) {\
+        _FMT(UCODE_PSM3D_OP_LOAD_LIGHTS, 24, 8) |\
+        _FMT(count, 0, 8),\
+            \
+        _FMT(lights, 0, 24)\
+    }
+
 
 #define usPSM3DPopMtx() { (UCODE_PSM3D_OP_POP_MTX << 24), 0 } 
 #define uPSM3DPopMtx(dl) *((dl) ++) = (uPSM3DDispCmd) { _FMT(UCODE_PSM3D_OP_POP_MTX, 24, 8), 0 } 

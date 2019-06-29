@@ -59,10 +59,39 @@ OPLoadVtx:
     lw r24, (%lo(cmd) + 16)($zero) // Load s and t
     sw r24, 12(r17)
 
-// TODO: Check for lighting and if so use R G and B as normals to calculate lighting
+    andi r24, rsp_mode, PSM3D_MODE_LIGHT
+    beq r24, r0, .NoLight
+    nop
+    
+.Light:
 
-    lh r24, (%lo(cmd) + 14)($zero) // Load G and B shading colors
-    sh r24, 10(r17)
+    // Initialize combined light as ambient
+    ori r24, r0, ambient_light
+
+        ldv vc16, 0, 0, r24
+
+        vnop 0, 0, 0, 0
+
+    // Final calculated light in vc16 
+        
+        sdv vc16, 0, 32, cmd_addr // Store RGB values
+        lh r19, (%lo(cmd) + 34)($zero) // Load G value
+        sll r19, 8 // Shift 8 left
+        lh r20, (%lo(cmd) + 36)($zero) // Load B value
+        or r19, r20 // Combine)
+        lh r20, (%lo(cmd) + 32)($zero) // Load R value
+        sll r20, 8 // Shift 8 left
+
+    b .CalcCoordinates
+    nop
+
+.NoLight:
+
+    lh r19, (%lo(cmd) + 14)($zero) // Load G and B shading coeffs as colors
+    lh r20, (%lo(cmd) + 6)($zero) // Load R shading coeff as color 
+
+// After this step, r27 and r28 will contain the shading color of the vertex
+.CalcCoordinates:
 
         ldv vc8, 0, cmd, $zero // Load integral part into vc8
         ldv vc8, 8, cmd, $zero
@@ -101,10 +130,10 @@ OPLoadVtx:
         andi r25, 0x38
         or r24, r25
 
-        lh r26, (%lo(cmd) + 6)($zero) // Add red color 
-        or r24, r26
+        or r20, r24 // OR with calculated red value
 
-        sh r24, 8(r17) // Save clip flags
+        sh r19, 10(r17)
+        sh r20, 8(r17) // Save clip flags and red
 
         vrcph vc18, 3, vc14, 3 // Get 1/w 
         vrcpl vc19, 3, vc15, 3

@@ -1,0 +1,41 @@
+/*
+ * pseultra/n64/ucode/src/psm3d/loadlights.sx
+ * PSM3D microcode LoadLights function
+ * 
+ * (C) pseudophpt 2019
+ */
+
+//////////////////////////////////////////////////////////////////////////////
+//                                                                          // 
+// LoadLights                                                               // 
+//                                                                          // 
+// Sets the lighting system lights                                          // 
+//                                                                          // 
+////////////////////////////////////////////////////////////////////////////// 
+//                                                                          // 
+// FORMAT:                                                                  // 
+//                                                                          // 
+// 05 -- -- PP -- DD DD DD                                                  // 
+//                                                                          //
+// P: Number of point lights                                                //
+// D: DRAM address of light struct                                          // 
+//                                                                          // 
+//////////////////////////////////////////////////////////////////////////////
+
+
+.global OPLoadLights
+
+OPLoadLights:
+
+    lw r24, (%lo(cmd) + 4)($zero) // Load DRAM address 
+    lb light_count, (%lo(cmd) + 3)($zero) // Load number of point lights
+    sll r26, light_count, 3 // 8 bytes to load for each point light
+    ori r25, $zero, %lo(ambient_light) // Load into light storage
+    jal DMARead 
+    addiu r26, 7 // Read ambient light info as well
+
+// TODO: Transform light positions according to MODELVIEW matrix.
+
+    op_ret
+    nop
+

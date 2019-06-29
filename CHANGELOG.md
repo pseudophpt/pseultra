@@ -4,6 +4,7 @@
 
 ### Added
 - Shaded triangles
+- Ambient lighting
 
 ### Fixed
 - Bug in which DzDx was written to DzDy
