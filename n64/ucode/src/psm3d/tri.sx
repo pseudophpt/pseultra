@@ -301,37 +301,27 @@ OPTri:
     addiu r23, 0x40 // Command size
 
         // We must unpack the shade color for each vertex
+
+        slv vc16, 8, 0, r22 // Store vertex formatted Blue/flags/red/green
+        slv vc18, 8, 4, r22 
+        luv vc22, 0, 0, r22 // Load bytes
+        vmudm vc22, vc22, v2nconst2, v2n2_512 // Shift right 7 to get correct color
+
+        vmov vc16, 3, vc22, e0 // Store vtx0
+        vmov vc16, 4, vc22, e2 
+        vmov vc16, 5, vc22, e3 
         
-        vor vc22, nullconst, v2nconst2, v2n2_256 // Load 0x100 into all vc22 vectors
-        vsub vc22, vc22, v2nconst, v2n_1 // Becomes 0xFF
-
-        ssv vc22, 0, 6, r22 // Store a int (0xFF00)
+        vmov vc18, 3, vc22, e4 // Store vtx1
+        vmov vc18, 4, vc22, e6 
+        vmov vc18, 5, vc22, e7 
         
-        vand vc23, vc16, vc22, f // Extract just blue color from each vertex (Might not be necessary?)
-        vand vc24, vc18, vc22, f 
-        vand vc25, vc20, vc22, f 
-        
-        vnor vc22, vc22, nullconst, f // Becomes 0xFF00 (vc22 must be preserved)
+        slv vc20, 8, 0, r22 // Store vertex formatted Blue/flags/red/green
+        luv vc22, 0, 0, r22 // Load bytes
+        vmudm vc22, vc22, v2nconst2, v2n2_512 // Shift right 7 to get correct color
 
-        vand vc26, vc16, vc22, f // Extract just red and green color from each vertex
-        vand vc27, vc18, vc22, f 
-        vand vc28, vc20, vc22, f
-
-        vmudl vc26, vc26, v2nconst2, v2n2_256 // Shift left 8
-        vmudl vc27, vc27, v2nconst2, v2n2_256 
-        vmudl vc28, vc28, v2nconst2, v2n2_256 
-
-        vmov vc16, 4, vc26, e4 // Store RGB for each vector
-        vmov vc16, 5, vc26, e5
-        vmov vc16, 3, vc23, e5
-
-        vmov vc18, 4, vc27, e4 
-        vmov vc18, 5, vc27, e5
-        vmov vc18, 3, vc24, e5
-        
-        vmov vc20, 4, vc28, e4 
-        vmov vc20, 5, vc28, e5
-        vmov vc20, 3, vc25, e5
+        vmov vc20, 3, vc22, e0 // Store vtx2
+        vmov vc20, 4, vc22, e2 
+        vmov vc20, 5, vc22, e3 
 
         slv vc16, 8, 0, r22 // Store r, g int 
         ssv vc16, 6, 4, r22 // Store b int 
