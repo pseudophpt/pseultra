@@ -24,17 +24,17 @@
 //////////////////////////////////////////////////////////////////////////////
 
 // Stored vertex format:
-// X, Y, Zi, Zf, F, GB, S, T
+// X, Y, Zi, Zf, F, RG, S, T
 // F: Flags
-// RRRRRRRR --xyzXYZ 
+// BBBBBBBB --xyzXYZ 
 // x: outside of negative x clip space
 // y: outside of negative y clip space
 // z: outside of negative z clip space
 // X: outside of positive x clip space
 // Y: outside of positive y clip space
 // Z: outside of positive z clip space
-// R: Red shading color
-// GB: Green and blue shading colors
+// B: Blue shading color
+// RG: Red and green shading colors
 
 // TODO: Pre-multiply projection and model matrices
 // TODO: Two vertices at a time
@@ -65,30 +65,19 @@ OPLoadVtx:
     
 .Light:
 
-    // Initialize combined light as ambient
-    ori r24, r0, ambient_light
+    ori r24, r0, ambient_light 
 
-        ldv vc16, 0, 0, r24
-
-        vnop 0, 0, 0, 0
-
+        luv vc16, 0, 0, r24
+    
     // Final calculated light in vc16 
-        
-        sdv vc16, 0, 32, cmd_addr // Store RGB values
-        lh r19, (%lo(cmd) + 34)($zero) // Load G value
-        sll r19, 8 // Shift 8 left
-        lh r20, (%lo(cmd) + 36)($zero) // Load B value
-        or r19, r20 // Combine)
-        lh r20, (%lo(cmd) + 32)($zero) // Load R value
-        sll r20, 8 // Shift 8 left
-
-    b .CalcCoordinates
-    nop
+    
+        suv vc16, 0, 24, cmd_addr // Store RGB values (OVERWRITES PART OF PADDING. THIS MAY BE AN ISSUE IF IT IS LATER USED)
 
 .NoLight:
 
-    lh r19, (%lo(cmd) + 14)($zero) // Load G and B shading coeffs as colors
-    lh r20, (%lo(cmd) + 6)($zero) // Load R shading coeff as color 
+    lh r19, (%lo(cmd) + 24)($zero) // Load R and G shading coeffs as colors
+    lh r20, (%lo(cmd) + 26)($zero) // Load B shading coeff as color 
+    andi r20, 0xFF00 // Clear lower half of blue
 
 // After this step, r27 and r28 will contain the shading color of the vertex
 .CalcCoordinates:
@@ -130,10 +119,10 @@ OPLoadVtx:
         andi r25, 0x38
         or r24, r25
 
-        or r20, r24 // OR with calculated red value
+        or r20, r24 // OR with calculated blue value
 
-        sh r19, 10(r17)
-        sh r20, 8(r17) // Save clip flags and red
+        sh r19, 10(r17) // Save red and green
+        sh r20, 8(r17) // Save clip flags and blue
 
         vrcph vc18, 3, vc14, 3 // Get 1/w 
         vrcpl vc19, 3, vc15, 3

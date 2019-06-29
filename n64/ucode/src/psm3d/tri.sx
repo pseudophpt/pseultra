@@ -325,6 +325,7 @@ OPTri:
 
         slv vc16, 8, 0, r22 // Store r, g int 
         ssv vc16, 6, 4, r22 // Store b int 
+        ssv v2nconst, v2n_128 * 2, 6, r22 // Store a int (256)
 
         sdv nullconst, 0, 8, r22 // Store rgba frac (0)
 

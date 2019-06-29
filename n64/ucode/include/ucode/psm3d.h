@@ -40,30 +40,32 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVtx_t {
     u16 yi;
     /** @brief Z-Coordinate Integral (s15.16 fixed point) */
     u16 zi;
-    /** @brief X-Normal (s.7 fixed point) / R Shading */
-    u8 xn;
-    /** @brief Padding (this padding must be zero) */
-    u8 pad;
+    /** @brief Padding */
+    u16 pad;
     /** @brief X-Coordinate Fractional (s15.16 fixed point) */
     u16 xf;
     /** @brief Y-Coordinate Fractional (s15.16 fixed point) */
     u16 yf;
     /** @brief Z-Coordinate Fractional (s15.16 fixed point) */
     u16 zf;
-    /** @brief Y-Normal (s.7 fixed point) / G Shading */
-    u8 yn;
-    /** @brief Z-Normal (s.7 fixed point) / B Shading */
-    u8 zn;
+    /** @brief Padding */
+    u16 pad2;
     /** @brief S coordinate (s10.5) */
     u16 s;
     /** @brief T coordinate (s10.5) */
     u16 t;
     /** @brief Padding */
-    u32 pad2;
-    /** @brief Padding */
     u32 pad3;
+    /** @brief X-Normal (s.7 fixed point) / R Shading */
+    u8 xn;
+    /** @brief Y-Normal (s.7 fixed point) / G Shading */
+    u8 yn;
+    /** @brief Z-Normal (s.7 fixed point) / B Shading */
+    u8 zn;
+    /** @brief Padding (this padding must be zero) */
+    u8 pad4;
     /** @brief Padding */
-    u32 pad4;
+    u32 pad5;
 } uPSM3DVtx;
 
 /** @brief Matrix for PSM3D */
@@ -88,14 +90,12 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
 
 /** @brief Ambient light structure for PSM3D */
 typedef struct uPSM3DAmbientLight_t {
-    /** @brief Red value (8 bit) of ambient light color */
-    u16 r;
-    /** @brief Green value (8 bit) of ambient light color */
-    u16 g;
-    /** @brief Blue value of (8 bit) ambient light color */
-    u16 b;
-    /** @brief Padding */
-    u16 pad;
+    /** @brief Red value of ambient light color */
+    u8 r;
+    /** @brief Green value of ambient light color */
+    u8 g;
+    /** @brief Blue value of ambient light color */
+    u8 b;
 } uPSM3DAmbientLight;
 
 /** @brief Point light structure for PSM3D */
