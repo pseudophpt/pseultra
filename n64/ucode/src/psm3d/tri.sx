@@ -23,8 +23,9 @@
 
 .global OPTri
 
-// TODO: Culling
 // TODO: Separate tri coefficient calculations in diff files
+// vc16-vc17 make up Vtx1 (High), vc18-vc19 make up Vtx2 (Mid), vc20-vc21 make up Vtx3 (Low)
+// Register format: | X | Y | Z | B | R | G | S | T |
 
 // There has to be a way to improve this, it's so fucking long.
 // Maybe improve sorting code, then perform the calculation cyclically?
@@ -43,8 +44,7 @@ OPTri:
     lb r20, (%lo(vtx_cache) + 9)(r16) // Get clip flags
     or r21, r20, r0 // Duplicate for OR
 
-        ldv vc16, 0, vtx_cache, r16 // Load vertex
-        llv vc16, 8, vtx_cache + 12, r16 // Load s, t
+        lqv vc16, 0, vtx_cache, r16 // Load vertex
 
     lb r16, (%lo(cmd) + 2)($zero) // Get vertex cache offset
     sll r16, 4 
@@ -53,8 +53,7 @@ OPTri:
     and r20, r22 // Perform OR and AND
     or r21, r22
 
-        ldv vc18, 0, vtx_cache, r16 // Load vertex
-        llv vc18, 8, vtx_cache + 12, r16 // Load s, t
+        lqv vc18, 0, vtx_cache, r16 // Load vertex
 
     lb r16, (%lo(cmd) + 3)($zero) // Get vertex cache offset
     sll r16, 4 
@@ -63,8 +62,7 @@ OPTri:
     and r20, r22 // Perform OR and AND
     or r21, r22
 
-        ldv vc20, 0, vtx_cache, r16 // Load vertex
-        llv vc20, 8, vtx_cache + 12, r16 // Load s, t
+        lqv vc20, 0, vtx_cache, r16 // Load vertex
 
     bnez r20, .Clip // Cull if all vertices are outside clip bounds
     andi r21, 0x04 // Only care about Z for OR
@@ -186,54 +184,39 @@ OPTri:
         vmov vc17, 2, vc16, e3 // Load z frac
         vmov vc19, 2, vc18, e3 
         vmov vc21, 2, vc20, e3 
-      /* 
-        vmov vc17, 4, vc16, e4 // Store s, t in frac parts
-        vmov vc17, 5, vc16, e5
-        vmov vc16, 4, nullconst, f
-        vmov vc16, 5, nullconst, f
-        
-        vmov vc19, 4, vc18, e4 
-        vmov vc19, 5, vc18, e5
-        vmov vc18, 4, nullconst, f
-        vmov vc18, 5, nullconst, f
 
-        vmov vc21, 4, vc20, e4 
-        vmov vc21, 5, vc20, e5
-        vmov vc20, 4, nullconst, f
-        vmov vc20, 5, nullconst, f
-        */
         ssv vc18, 0, cmd + 0x8, $zero // Store XL, int
         ssv nullconst, 0, cmd + 0xa, $zero // Store XL, frac
         
-        ssv vc16, 0, cmd + 0x10, $zero // Store XH, int
-        ssv nullconst, 0, cmd + 0x12, $zero // Store XH, frac
+        ssv vc16, 0, 0x10, cmd_addr // Store XH, int
+        ssv nullconst, 0, 0x12, cmd_addr // Store XH, frac
         
-        ssv vc16, 0, cmd + 0x18, $zero // Store XM, int
-        ssv nullconst, 0, cmd + 0x1a, $zero // Store XM, frac
+        ssv vc16, 0, 0x18, cmd_addr // Store XM, int
+        ssv nullconst, 0, 0x1a, cmd_addr // Store XM, frac
 
         vsub vc22, vc20, vc18, f
         
     jal CalcTriDxDy // Calculate DxLDy
     nop
 
-        ssv vc26, 0, cmd + 0xc, $zero // Store int
-        ssv vc27, 0, cmd + 0xe, $zero // Store frac
+        ssv vc26, 0, 0xc, cmd_addr // Store int
+        ssv vc27, 0, 0xe, cmd_addr // Store frac
 
         vsub vc22, vc20, vc16, f
 
     jal CalcTriDxDy // Calculate DxHDy
     nop
 
-        ssv vc26, 0, cmd + 0x14, $zero // Store int
-        ssv vc27, 0, cmd + 0x16, $zero // Store frac
+        ssv vc26, 0, 0x14, cmd_addr // Store int
+        ssv vc27, 0, 0x16, cmd_addr // Store frac
 
         vsub vc22, vc18, vc16, f
         
     jal CalcTriDxDy // Calculate DxMDy
     nop
 
-        ssv vc26, 0, cmd + 0x1c, $zero // Store int
-        ssv vc27, 0, cmd + 0x1e, $zero // Store frac
+        ssv vc26, 0, 0x1c, cmd_addr // Store int
+        ssv vc27, 0, 0x1e, cmd_addr // Store frac
 
         // TODO: Make it 1 operation
 
@@ -280,8 +263,8 @@ OPTri:
         vmov vc30, 2, vc12, e1 // Store DzDx
         vmov vc30, 3, vc13, e1
         
-        vmov vc30, 6, vc12, e1 // Store DzDy
-        vmov vc30, 7, vc13, e1
+        vmov vc30, 6, vc12, e3 // Store DzDy
+        vmov vc30, 7, vc13, e3
 
         vmov vc30, 0, vc16, e2
         vmov vc30, 1, vc17, e2
@@ -307,6 +290,134 @@ OPTri:
 
 .NoCalcZ:
 
+    andi r24, rsp_mode, PSM3D_MODE_SHADE
+    beq r24, r0, .NoShade
+    nop
+
+.Shade:
+
+    ori r21, 0x4 // Z-Buffering command
+
+    addiu r23, 0x40 // Command size
+
+        // We must unpack the shade color for each vertex
+
+        slv vc16, 8, 0, r22 // Store vertex formatted Blue/flags/red/green
+        slv vc18, 8, 4, r22 
+        luv vc22, 0, 0, r22 // Load bytes
+        vmudm vc22, vc22, v2nconst2, v2n2_512 // Shift right 7 to get correct color
+
+        vmov vc16, 3, vc22, e0 // Store vtx0
+        vmov vc16, 4, vc22, e2 
+        vmov vc16, 5, vc22, e3 
+        
+        vmov vc18, 3, vc22, e4 // Store vtx1
+        vmov vc18, 4, vc22, e6 
+        vmov vc18, 5, vc22, e7 
+        
+        slv vc20, 8, 0, r22 // Store vertex formatted Blue/flags/red/green
+        luv vc22, 0, 0, r22 // Load bytes
+        vmudm vc22, vc22, v2nconst2, v2n2_512 // Shift right 7 to get correct color
+
+        vmov vc20, 3, vc22, e0 // Store vtx2
+        vmov vc20, 4, vc22, e2 
+        vmov vc20, 5, vc22, e3 
+
+        slv vc16, 8, 0, r22 // Store r, g int 
+        ssv vc16, 6, 4, r22 // Store b int 
+        ssv v2nconst, v2n_128 * 2, 6, r22 // Store a int (256)
+
+        sdv nullconst, 0, 8, r22 // Store rgba frac (0)
+
+        sqv nullconst, 0, 16, r22 // Store rgba frac (0)
+        sqv nullconst, 0, 32, r22 // Store rgba frac (0)
+        sqv nullconst, 0, 48, r22 // Store rgba frac (0)
+        
+    // Possibly combinable? This is such a mess at this point I need to get my registers straight
+
+        vsubc vc9, vc17, vc21, f // Calculate v3-v1
+        vsub vc8, vc16, vc20, f
+        
+        vrcph vc24, 1, vc8, 1 // Get 1/(y3-y1) 
+        vrcpl vc25, 1, vc9, 1
+        vrcph vc24, 1, nullconst, 0
+        
+        vmudn vc25, vc25, v2nconst, v2n_2 // Shift left 1 for correct point position 
+        vmadh vc24, vc24, v2nconst, v2n_2        
+        vmadn vc25, nullconst, nullconst, f 
+        
+        vmudl vc26, vc9, vc25, e1 // Calculate DrgbDe = (c3-c1)/(y3-y1)
+        vmadm vc26, vc8, vc25, e1
+        vmadn vc27, vc9, vc24, e1
+        vmadh vc26, vc8, vc24, e1
+        
+        slv vc26, 8, 0x20, r22 // Store Dr/gDe
+        slv vc27, 8, 0x30, r22
+        
+        ssv vc26, 6, 0x24, r22 // Store DbDe
+        ssv vc27, 6, 0x34, r22
+
+        vsubc vc9, vc17, vc21, f // Calculate v1-v3
+        vsub vc8, vc16, vc20, f
+        
+        vsubc vc11, vc19, vc17, f // Calculate v2-v1
+        vsub vc10, vc18, vc16, f 
+        
+        vmov vc9, 2, vc9, e4  // Move r into z 
+        vmov vc8, 2, vc8, e4 
+        
+        vmov vc11, 2, vc11, e4 
+        vmov vc10, 2, vc10, e4 
+
+        ori r24, r0, 1 // Divide by -z(-s/-t)
+
+    jal CrossProduct
+    nop
+        
+        ssv vc12, 2, 0x08, r22 // Store DrDx
+        ssv vc13, 2, 0x18, r22
+        
+        ssv vc12, 6, 0x28, r22 // Store DrDy
+        ssv vc13, 6, 0x38, r22
+
+        vmov vc9, 2, vc9, e5  // Move g into z 
+        vmov vc8, 2, vc8, e5 
+        
+        vmov vc11, 2, vc11, e5 
+        vmov vc10, 2, vc10, e5 
+
+        ori r24, r0, 1 // Divide by -z(-s/-t)
+
+    jal CrossProduct
+    nop
+        
+        ssv vc12, 2, 0x0A, r22 // Store DgDx
+        ssv vc13, 2, 0x1A, r22
+        
+        ssv vc12, 6, 0x2A, r22 // Store DgDy
+        ssv vc13, 6, 0x3A, r22
+        
+        vmov vc9, 2, vc9, e3  // Move b into z 
+        vmov vc8, 2, vc8, e3 
+        
+        vmov vc11, 2, vc11, e3 
+        vmov vc10, 2, vc10, e3
+
+        ori r24, r0, 1 // Divide by -z(-s/-t)
+
+    jal CrossProduct
+    nop
+        
+        ssv vc12, 2, 0x0C, r22 // Store DbDx
+        ssv vc13, 2, 0x1C, r22
+        
+        ssv vc12, 6, 0x2C, r22 // Store DbDy
+        ssv vc13, 6, 0x3C, r22
+ 
+    addiu r22, 0x40 // Add to command pointer
+
+.NoShade:
+    
     andi r24, rsp_mode, PSM3D_MODE_TEXTURING
     beq r24, r0, .NoTex
     nop
@@ -316,27 +427,27 @@ OPTri:
 
     addiu r23, 0x40
 
-        slv vc16, 8, 0, r22 // Store s, t int // 72C
-        slv vc17, 0, 0x10, r22 // Store s, t frac (0)
+        slv vc16, 12, 0, r22 // Store s, t int
+        slv nullconst, 0, 0x10, r22 // Store s, t frac (0)
 
-        vsubc vc23, vc17, vc21, f // Calculate v3-v1
-        vsub vc22, vc16, vc20, f
+        vsubc vc9, vc17, vc21, f // Calculate v3-v1
+        vsub vc8, vc16, vc20, f
         
-        vrcph vc24, 1, vc22, 1 // Get 1/(y3-y1) 
-        vrcpl vc25, 1, vc23, 1
+        vrcph vc24, 1, vc8, 1 // Get 1/(y3-y1) 
+        vrcpl vc25, 1, vc9, 1
         vrcph vc24, 1, nullconst, 0
         
         vmudn vc25, vc25, v2nconst, v2n_2 // Shift left 1 for correct point position 
         vmadh vc24, vc24, v2nconst, v2n_2        
         vmadn vc25, nullconst, nullconst, f 
         
-        vmudl vc26, vc23, vc25, e1 // Calculate Ds/tDe = (t3-t1)/(y3-y1)
-        vmadm vc26, vc22, vc25, e1
-        vmadn vc27, vc23, vc24, e1
-        vmadh vc26, vc22, vc24, e1
+        vmudl vc26, vc9, vc25, e1 // Calculate Ds/tDe = (t3-t1)/(y3-y1)
+        vmadm vc26, vc8, vc25, e1
+        vmadn vc27, vc9, vc24, e1
+        vmadh vc26, vc8, vc24, e1
         
-        slv vc26, 8, 0x20, r22 // Store
-        slv vc27, 8, 0x30, r22 
+        slv vc26, 12, 0x20, r22 // Store
+        slv vc27, 12, 0x30, r22 
         
         vsubc vc9, vc17, vc21, f // Calculate v1-v3
         vsub vc8, vc16, vc20, f
@@ -350,11 +461,11 @@ OPTri:
         vmudm vc10, vc10, v2nconst2, v2n2_256 // >> 8
         vmadn vc11, nullconst, nullconst, f
         
-        vmov vc9, 2, vc9, e4  // Move s into z 
-        vmov vc8, 2, vc8, e4 
+        vmov vc9, 2, vc9, e6  // Move s into z 
+        vmov vc8, 2, vc8, e6 
         
-        vmov vc11, 2, vc11, e4 
-        vmov vc10, 2, vc10, e4 
+        vmov vc11, 2, vc11, e6 
+        vmov vc10, 2, vc10, e6 
 
         ori r24, r0, 1 // Divide by -z(-s/-t)
 
@@ -367,11 +478,11 @@ OPTri:
         ssv vc12, 6, 0x28, r22 // Store DsDy
         ssv vc13, 6, 0x38, r22
     
-        vmov vc9, 2, vc9, e5 // Move t into z 
-        vmov vc8, 2, vc8, e5
+        vmov vc9, 2, vc9, e7 // Move t into z 
+        vmov vc8, 2, vc8, e7
         
-        vmov vc11, 2, vc11, e5 
-        vmov vc10, 2, vc10, e5 
+        vmov vc11, 2, vc11, e7 
+        vmov vc10, 2, vc10, e7 
 
     jal CrossProduct
     nop

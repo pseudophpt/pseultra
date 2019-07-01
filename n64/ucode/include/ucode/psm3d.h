@@ -35,35 +35,37 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DDispCmd_t {
 /** @brief Vertex for PSM3D */
 typedef struct __attribute__((packed, aligned(8))) uPSM3DVtx_t {
     /** @brief X-Coordinate Integral (s15.16 fixed point) */
-    u16 xi;
+    s16 xi;
     /** @brief Y-Coordinate Integral (s15.16 fixed point) */
-    u16 yi;
+    s16 yi;
     /** @brief Z-Coordinate Integral (s15.16 fixed point) */
-    u16 zi;
+    s16 zi;
     /** @brief Padding */
-    u8 pad;
-    /** @brief X-Normal (s.7 fixed point) */
-    u8 xn;
+    u16 pad;
     /** @brief X-Coordinate Fractional (s15.16 fixed point) */
-    u16 xf;
+    s16 xf;
     /** @brief Y-Coordinate Fractional (s15.16 fixed point) */
-    u16 yf;
+    s16 yf;
     /** @brief Z-Coordinate Fractional (s15.16 fixed point) */
-    u16 zf;
-    /** @brief Y-Normal (s.7 fixed point) */
-    u8 yn;
-    /** @brief Z-Normal (s.7 fixed point) */
-    u8 zn;
-    /** @brief S coordinate (s10.5) */
-    u16 s;
-    /** @brief T coordinate (s10.5) */
-    u16 t;
+    s16 zf;
     /** @brief Padding */
-    u32 pad2;
+    u16 pad2;
+    /** @brief S coordinate (s10.5) */
+    s16 s;
+    /** @brief T coordinate (s10.5) */
+    s16 t;
     /** @brief Padding */
     u32 pad3;
+    /** @brief X-Normal (s.7 fixed point) / R Shading */
+    s8 xn;
+    /** @brief Y-Normal (s.7 fixed point) / G Shading */
+    s8 yn;
+    /** @brief Z-Normal (s.7 fixed point) / B Shading */
+    s8 zn;
+    /** @brief Padding (this padding must be zero) */
+    u8 pad4;
     /** @brief Padding */
-    u32 pad4;
+    u32 pad5;
 } uPSM3DVtx;
 
 /** @brief Matrix for PSM3D */
@@ -81,11 +83,48 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
     /** @brief Half the viewport height */
     u16 hheight;
     /** @brief Viewport X offset */
-    u16 xoff;
+    s16 xoff;
     /** @brief Viewport Y offset */
-    u16 yoff;
+    s16 yoff;
 } uPSM3DVp;
 
+/** @brief Ambient light structure for PSM3D */
+typedef struct __attribute((aligned(8))) uPSM3DAmbientLight_t {
+    /** @brief Red value of ambient light color */
+    u8 r;
+    /** @brief Green value of ambient light color */
+    u8 g;
+    /** @brief Blue value of ambient light color */
+    u8 b;
+} uPSM3DAmbientLight;
+
+/** @brief Point light structure for PSM3D */
+typedef struct __attribute((aligned(8))) uPSM3DPointLight_t {
+    /** @brief Red value of point light color */
+    u8 r;
+    /** @brief Green value of point light color */
+    u8 g;
+    /** @brief Blue value of point light color */
+    u8 b;
+    /** @brief Attenuation factor */
+    u8 att;
+    /** @brief X value of point light in current coordinate system (MODELVIEW) */
+    s8 x;
+    /** @brief Y value of point light in current coordinate system (MODELVIEW) */
+    s8 y;
+    /** @brief Z value of point light in current coordinate system (MODELVIEW) */
+    s8 z;
+    /** @brief Padding */
+    u8 pad;
+} uPSM3DPointLight;
+
+/** @brief Light structure for PSM3D */
+typedef struct __attribute__((packed, aligned(8))) uPSM3DLights_t {
+    /** @brief Ambient light */
+    uPSM3DAmbientLight ambient;
+    /** @brief Point lights */
+    uPSM3DPointLight point_lights [];
+} uPSM3DLights;
 
 #endif
 
@@ -107,6 +146,7 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
 #define UCODE_PSM3D_OP_TRI 0x07
 #define UCODE_PSM3D_OP_SET_VP 0x08
 #define UCODE_PSM3D_OP_POP_MTX 0x09
+#define UCODE_PSM3D_OP_LOAD_LIGHTS 0x0A
 
 /*
  * Operation macros
@@ -137,6 +177,14 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
 #define UCODE_PSM3D_RSPMODE_ZBUF 0x400
 #define UCODE_PSM3D_RSPMODE_ZBUF_OFF 0
 #define UCODE_PSM3D_RSPMODE_ZBUF_ON 0x400
+
+#define UCODE_PSM3D_RSPMODE_LIGHT 0x800
+#define UCODE_PSM3D_RSPMODE_LIGHT_OFF 0
+#define UCODE_PSM3D_RSPMODE_LIGHT_ON 0x800
+
+#define UCODE_PSM3D_RSPMODE_SHADE 0x1000
+#define UCODE_PSM3D_RSPMODE_SHADE_OFF 0
+#define UCODE_PSM3D_RSPMODE_SHADE_ON 0x1000
 
 #define usPSM3DSetRSPMode(mask, data) \
     {\
@@ -292,6 +340,22 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
             \
         _FMT(vp, 0, 24)\
     }
+
+#define usPSM3DLoadLights(lights, count) \
+    {\
+        _FMT(UCODE_PSM3D_OP_LOAD_LIGHTS, 24, 8) |\
+        _FMT(count, 0, 8),\
+            \
+        _FMT(lights, 0, 24)\
+    }
+#define uPSM3DLoadLights(dl, lights, count) \
+    *((dl) ++) = (uPSM3DDispCmd) {\
+        _FMT(UCODE_PSM3D_OP_LOAD_LIGHTS, 24, 8) |\
+        _FMT(count, 0, 8),\
+            \
+        _FMT(lights, 0, 24)\
+    }
+
 
 #define usPSM3DPopMtx() { (UCODE_PSM3D_OP_POP_MTX << 24), 0 } 
 #define uPSM3DPopMtx(dl) *((dl) ++) = (uPSM3DDispCmd) { _FMT(UCODE_PSM3D_OP_POP_MTX, 24, 8), 0 } 

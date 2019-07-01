@@ -34,6 +34,11 @@
 #define PSM3D_VTX_SIZE 16
 #define PSM3D_VTX_COUNT 16
 
+#define PSM3D_AMBIENT_LIGHT_SIZE 8
+
+#define PSM3D_POINT_LIGHT_SIZE 16
+#define PSM3D_POINT_LIGHT_COUNT 8
+
 #define v2nconst vc0 // Contains powers of 2
 #define v2nconst2 vc1 // Contains powers of 2
 #define nullconst vc2 // Contains 0 
@@ -66,8 +71,14 @@
 #define PSM3D_MODE_CLOCK_CULL 0x200 // Clockwise culling?
 #define PSM3D_MODE_COUNTER_CULL 0x100 // Counter-clockwise culling?
 #define PSM3D_MODE_ZBUF 0x400 // Z buffering tri calculations enabled 
+#define PSM3D_MODE_LIGHT 0x800 // Lighting enabled (Uses shading values as normals, not colors) 
+#define PSM3D_MODE_SHADE 0x1000 // Shading enabled 
 
 #define rsp_mode r4
+
+#define light_count r5
+
+#define cmd_addr r6
 
 #define op_ret b .ExecutionLoop
 
@@ -144,6 +155,7 @@ uPSM3DTextStart:
 
 .ScalarInit:
     or rsp_mode, r0, r0 // Mode = 0
+    ori cmd_addr, r0, %lo(cmd) // Load command pointer
 //
 // Begin execution
 //
@@ -215,6 +227,7 @@ uPSM3DTextStart:
 #include "psm3d/tri.sx"
 #include "psm3d/setvp.sx"
 #include "psm3d/popmtx.sx"
+#include "psm3d/loadlights.sx"
 
 #undef dl_dram_ptr
 
@@ -231,13 +244,17 @@ uPSM3DTextEnd:
 .align 3
 
 // Current display list command: also used as temp memory for subroutines
-.lcomm cmd, 0x80
+.lcomm cmd, 0x100
 // Vertex cache
 .lcomm vtx_cache, PSM3D_VTX_SIZE * PSM3D_VTX_COUNT
 // Projection matrix
 .lcomm mtx_proj, PSM3D_MTX_SIZE
 // Modeling matrix stack
 .lcomm mtx_stack, PSM3D_MTX_SIZE * PSM3D_MTX_COUNT
+// Ambient light
+.lcomm ambient_light, PSM3D_AMBIENT_LIGHT_SIZE
+// Point lights
+.lcomm point_lights, PSM3D_POINT_LIGHT_SIZE * PSM3D_POINT_LIGHT_COUNT
 // XBUS buffer
 .lcomm xbus_buffer, PSM3D_XBUS_BUFFER_SIZE
 
@@ -268,6 +285,7 @@ jump_tbl:
 .word OPTri
 .word OPSetVp
 .word OPPopMtx
+.word OPLoadLights
 
 .align 4
 

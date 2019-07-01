@@ -24,15 +24,17 @@
 //////////////////////////////////////////////////////////////////////////////
 
 // Stored vertex format:
-// X, Y, Zi, Zf, F, 0, S, T
+// X, Y, Zi, Zf, F, RG, S, T
 // F: Flags
-// -------- --xyzXYZ 
+// BBBBBBBB --xyzXYZ 
 // x: outside of negative x clip space
 // y: outside of negative y clip space
 // z: outside of negative z clip space
 // X: outside of positive x clip space
 // Y: outside of positive y clip space
 // Z: outside of positive z clip space
+// B: Blue shading color
+// RG: Red and green shading colors
 
 // TODO: Pre-multiply projection and model matrices
 // TODO: Two vertices at a time
@@ -57,12 +59,7 @@ OPLoadVtx:
     lw r24, (%lo(cmd) + 16)($zero) // Load s and t
     sw r24, 12(r17)
 
-/*
- * Actual shading should be performed here by calculating the dot product of 
- * the supplied vector normal with the light unit vector to get shading 
- * values. Here, we're going to assume light unit vector <0, 0, 1>, so that
- * we can just take the Z component of the normal and use it as a shade value
- */
+.CalcCoordinates:
 
         ldv vc8, 0, cmd, $zero // Load integral part into vc8
         ldv vc8, 8, cmd, $zero
@@ -80,15 +77,129 @@ OPLoadVtx:
     jal MTXApply4x4
     addiu r24, -PSM3D_MTX_SIZE
 
-        vor vc8, nullconst, vc14, f // Use output as input to projection
-        vor vc9, nullconst, vc15, f
+        vor vc16, nullconst, vc14, f // Save vertices in eye coordinates for use with lighting
+        vor vc17, nullconst, vc15, f
+        
+        sdv vc16, 0, cmd + 32, $zero // Copy second halves
+        ldv vc16, 8, cmd + 32, $zero
 
-        sdv vc8, 0, cmd, $zero // Copy second halves
-        ldv vc8, 8, cmd, $zero
+        sdv vc17, 0, cmd + 32, $zero
+        ldv vc17, 8, cmd + 32, $zero
 
-        sdv vc9, 0, cmd, $zero
-        ldv vc9, 8, cmd, $zero
+    // Eye coordinates for this vertex have been calculated, now they can be used in the lighting proces (if necessary)
+
+    andi r24, rsp_mode, PSM3D_MODE_LIGHT
+    beq r24, r0, .NoLight
+    nop
     
+.Light:
+
+    ori r24, r0, ambient_light 
+
+        luv vc18, 0, 0, r24 // Load ambient light as default
+
+.DiffuseLight:
+
+// Diffuse lighting assumes MODELVIEW is normal, which can be ensured by only 
+// using rotations and translations. This requirement is necessary as normal
+// vectors are only preserved by normal matrices
+
+        lpv vc19, 0, 24, cmd_addr // Load normal values as signed fraction
+        
+        sdv vc19, 0, cmd + 32, $zero // Copy second halves for matrix multiply
+        ldv vc19, 8, cmd + 32, $zero
+        
+        vmudm vc8, vc19, v2nconst, v2n_1 // Multiply by 1/65536 to get signed fraction as double-precision (normal is halved here)
+        vmadn vc9, nullconst, nullconst, f // Accumulate fractional result
+
+    move r24, mtx_stack_ptr // Model matrix multiply to calculate transformed noral
+    jal MTXApply4x4
+    addiu r24, -PSM3D_MTX_SIZE
+
+    or r19, r0, r0 // Current light
+    ori r20, r0, %lo(point_lights) // Current light pointer
+
+.DiffuseLightLoop:
+
+    beq r19, light_count, .EndDiffuseLight // If we've gone through all the lights
+    nop        
+       
+        ldv vc20, 0, 0, r20 // Load light coordinates
+        llv vc21, 0, 8, r20
+        vmov vc21, 2, vc20, e3 
+
+        vsubc vc21, vc21, vc17, f // Calculate light - vtx (light vector)
+        vsub vc20, vc20, vc16, f
+
+        vmov vc20, 3, nullconst, f // Clear 4th element of vector 
+        vmov vc21, 3, nullconst, f // 
+
+        vmudl vc22, vc21, vc21, f // Calculate x^2, y^2, z^2, 0
+        vmadm vc22, vc20, vc21, f
+        vmadn vc23, vc21, vc20, f 
+        vmadh vc22, vc20, vc20, f
+
+        vaddc vc23, vc23, vc23, q1
+        vadd vc22, vc22, vc22, q1
+
+        vaddc vc23, vc23, vc23, h2 // Calculate x^2 + y^2 + z^2
+        vadd vc22, vc22, vc22, h2
+
+        vrsqh vc22, 0, vc22, 0 // Calculate 1/||light - vtx||
+        vrsql vc23, 0, vc23, 0
+        vrsqh vc22, 0, nullconst, 0 
+
+        vmudl vc23, vc23, v2nconst2, v2n2_512 // Shift appropriately
+        vmadm vc22, vc22, v2nconst2, v2n2_512
+        vmadn vc23, nullconst, nullconst, f
+
+        vmudl vc24, vc21, vc23, e0 // Calculate unit vector for (light - vtx)
+        vmadm vc24, vc20, vc23, e0
+        vmadn vc21, vc21, vc22, e0
+        vmadh vc20, vc20, vc22, e0
+
+        vmudl vc24, vc15, vc21, f // Dot product unit(light - vtx) * normal / 2
+        vmadm vc24, vc14, vc21, f
+        vmadn vc21, vc15, vc20, f
+        vmadh vc20, vc14, vc20, f
+
+        vaddc vc21, vc21, vc21, q1
+        vadd vc20, vc20, vc20, q1
+
+        vaddc vc21, vc21, vc21, h2 
+        vadd vc20, vc20, vc20, h2
+        
+        vabs vc20, vc21, vc21, f // Calculate |dot / 2|
+        
+        vaddc vc20, vc20, vc21, f // Calculate (dot / 2) + |dot / 2| (Dot clamped to 0)
+        vadd vc21, nullconst, nullconst, f
+
+        luv vc22, 0, 8, r20 // Load RGBA for this light
+
+        sdv vc22, 8, cmd + 32, $zero // Copy right half of vector to left (Do this outside, so it will be faster)
+        ldv vc22, 0, cmd + 32, $zero
+        
+        vmudm vc20, vc22, vc20, e0 // Calculate RGBA * clamped dot
+
+        vadd vc18, vc20, vc18, f // Add to ambient light
+
+    addiu r19, 1 // Increment current light
+    b .DiffuseLightLoop
+    addiu r20, PSM3D_POINT_LIGHT_SIZE // Add to light pointer
+
+.EndDiffuseLight: 
+    
+        suv vc18, 0, 24, cmd_addr // Store RGB values (OVERWRITES PART OF PADDING. THIS MAY BE AN ISSUE IF IT IS LATER USED)
+
+.NoLight:
+
+    lh r19, (%lo(cmd) + 24)($zero) // Load R and G shading coeffs as colors
+    lh r20, (%lo(cmd) + 26)($zero) // Load B shading coeff as color 
+    andi r20, 0xFF00 // Clear lower half of blue
+        
+        vor vc8, nullconst, vc16, f // Use output as input to projection
+        vor vc9, nullconst, vc17, f
+ 
     jal MTXApply4x4
     ori r24, $zero, %lo(mtx_proj) // Projection matrix multiply         
 
@@ -101,7 +212,10 @@ OPLoadVtx:
         andi r25, 0x38
         or r24, r25
 
-        sb r24, 9(r17) // Save clip flags
+        or r20, r24 // OR with calculated blue value
+
+        sh r19, 10(r17) // Save red and green
+        sh r20, 8(r17) // Save clip flags and blue
 
         vrcph vc18, 3, vc14, 3 // Get 1/w 
         vrcpl vc19, 3, vc15, 3

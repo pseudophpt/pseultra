@@ -1,0 +1,78 @@
+/*
+ * pseultra/n64/ucode/src/psm3d/loadlights.sx
+ * PSM3D microcode LoadLights function
+ * 
+ * (C) pseudophpt 2019
+ */
+
+//////////////////////////////////////////////////////////////////////////////
+//                                                                          // 
+// LoadLights                                                               // 
+//                                                                          // 
+// Sets the lighting system lights                                          // 
+//                                                                          // 
+////////////////////////////////////////////////////////////////////////////// 
+//                                                                          // 
+// FORMAT:                                                                  // 
+//                                                                          // 
+// 05 -- -- PP -- DD DD DD                                                  // 
+//                                                                          //
+// P: Number of point lights                                                //
+// D: DRAM address of light struct                                          // 
+//                                                                          // 
+//////////////////////////////////////////////////////////////////////////////
+
+
+.global OPLoadLights
+
+// Light format:
+// Xi, Yi, Zi, Zf, Xf, Yf, RG, BA
+
+OPLoadLights:
+
+    lw r24, (%lo(cmd) + 4)($zero) // Load DRAM address 
+    lb light_count, (%lo(cmd) + 3)($zero) // Load number of point lights
+    sll r16, light_count, 3 // 8 bytes to load for each point light
+    sll r17, r16, 1 // 16 bytes for each point light as stored
+    ori r25, $zero, %lo(ambient_light) // Load into light storage
+    jal DMARead 
+    addiu r26, r16, 7 // Read ambient light info to size
+
+    addiu r16, %lo(point_lights) // Add to point light offset 
+    addiu r17, %lo(point_lights)
+
+// Since this loops transforms lights from 8 byte form to 16 bytes, it goes backwards
+.TransformLoop:
+    beq r16, r17, .TransformFinished // If we've translated all the point lights we are finished
+
+    lw r18, -8(r16) // Load RGBA
+    sw r18, -4(r17) // Store RGBA
+
+        lpv vc19, 0, -8, r16 // Load position as signed fraction (pointer is aligned to end)
+        
+        vmov vc19, 7, v2nconst2, v2n2_256 // Load 1 into w (256)
+
+        sdv vc19, 8, cmd, $zero // Copy second halves for matrix multiply
+        ldv vc19, 0, cmd, $zero
+        
+        vmudm vc8, vc19, v2nconst2, v2n2_256 // Multiply by 1/256 to get signed fraction as double-precision
+        vmadn vc9, nullconst, nullconst, f // Accumulate fractional result
+
+    move r24, mtx_stack_ptr // Model matrix multiply to calculate transformed noral
+    jal MTXApply4x4
+    addiu r24, -PSM3D_MTX_SIZE
+ 
+        vmov vc14, 3, vc15, e2 // Move Zf next to Zi
+        sdv vc14, 0, -16, r17 // Store coordinates
+        slv vc15, 0, -8, r17
+
+    addiu r16, -8 // Go to next (previous) light
+    b .TransformLoop
+    addiu r17, -16
+
+
+.TransformFinished:
+
+    op_ret
+    nop
+
