@@ -35,33 +35,33 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DDispCmd_t {
 /** @brief Vertex for PSM3D */
 typedef struct __attribute__((packed, aligned(8))) uPSM3DVtx_t {
     /** @brief X-Coordinate Integral (s15.16 fixed point) */
-    u16 xi;
+    s16 xi;
     /** @brief Y-Coordinate Integral (s15.16 fixed point) */
-    u16 yi;
+    s16 yi;
     /** @brief Z-Coordinate Integral (s15.16 fixed point) */
-    u16 zi;
+    s16 zi;
     /** @brief Padding */
     u16 pad;
     /** @brief X-Coordinate Fractional (s15.16 fixed point) */
-    u16 xf;
+    s16 xf;
     /** @brief Y-Coordinate Fractional (s15.16 fixed point) */
-    u16 yf;
+    s16 yf;
     /** @brief Z-Coordinate Fractional (s15.16 fixed point) */
-    u16 zf;
+    s16 zf;
     /** @brief Padding */
     u16 pad2;
     /** @brief S coordinate (s10.5) */
-    u16 s;
+    s16 s;
     /** @brief T coordinate (s10.5) */
-    u16 t;
+    s16 t;
     /** @brief Padding */
     u32 pad3;
     /** @brief X-Normal (s.7 fixed point) / R Shading */
-    u8 xn;
+    s8 xn;
     /** @brief Y-Normal (s.7 fixed point) / G Shading */
-    u8 yn;
+    s8 yn;
     /** @brief Z-Normal (s.7 fixed point) / B Shading */
-    u8 zn;
+    s8 zn;
     /** @brief Padding (this padding must be zero) */
     u8 pad4;
     /** @brief Padding */
@@ -83,13 +83,13 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
     /** @brief Half the viewport height */
     u16 hheight;
     /** @brief Viewport X offset */
-    u16 xoff;
+    s16 xoff;
     /** @brief Viewport Y offset */
-    u16 yoff;
+    s16 yoff;
 } uPSM3DVp;
 
 /** @brief Ambient light structure for PSM3D */
-typedef struct uPSM3DAmbientLight_t {
+typedef struct __attribute((aligned(8))) uPSM3DAmbientLight_t {
     /** @brief Red value of ambient light color */
     u8 r;
     /** @brief Green value of ambient light color */
@@ -99,7 +99,7 @@ typedef struct uPSM3DAmbientLight_t {
 } uPSM3DAmbientLight;
 
 /** @brief Point light structure for PSM3D */
-typedef struct uPSM3DPointLight_t {
+typedef struct __attribute((aligned(8))) uPSM3DPointLight_t {
     /** @brief Red value of point light color */
     u8 r;
     /** @brief Green value of point light color */
@@ -109,11 +109,11 @@ typedef struct uPSM3DPointLight_t {
     /** @brief Attenuation factor */
     u8 att;
     /** @brief X value of point light in current coordinate system (MODELVIEW) */
-    u8 x;
+    s8 x;
     /** @brief Y value of point light in current coordinate system (MODELVIEW) */
-    u8 y;
+    s8 y;
     /** @brief Z value of point light in current coordinate system (MODELVIEW) */
-    u8 z;
+    s8 z;
     /** @brief Padding */
     u8 pad;
 } uPSM3DPointLight;

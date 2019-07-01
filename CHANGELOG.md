@@ -5,6 +5,7 @@
 ### Added
 - Shaded triangles
 - Ambient lighting
+- Diffuse lighting
 
 ### Fixed
 - Bug in which DzDx was written to DzDy

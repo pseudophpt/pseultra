@@ -34,8 +34,10 @@
 #define PSM3D_VTX_SIZE 16
 #define PSM3D_VTX_COUNT 16
 
-#define PSM3D_LIGHT_SIZE 8
-#define PSM3D_LIGHT_COUNT 8
+#define PSM3D_AMBIENT_LIGHT_SIZE 8
+
+#define PSM3D_POINT_LIGHT_SIZE 16
+#define PSM3D_POINT_LIGHT_COUNT 8
 
 #define v2nconst vc0 // Contains powers of 2
 #define v2nconst2 vc1 // Contains powers of 2
@@ -250,9 +252,9 @@ uPSM3DTextEnd:
 // Modeling matrix stack
 .lcomm mtx_stack, PSM3D_MTX_SIZE * PSM3D_MTX_COUNT
 // Ambient light
-.lcomm ambient_light, PSM3D_LIGHT_SIZE
+.lcomm ambient_light, PSM3D_AMBIENT_LIGHT_SIZE
 // Point lights
-.lcomm point_lights, PSM3D_LIGHT_SIZE * PSM3D_LIGHT_COUNT
+.lcomm point_lights, PSM3D_POINT_LIGHT_SIZE * PSM3D_POINT_LIGHT_COUNT
 // XBUS buffer
 .lcomm xbus_buffer, PSM3D_XBUS_BUFFER_SIZE
 
