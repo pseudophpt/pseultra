@@ -22,7 +22,7 @@
  * @param[in] dx Translation in x direction (s15.16)
  * @param[in] dy Translation in y direction (s15.16)
  * @param[in] dz Translation in z direction (s15.16)
- * @param[in] transpose Transpose this matrix if this value is non-zero. Must be used if this matrix is on the base of a matrix stack for pseultra microcodes.
+ * @param[in] transpose Transpose this matrix if this value is non-zero. Must be used if this matrix is not on the base of a matrix stack for pseultra microcodes.
  * @date 1 Jul 2019
  * @author pseudophpt
  *
