@@ -2,6 +2,8 @@
 
 ## [Unreleased](https://github.com/pseudophpt/pseultra/compare/master...develop)
 
+## [1.4.0](https://github.com/pseudophpt/pseultra/compare/v1.3.0...v1.4.0) - 2019-07-01
+
 ### Added
 - Shaded triangles
 - Ambient lighting
