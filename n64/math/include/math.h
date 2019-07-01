@@ -19,5 +19,6 @@
 
 #include <math/mathf.h>
 #include <math/maths.h>
+#include <math/mtx.h>
 
 #endif

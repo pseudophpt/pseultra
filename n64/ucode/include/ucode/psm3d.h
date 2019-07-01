@@ -68,14 +68,6 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DVtx_t {
     u32 pad5;
 } uPSM3DVtx;
 
-/** @brief Matrix for PSM3D */
-typedef struct __attribute__((packed, aligned(8))) uPSM3DMtx_t {
-    /** @brief Integral part of matrix */
-    u16 intgr [4][4];
-    /** @brief Fractional part of matrix */
-    u16 frac [4][4];
-} uPSM3DMtx;
-
 /** @brief Viewport for PSM3D */
 typedef struct __attribute__((packed, aligned(8))) uPSM3DVp_t {
     /** @brief Half the viewport width */
