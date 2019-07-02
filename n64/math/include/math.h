@@ -17,6 +17,8 @@
 #ifndef MATH_H_GUARD
 #define MATH_H_GUARD
 
+#include <ints.h>
+
 #include <math/mathf.h>
 #include <math/maths.h>
 #include <math/mtx.h>
