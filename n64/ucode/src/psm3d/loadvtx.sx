@@ -109,7 +109,7 @@ OPLoadVtx:
         sdv vc19, 0, cmd + 32, $zero // Copy second halves for matrix multiply
         ldv vc19, 8, cmd + 32, $zero
         
-        vmudm vc8, vc19, v2nconst, v2n_1 // Multiply by 1/65536 to get signed fraction as double-precision (normal is halved here)
+        vmudm vc8, vc19, v2nconst, v2n_2 // Multiply by 1/32768 to get signed fraction as double-precision
         vmadn vc9, nullconst, nullconst, f // Accumulate fractional result
 
     move r24, mtx_stack_ptr // Model matrix multiply to calculate transformed noral
@@ -149,8 +149,8 @@ OPLoadVtx:
         vrsql vc23, 0, vc23, 0
         vrsqh vc22, 0, nullconst, 0 
 
-        vmudl vc23, vc23, v2nconst2, v2n2_512 // Shift appropriately
-        vmadm vc22, vc22, v2nconst2, v2n2_512
+        vmudl vc23, vc23, v2nconst2, v2n2_256 // Shift appropriately (light - vtx)
+        vmadm vc22, vc22, v2nconst2, v2n2_256
         vmadn vc23, nullconst, nullconst, f
 
         vmudl vc24, vc21, vc23, e0 // Calculate unit vector for (light - vtx)
@@ -168,18 +168,16 @@ OPLoadVtx:
 
         vaddc vc21, vc21, vc21, h2 
         vadd vc20, vc20, vc20, h2
-        
-        vabs vc20, vc21, vc21, f // Calculate |dot / 2|
-        
-        vaddc vc20, vc20, vc21, f // Calculate (dot / 2) + |dot / 2| (Dot clamped to 0)
-        vadd vc21, nullconst, nullconst, f
+
+        vnor vc20, vc20, nullconst, f // Invert upper half to get 0x0000 for negative, 0xFFFF for positive 
+        vand vc21, vc21, vc20, f // Make zero if negative
 
         luv vc22, 0, 8, r20 // Load RGBA for this light
 
         sdv vc22, 8, cmd + 32, $zero // Copy right half of vector to left (Do this outside, so it will be faster)
         ldv vc22, 0, cmd + 32, $zero
         
-        vmudm vc20, vc22, vc20, e0 // Calculate RGBA * clamped dot
+        vmudm vc20, vc22, vc21, e0 // Calculate RGBA * clamped dot
 
         vadd vc18, vc20, vc18, f // Add to ambient light
 
