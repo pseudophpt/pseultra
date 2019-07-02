@@ -35,4 +35,10 @@ extern float mathFSin (float in);
 extern float mathFCos (float in);
 #endif
 
+#ifdef __asm__
+.extern mathFtoS
+#else
+extern s32 mathFtoS (float in);
+#endif
+
 #endif

@@ -83,3 +83,31 @@ mathFCos
     // Return sine approximation
     return mathFSin(in);
 }
+
+/**
+ * @brief Converts a floating point number into fixed point s16.15
+ * @param[in] in Floating point number to convert to fixed point
+ * @return Clamped s15.16 equivalent of input float
+ * @date 1 Jul 2019
+ * @author pseudophpt
+ *
+ * This function converts a floating point number into a signed s16.15 fixed point number. It clamps for numbers larger than 32768 or smaller than -32768.
+ */
+s32
+mathFtoS
+(float in) {
+    // Clamp
+    if (in >= 32768.0)
+    {
+        return 0x7FFFFFFF;
+    }
+    else if (in < -32768.0)
+    {
+        return 0x80000000;
+    }
+    else
+    {
+        // Return in << 16 floored
+        return (s32)(in * 65536.0);
+    }
+}
