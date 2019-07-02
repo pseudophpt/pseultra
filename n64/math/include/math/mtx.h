@@ -32,7 +32,13 @@ typedef struct __attribute__((packed, aligned(8))) MMtx_t {
 #ifdef __asm__
 .extern mathMtxTrans
 #else
-extern void mathMtxTrans (MMtx *mtx, s32 dx, s32 dy, s32 dz, int transpose);
+extern void mathMtxTrans (MMtx *mtx, float dx, float dy, float dz, int transpose);
+#endif
+
+#ifdef __asm__
+.extern mathMtxRot
+#else
+extern void mathMtxRot (MMtx *mtx, float x, float y, float z, float theta, int transpose);
 #endif
 
 #endif
