@@ -146,3 +146,56 @@ mathMtxRot
     mtx->intgr[3][3] = 1;
     mtx->frac[3][3] = 0; 
 }
+
+/**
+ * @brief Constructs a perspective projection matrix at the provided address 
+ * @param[out] mtx Matrix to write result to
+ * @param[in] yfov Field of view of Y in radians 
+ * @param[in] invasp Inverse aspect ratio (height / width) of screen
+ * @param[in] n Distance from camera to near clipping plane
+ * @param[in] f Distance from camera to far clipping plane
+ * @date 2 Jul 2019
+ * @author pseudophpt
+ *
+ * This function constructs a fixed point perspective projection matrix from given values. It is automatically non-transposed, as all projection matrices are at the base 
+ *
+ */
+void
+mathMtxPersp
+(MMtx *mtx, float yfov, float invasp, float n, float f) {
+    // Clear matrix
+    for (int i = 0; i < 4; i ++) {
+        for (int j = 0; j < 4; j ++) {
+            mtx->intgr[i][j] = 0;
+            mtx->frac[i][j] = 0;
+        }
+    }
+    
+    // Calculate cotangent of field of view in y direction
+    float cot = mathFCos(yfov / 2) / mathFSin (yfov / 2);
+
+    s32 result; // Temporary storage for calculate value
+
+    result = mathFtoS(cot * invasp);
+
+    mtx->intgr[0][0] = result >> 16; // Possibly inline this?
+    mtx->frac[0][0] = result & 0xFFFF;
+    
+    result = mathFtoS(cot);
+
+    mtx->intgr[1][1] = result >> 16;
+    mtx->frac[1][1] = result & 0xFFFF;
+
+    result = mathFtoS((n + f) / (n - f));
+
+    mtx->intgr[2][2] = result >> 16;
+    mtx->frac[2][2] = result & 0xFFFF;
+
+    result = mathFtoS((2 * n * f) / (n - f));
+    
+    mtx->intgr[2][3] = result >> 16;
+    mtx->frac[2][3] = result & 0xFFFF;
+    
+    mtx->intgr[3][2] = -1;
+    mtx->frac[3][2] = 0;
+}

@@ -41,4 +41,10 @@ extern void mathMtxTrans (MMtx *mtx, float dx, float dy, float dz, int transpose
 extern void mathMtxRot (MMtx *mtx, float x, float y, float z, float theta, int transpose);
 #endif
 
+#ifdef __asm__
+.extern mathMtxPersp
+#else
+extern void mathMtxPersp (MMtx *mtx, float yfov, float invasp, float n, float f);
+#endif
+
 #endif
