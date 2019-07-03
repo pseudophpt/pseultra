@@ -348,9 +348,19 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DLights_t {
         _FMT(lights, 0, 24)\
     }
 
+#define usPSM3DPopMtx(c) \
+    {\
+        _FMT(UCODE_PSM3D_OP_POP_MTX, 24, 8)\
+            ,\
+        _FMT(c, 0, 8)\
+    }
 
-#define usPSM3DPopMtx() { (UCODE_PSM3D_OP_POP_MTX << 24), 0 } 
-#define uPSM3DPopMtx(dl) *((dl) ++) = (uPSM3DDispCmd) { _FMT(UCODE_PSM3D_OP_POP_MTX, 24, 8), 0 } 
+#define uPSM3DPopMtx(dl, c)\
+    *((dl) ++) = (uPSM3DDispCmd) {\
+        _FMT(UCODE_PSM3D_OP_POP_MTX, 24, 8)\
+            ,\
+        _FMT(c, 0, 8)\
+    }
 
 #define UCODE_PSM3D_BLEND_MODE_M1A_IN 0
 #define UCODE_PSM3D_BLEND_MODE_M1A_MEM 1

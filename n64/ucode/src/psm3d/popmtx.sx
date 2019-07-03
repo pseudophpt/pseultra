@@ -15,8 +15,10 @@
 //                                                                          // 
 // FORMAT:                                                                  // 
 //                                                                          // 
-// 08 -- -- -- -- -- -- --                                                  // 
-//                                                                          // 
+// 08 -- -- -- -- -- -- CC                                                  // 
+//                                                                          //
+// C: Number of matrices to pop                                             //
+//                                                                          //
 //////////////////////////////////////////////////////////////////////////////
 
 
@@ -24,5 +26,8 @@
 
 OPPopMtx:
 
+    lb r16, (%lo(cmd) + 7)(r0) // Load number of matrices   
+    sll r16, 6 // 64 bytes for each matrix
+    
     op_ret // Return
-    addiu mtx_stack_ptr, -PSM3D_MTX_SIZE    
+    subu mtx_stack_ptr, r16   
