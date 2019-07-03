@@ -5,6 +5,9 @@
 ### Added
 - Matrix operations
 
+### Fixed
+- Bug involving clamping of diffuse lighting value which would cause incorrect lighting
+
 ## [1.4.0](https://github.com/pseudophpt/pseultra/compare/v1.3.0...v1.4.0) - 2019-07-01
 
 ### Added
