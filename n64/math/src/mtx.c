@@ -16,6 +16,27 @@
 
 #include <math.h>
 
+static inline void mathMtxWrite (MMtx *mtx, int r, int c, s32 e);
+
+/**
+* @brief Writes to a matrix entry 
+* @param[out] mtx Matrix to write result to
+* @param[in] r Row of element to write 
+* @param[in] c Column of element to write
+* @param[in] e Element to write 
+* @date 3 Jul 2019
+* @author pseudophpt
+*
+* This inline function writes a s16.15 fixed point number to a certain element of a fixed point array
+*
+*/
+static inline void
+mathMtxWrite
+(MMtx *mtx, int r, int c, s32 e) {
+    mtx->intgr[r][c] = e >> 16;
+    mtx->frac[r][c] = e & 0xFFFF;
+}
+
 /**
  * @brief Constructs a translation matrix at the provided address 
  * @param[out] mtx Matrix to write result to
@@ -51,26 +72,16 @@ mathMtxTrans
 
     // If not transposing, coefficients go in the rightmost column vector
     if (transpose == 0) {
-        mtx->intgr[0][3] = (dxs >> 16);
-        mtx->frac[0][3] = (dxs & 0xFFFF);
-                     
-        mtx->intgr[1][3] = (dys >> 16);
-        mtx->frac[1][3] = (dys & 0xFFFF);
-                     
-        mtx->intgr[2][3] = (dzs >> 16);
-        mtx->frac[2][3] = (dzs & 0xFFFF);
+        mathMtxWrite(mtx, 0, 3, dxs);
+        mathMtxWrite(mtx, 1, 3, dys);
+        mathMtxWrite(mtx, 2, 3, dzs);
     }
     
     // If transposing, coefficients go in the bottom row vector
     else {
-        mtx->intgr[3][0] = (dxs >> 16);
-        mtx->frac[3][0] = (dxs & 0xFFFF);
-
-        mtx->intgr[3][1] = (dys >> 16);
-        mtx->frac[3][1] = (dys & 0xFFFF);
-
-        mtx->intgr[3][2] = (dzs >> 16);
-        mtx->frac[3][2] = (dzs & 0xFFFF);
+        mathMtxWrite(mtx, 3, 0, dxs);
+        mathMtxWrite(mtx, 3, 1, dys);
+        mathMtxWrite(mtx, 3, 2, dzs);
     }
 }
 
@@ -122,29 +133,23 @@ mathMtxRot
             // Apply to matrix
             if (transpose == 0)
             {
-                mtx->intgr[i][j] = (fixed_value >> 16);
-                mtx->frac[i][j] = (fixed_value & 0xFFFF);
+                mathMtxWrite(mtx, i, j, fixed_value);
             }
             else
             {
-                mtx->intgr[j][i] = (fixed_value >> 16);
-                mtx->frac[j][i] = (fixed_value & 0xFFFF);
+                mathMtxWrite(mtx, j, i, fixed_value);
             }
         }
     }
 
     // Fill bottom and right vectors
     for (int i = 0; i < 3; i ++) {
-        mtx->intgr[3][i] = 0;
-        mtx->frac[3][i] = 0; 
-        
-        mtx->intgr[i][3] = 0;
-        mtx->frac[i][3] = 0; 
+        mathMtxWrite(mtx, 3, i, 0);
+        mathMtxWrite(mtx, i, 3, 0);
     }
     
     // Fill bottom right element with 1
-    mtx->intgr[3][3] = 1;
-    mtx->frac[3][3] = 0; 
+    mathMtxWrite(mtx, 3, 3, mathFtoS(1));
 }
 
 /**
@@ -166,36 +171,18 @@ mathMtxPersp
     // Clear matrix
     for (int i = 0; i < 4; i ++) {
         for (int j = 0; j < 4; j ++) {
-            mtx->intgr[i][j] = 0;
-            mtx->frac[i][j] = 0;
+            mathMtxWrite(mtx, i, j, 0);
         }
     }
     
     // Calculate cotangent of field of view in y direction
     float cot = mathFCos(yfov / 2) / mathFSin (yfov / 2);
 
-    s32 result; // Temporary storage for calculate value
-
-    result = mathFtoS(cot * invasp);
-
-    mtx->intgr[0][0] = result >> 16; // Possibly inline this?
-    mtx->frac[0][0] = result & 0xFFFF;
+    // Write matrix values
+    mathMtxWrite(mtx, 0, 0, mathFtoS(cot * invasp)); 
+    mathMtxWrite(mtx, 1, 1, mathFtoS(cot));
+    mathMtxWrite(mtx, 2, 2, mathFtoS((n + f) / (n - f)));
+    mathMtxWrite(mtx, 2, 3, mathFtoS((2 * n * f) / (n - f)));    
+    mathMtxWrite(mtx, 3, 2, mathFtoS(-1));
     
-    result = mathFtoS(cot);
-
-    mtx->intgr[1][1] = result >> 16;
-    mtx->frac[1][1] = result & 0xFFFF;
-
-    result = mathFtoS((n + f) / (n - f));
-
-    mtx->intgr[2][2] = result >> 16;
-    mtx->frac[2][2] = result & 0xFFFF;
-
-    result = mathFtoS((2 * n * f) / (n - f));
-    
-    mtx->intgr[2][3] = result >> 16;
-    mtx->frac[2][3] = result & 0xFFFF;
-    
-    mtx->intgr[3][2] = -1;
-    mtx->frac[3][2] = 0;
 }
