@@ -2,6 +2,9 @@
 
 ## [Unreleased](https://github.com/pseudophpt/pseultra/compare/master...develop)
 
+### Added
+- Matrix operations
+
 ### Fixed
 - Bug involving clamping of diffuse lighting value which would cause incorrect lighting
 

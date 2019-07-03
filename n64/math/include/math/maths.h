@@ -17,8 +17,6 @@
 #ifndef MATH_MATHS_H_GUARD
 #define MATH_MATHS_H_GUARD
 
-#include <ints.h>
-
 #ifdef __asm__
 .extern mathSSin
 #else
