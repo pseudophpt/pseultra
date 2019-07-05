@@ -22,6 +22,7 @@ includes = [
     './include/os/interfaces/pi.h',
     './include/os/interfaces/rsp.h',
     './include/os/interfaces/vi.h',
+    './include/os/interfaces/si.h',
 ]
 
 sources = [
@@ -39,6 +40,7 @@ sources = [
     './src/interfaces/pi.c',
     './src/interfaces/rsp.c',
     './src/interfaces/vi.c',
+    './src/interfaces/si.c',
 ] + includes
 
 oslib_debug = mips_env.GetOption('oslib_debug')

@@ -17,3 +17,4 @@
 #include <os/interfaces/rsp.h>
 #include <os/interfaces/vi.h>
 #include <os/interfaces/pi.h>
+#include <os/interfaces/si.h>
