@@ -5,6 +5,7 @@
 ### Added
 - Matrix operations
 - PopMtx argument to pop multiple matrices at once
+- Controller (SI) interface
 
 ### Fixed
 - Bug involving clamping of diffuse lighting value which would cause incorrect lighting
