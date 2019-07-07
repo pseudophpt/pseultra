@@ -3,6 +3,7 @@ mips_env = Environment()
 import os
 
 cc_prefix = mips_env.GetOption('cc_prefix')
+path = mips_env.GetOption('prefix') + '/bin'
 
 mips_env.Replace(CC = cc_prefix + '-gcc')
 mips_env.Replace(LD = cc_prefix + '-ld')
@@ -16,5 +17,8 @@ mips_env.Replace(CCFLAGS = '-G0 -EB -ffreestanding')
 mips_env.Replace(ASFLAGS = '-G0 -EB -Iinclude -I../../include')
 
 mips_env.Replace(ENV = os.environ)
+mips_env.PrependENVPath('PATH', path)
+#mips_env['ENV']['PATH'] += path
+#mips_env.Replace(ENV = {'PATH' : path})
 
 Export('mips_env')

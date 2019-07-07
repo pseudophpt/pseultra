@@ -30,7 +30,7 @@ ucode_env.Command(target = path + '/src/psm3d.elf', source = path + '/src/psm3d.
 psm3d_obj = ucode_env.Command(
     target = path + '/lib/psm3d.o', 
     source = path + '/src/psm3d.elf', 
-    action = 'mips64-objcopy --only-section .text --only-section .data -S -K uPSM3DTextStart -K uPSM3DTextEnd -K uPSM3DDataStart -K uPSM3DDataEnd $SOURCE $TARGET'
+    action = '$OBJCOPY --only-section .text --only-section .data -S -K uPSM3DTextStart -K uPSM3DTextEnd -K uPSM3DDataStart -K uPSM3DDataEnd $SOURCE $TARGET'
 )
 
 ucode_env.Default(psm3d_obj)
