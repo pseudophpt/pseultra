@@ -1,4 +1,6 @@
-env = Environment ()
+import os
+
+env = Environment (ENV = os.environ)
 
 prefix = env.GetOption('prefix')
 path = Dir('.').abspath

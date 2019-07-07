@@ -7,6 +7,9 @@
 - PopMtx argument to pop multiple matrices at once
 - Controller (SI) interface
 
+### Changed
+- Add PATH environment variable to scons build
+
 ### Fixed
 - Bug involving clamping of diffuse lighting value which would cause incorrect lighting
 
