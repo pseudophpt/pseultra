@@ -1,0 +1,33 @@
+/*
+ * pseultra/n64/ucode/src/psm3d/SetWScale.sx
+ * PSM3D microcode SetWScale function
+ * 
+ * (C) pseudophpt 2019
+ */
+
+//////////////////////////////////////////////////////////////////////////////
+//                                                                          // 
+// SetWScale                                                                // 
+//                                                                          // 
+// Sets the W scale value for vertices                                      // 
+//                                                                          // 
+////////////////////////////////////////////////////////////////////////////// 
+//                                                                          // 
+// FORMAT:                                                                  // 
+//                                                                          // 
+// 0B -- -- -- -- -- WW WW                                                  // 
+//                                                                          // 
+// W: W scale value                                                         // 
+//                                                                          // 
+//////////////////////////////////////////////////////////////////////////////
+
+
+.global OPSetWScale
+
+OPSetWScale:
+
+        lsv wscale, 0, 6, cmd_addr // Load wscale value
+
+    op_ret
+    nop
+

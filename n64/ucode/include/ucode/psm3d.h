@@ -139,6 +139,7 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DLights_t {
 #define UCODE_PSM3D_OP_SET_VP 0x08
 #define UCODE_PSM3D_OP_POP_MTX 0x09
 #define UCODE_PSM3D_OP_LOAD_LIGHTS 0x0A
+#define UCODE_PSM3D_OP_SET_WSCALE 0x0B
 
 /*
  * Operation macros
@@ -177,6 +178,10 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DLights_t {
 #define UCODE_PSM3D_RSPMODE_SHADE 0x1000
 #define UCODE_PSM3D_RSPMODE_SHADE_OFF 0
 #define UCODE_PSM3D_RSPMODE_SHADE_ON 0x1000
+
+#define UCODE_PSM3D_RSPMODE_PERSP 0x2000
+#define UCODE_PSM3D_RSPMODE_PERSP_OFF 0
+#define UCODE_PSM3D_RSPMODE_PERSP_ON 0x2000
 
 #define usPSM3DSetRSPMode(mask, data) \
     {\
@@ -331,6 +336,19 @@ typedef struct __attribute__((packed, aligned(8))) uPSM3DLights_t {
         _FMT(UCODE_PSM3D_OP_SET_VP, 24, 8),\
             \
         _FMT(vp, 0, 24)\
+    }
+
+#define usPSM3DSetWScale(wscale) \
+    {\
+        _FMT(UCODE_PSM3D_OP_SET_WSCALE, 24, 8),\
+            \
+        _FMT(wscale, 0, 16)\
+    }
+#define uPSM3DSetWScale(dl, wscale) \
+    *((dl) ++) = (uPSM3DDispCmd) {\
+        _FMT(UCODE_PSM3D_OP_SET_WSCALE, 24, 8),\
+            \
+        _FMT(wscale, 0, 16)\
     }
 
 #define usPSM3DLoadLights(lights, count) \

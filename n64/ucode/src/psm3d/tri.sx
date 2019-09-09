@@ -25,7 +25,7 @@
 
 // TODO: Separate tri coefficient calculations in diff files
 // vc16-vc17 make up Vtx1 (High), vc18-vc19 make up Vtx2 (Mid), vc20-vc21 make up Vtx3 (Low)
-// Register format: | X | Y | Z | B | R | G | S | T |
+// Register format: | X | Y/W | Z | B | R | G | S | T |
 
 // There has to be a way to improve this, it's so fucking long.
 // Maybe improve sorting code, then perform the calculation cyclically?
@@ -78,10 +78,6 @@ OPTri:
     nop
 
 .NoClip:
-    vmov vc17, 2, vc16, e3 // Load z frac
-    vmov vc19, 2, vc18, e3 
-    vmov vc21, 2, vc20, e3 
-
     vsubc vc9, vc17, vc21, f // Calculate v3-v1
     vsub vc8, vc16, vc20, f
         
@@ -181,10 +177,6 @@ OPTri:
     or r19, $zero, r20
 
 .NoSwapYZ:
-        vmov vc17, 2, vc16, e3 // Load z frac
-        vmov vc19, 2, vc18, e3 
-        vmov vc21, 2, vc20, e3 
-
         ssv vc18, 0, cmd + 0x8, $zero // Store XL, int
         ssv nullconst, 0, cmd + 0xa, $zero // Store XL, frac
         
@@ -193,318 +185,341 @@ OPTri:
         
         ssv vc16, 0, 0x18, cmd_addr // Store XM, int
         ssv nullconst, 0, 0x1a, cmd_addr // Store XM, frac
+ 
+        vmov vc28, 3, vc16, e1 // Load Y coordinates into one vector
+        vmov vc28, 4, vc18, e1 
+        vmov vc28, 5, vc20, e1 
 
-        vsub vc22, vc20, vc18, f
+        vmudh vc28, vc28, v2nconst, v2n_4 // Shift
+
+        ssv vc28, 6, cmd + 0x6, $zero // Store y coords
+        ssv vc28, 8, cmd + 0x4, $zero
+        ssv vc28, 10, cmd + 0x2, $zero
+ 
+        vsub vc22, vc20, vc18, f // Calculate v3-v2
+
+        vmov vc23, 0, vc22, e0 // Move X into corresponding location of 1/dy with Y
+        vmov vc23, 3, vc22, e1
+ 
+        vrcph vc24, 3, vc22, 0
+        vrcpl vc25, 3, nullconst, 0 // Calculate 1 / dx
+        vrcph vc24, 3, nullconst, 0 
         
-    jal CalcTriDxDy // Calculate DxLDy
-    nop
-
-        ssv vc26, 0, 0xc, cmd_addr // Store int
-        ssv vc27, 0, 0xe, cmd_addr // Store frac
-
-        vsub vc22, vc20, vc16, f
-
-    jal CalcTriDxDy // Calculate DxHDy
-    nop
-
-        ssv vc26, 0, 0x14, cmd_addr // Store int
-        ssv vc27, 0, 0x16, cmd_addr // Store frac
-
-        vsub vc22, vc18, vc16, f
+        vrcph vc24, 0, vc22, 1
+        vrcpl vc25, 0, nullconst, 1 // Calculate 1 / dy 
+        vrcph vc24, 0, nullconst, 0 
         
-    jal CalcTriDxDy // Calculate DxMDy
-    nop
-
-        ssv vc26, 0, 0x1c, cmd_addr // Store int
-        ssv vc27, 0, 0x1e, cmd_addr // Store frac
-
-        // TODO: Make it 1 operation
-
-        vmov vc26, 0, vc16, e1 // Load Y coordinates into one vector
-        vmov vc26, 1, vc18, e1 
-        vmov vc26, 2, vc20, e1 
-
-        vmudh vc26, vc26, v2nconst, v2n_4
-
-        vadd vc27, nullconst, v2nconst2, v2n2_16384 // vc27 = 0x3FFF
-        vsub vc27, vc27, v2nconst, v2n_1
-
-        vand vc26, vc26, vc27, f // Mask y coords
-
-        ssv vc26, 0, cmd + 0x6, $zero // Store y coords
-        ssv vc26, 2, cmd + 0x4, $zero
-        ssv vc26, 4, cmd + 0x2, $zero
-
-    addiu r22, 0x20 // Add to command pointer     
-
-    andi r24, rsp_mode, PSM3D_MODE_TEXTURING | PSM3D_MODE_ZBUF // Texturing and z buffer triangles use z coefficients
-    beq r24, r0, .NoCalcZ
-    nop
-
-// Calculates DzDe, DzDx, DzDy in format of z coeffs
-.CalcZ:
-        // The z-buffer code has to calculate dz/dx and dz/dy. This is done by
-        // performing a cross product of the two edges (v2-v1) and (v3-v1) to
-        // obtain a normal vector <a, b, c>, converting that to a plane 
-        // equation, and then taking the partial derivatives -a/c and -b/c 
-        // respectively.
-
-        vsubc vc9, vc17, vc21, f // Calculate v3-v1
-        vsub vc8, vc16, vc20, f
+        vsub vc22, vc20, vc16, f // Calculate v3-v1
+        slv vc22, 0, 0x24, cmd_addr // Temporarily store (x3-x1), (y3-y1)
         
-        vsubc vc11, vc19, vc17, f // Calculate v2-v1
-        vsub vc10, vc18, vc16, f
-        
-        ori r24, r0, 1 // Divide by -z
+        vmov vc23, 1, vc22, e0 // Move X into corresponding location of 1/dy
+        vmov vc23, 4, vc22, e1
 
-    jal CrossProduct
-    nop
+        vrcph vc24, 4, vc22, 0
+        vrcpl vc25, 4, nullconst, 0 // Calculate 1 / dx
+        vrcph vc24, 4, nullconst, 0 
         
-        vmov vc30, 2, vc12, e1 // Store DzDx
-        vmov vc30, 3, vc13, e1
+        vrcph vc24, 1, vc22, 1
+        vrcpl vc25, 1, nullconst, 1 // Calculate 1 / dy
+        vrcph vc24, 1, nullconst, 0 
         
-        vmov vc30, 6, vc12, e3 // Store DzDy
-        vmov vc30, 7, vc13, e3
+        vsub vc22, vc18, vc16, f // Calculate v2-v1
+        slv vc22, 0, 0x20, cmd_addr // Temporarily store (x2-x1), (y2-y1)
+        
+        vmov vc23, 2, vc22, e0 // Move X into corresponding location of 1/dy
+        vmov vc23, 5, vc22, e1
 
-        vmov vc30, 0, vc16, e2
-        vmov vc30, 1, vc17, e2
+        vrcph vc24, 5, vc22, 0
+        vrcpl vc25, 5, nullconst, 0 // Calculate 1 / dx
+        vrcph vc24, 5, nullconst, 0 
+        
+        vrcph vc24, 2, vc22, 1
+        vrcpl vc25, 2, nullconst, 1 // Calculate 1 / dy
+        vrcph vc24, 2, nullconst, 0 
 
-        vsubc vc23, vc17, vc21, f // Calculate v3-v1
-        vsub vc22, vc16, vc20, f
-        
-        vrcph vc24, 1, vc22, 1 // Get 1/(y3-y1) 
-        vrcpl vc25, 1, vc23, 1
-        vrcph vc24, 1, nullconst, 0
-        
-        vmudn vc25, vc25, v2nconst, v2n_2 // Shift left 1 for correct point position 
+        vmudn vc29, vc25, v2nconst, v2n_2 // Shift left 1 for correct point position 
         vmadh vc24, vc24, v2nconst, v2n_2        
         vmadn vc25, nullconst, nullconst, f 
+
+        vmudm vc26, vc23, vc25, f // Calculate Dx/Dy, Dy/Dx
+        vmadh vc26, vc23, vc24, f 
+        vmadn vc27, nullconst, nullconst, f
+
+        ssv vc26, 0, 0xc, cmd_addr // Store DxLDy 
+        ssv vc27, 0, 0xe, cmd_addr 
         
-        vmudl vc26, vc23, vc25, e1 // Calculate DzDe = (z3-z1)/(y3-y1)
-        vmadm vc26, vc22, vc25, e1
-        vmadn vc27, vc23, vc24, e1
-        vmadh vc26, vc22, vc24, e1
+        ssv vc26, 2, 0x14, cmd_addr // Store DxHDy
+        ssv vc27, 2, 0x16, cmd_addr // 
+        
+        ssv vc26, 4, 0x1c, cmd_addr // Store DxMDy
+        ssv vc27, 4, 0x1e, cmd_addr // 
+      
+    andi r24, rsp_mode, PSM3D_MODE_PERSP // First conditional perspective correction code
+    beq r24, r0, .NoPersp1
+    nop
 
-        vmov vc30, 4, vc26, e2
-        vmov vc30, 5, vc27, e2
+.Persp1:
+        vmov vc8, 0, vc16, e3 // Load s3.12 1/w values
+        vmov vc8, 2, vc18, e3 
+        vmov vc8, 4, vc20, e3 
 
-.NoCalcZ:
+        vmov vc16, 1, vc8, e0 // Store in Y position (Y is not used after this)
+        vmov vc18, 1, vc8, e2
+        vmov vc20, 1, vc8, e4
+ 
+        vmudh vc8, vc8, v2nconst, v2n_2 // Shift left once because 1/w is out of 32768
 
+        vmov vc10, 0, vc16, e6 // Load s and t values for multiplication by 1/w
+        vmov vc10, 1, vc16, e7
+        vmov vc10, 2, vc18, e6
+        vmov vc10, 3, vc18, e7
+        vmov vc10, 4, vc20, e6
+        vmov vc10, 5, vc20, e7
+        
+        vmudm vc10, vc10, vc8, q0 // Calculate s/w, t/w
+        vmadn vc11, nullconst, nullconst, f
+
+        vmov vc16, 6, vc10, e0 // Store s/w and t/w values
+        vmov vc16, 7, vc10, e1
+        vmov vc17, 6, vc11, e0
+        vmov vc17, 7, vc11, e1
+        vmov vc18, 6, vc10, e2
+        vmov vc18, 7, vc10, e3
+        vmov vc19, 6, vc11, e2
+        vmov vc19, 7, vc11, e3
+        vmov vc20, 6, vc10, e4
+        vmov vc20, 7, vc10, e5
+        vmov vc21, 6, vc11, e4
+        vmov vc21, 7, vc11, e5
+
+.NoPersp1:
+
+        // We must unpack the shade color for each vertex
+
+        slv vc16, 8, 0x20, r22 // Store vertex formatted Blue/flags/red/green
+        slv vc18, 8, 0x24, r22 
+        luv vc8, 0, 0x20, r22 // Load bytes
+        vmudm vc8, vc8, v2nconst2, v2n2_512 // Shift right 7 to get correct color
+
+        vmov vc16, 3, vc8, e0 // Store vtx0
+        vmov vc16, 4, vc8, e2 
+        vmov vc16, 5, vc8, e3 
+        
+        vmov vc18, 3, vc8, e4 // Store vtx1
+        vmov vc18, 4, vc8, e6 
+        vmov vc18, 5, vc8, e7 
+        
+        slv vc20, 8, 0x20, r22 // Store vertex formatted Blue/flags/red/green
+        luv vc8, 0, 0x20, r22 // Load bytes
+        vmudm vc8, vc8, v2nconst2, v2n2_512 // Shift right 7 to get correct color
+
+        vmov vc20, 3, vc8, e0 // Store vtx2
+        vmov vc20, 4, vc8, e2 
+        vmov vc20, 5, vc8, e3 
+        
+        vsubc vc19, vc19, vc17, f // v2=v2-v1 
+        vsub vc18, vc18, vc16, f
+        
+        vsubc vc21, vc21, vc17, f // v3=v3-v1 
+        vsub vc20, vc20, vc16, f
+        
+        vmudl vc27, vc27, v2nconst2, v2n2_32768 // Shift Dx/Dy right 1 to accomodate for the inverses below
+        vmadm vc26, vc26, v2nconst2, v2n2_32768   
+        vmadn vc27, nullconst, nullconst, f 
+        
+        // Calculate attribute values u, DuDe, DuDx, DuDy
+
+        vmudl vc8, vc21, vc25, e1 // Calculate DuDe = (u3-u1)/(y3-y1)
+        vmadm vc8, vc20, vc25, e1
+        vmadn vc9, vc21, vc24, e1
+        vmadh vc8, vc20, vc24, e1
+        
+        vmudl vc10, vc19, vc25, e2 // Calculate DuDme = (u2-u1)/(y2-y1)
+        vmadm vc10, vc18, vc25, e2 // This is used only for calculation of DuDx/y
+        vmadn vc11, vc19, vc24, e2
+        vmadh vc10, vc18, vc24, e2 // 934
+ 
+        vmudl vc12, vc21, vc25, e4 // Calculate DuDxe = (u3-u1)/(x3-x1)
+        vmadm vc12, vc20, vc25, e4 // This is used only for calculation of DuDx/y
+        vmadn vc13, vc21, vc24, e4
+        vmadh vc12, vc20, vc24, e4
+        
+        vmudl vc14, vc19, vc25, e5 // Calculate DuDxme = (u2-u1)/(x2-x1)
+        vmadm vc14, vc18, vc25, e5 // This is used only for calculation of DuDx/y
+        vmadn vc15, vc19, vc24, e5
+        vmadh vc14, vc18, vc24, e5
+
+.DuDx:
+
+    lh r25, 0x22(cmd_addr) // Load y2-y1
+    bne r25, r0, .BNonZero // If y2-y1 = 0, DuDx = (u2-u1)/(x2-x1) = DuDxme
+    nop
+
+        vor vc28, vc14, vc14, f // DuDx = DuDxme
+        vor vc29, vc15, vc15, f
+
+    b .DuDy
+    nop
+
+.BNonZero:
+    
+    lh r25, 0x26(cmd_addr) // Load y3-y1
+    bne r25, r0, .ENonZero // If y3-y1 = 0, DuDx = (u3-u1)/(x3-x1) = DuDxe
+    nop
+
+        vor vc28, vc12, vc12, f // DuDx = DuDxe
+        vor vc29, vc13, vc13, f
+
+    b .DuDy
+    nop
+
+.ENonZero:
+
+        vsubc vc29, vc11, vc9, f // Calculate DuDme - DuDe
+        vsub vc28, vc10, vc8, f
+
+        vsubc vc31, vc27, vc27, e1 // Calculate DxMDy - DxHDy
+        vsub vc30, vc26, vc26, e1
+
+        vrcph vc30, 0, vc30, 2 // Calculate 1 / (DxMDy - DxHDy)
+        vrcpl vc31, 0, vc31, 2 
+        vrcph vc30, 0, nullconst, f 
+
+        vmudl nullconst, vc29, vc31, e0 // Calculate DuDx = (DuDme - DuDe) / (DxMDy - DxHDy)
+        vmadm nullconst, vc28, vc31, e0
+        vmadn vc29, vc29, vc30, e0
+        vmadh vc28, vc28, vc30, e0
+       
+.DuDy:
+    
+    lh r25, 0x20(cmd_addr) // Load x2-x1
+    bne r25, r0, .ANonZero // If x2-x1 = 0, DuDy = (u2-u1)/(y2-y1) = DuDme
+    nop
+
+        vor vc30, vc10, vc10, f // DuDy = DuDme
+        vor vc31, vc11, vc11, f
+
+    b .UDone
+    nop
+
+.ANonZero:
+    
+    lh r25, 0x24(cmd_addr) // Load x3-x1
+    bne r25, r0, .DNonZero // If x3-x1 = 0, DuDy = (u3-u1)/(y3-y1) = DuDe
+    nop
+
+        vor vc30, vc8, vc8, f // DuDy = DuDe
+        vor vc31, vc9, vc9, f
+
+    b .UDone
+    nop
+
+.DNonZero:
+
+        vsubc vc13, vc13, vc15, f // Calculate DuDxe - DuDxme (Overwrites because its not necessary anymore)
+        vsub vc12, vc12, vc14, f // 
+
+        vsubc vc31, vc27, vc27, e5 // Calculate DyHDx - DyMDx
+        vsub vc30, vc26, vc26, e5
+
+        vrcph vc30, 0, vc30, 4 // Calculate 1 / (DyHDx - DyMDx)
+        vrcpl vc31, 0, vc31, 4 
+        vrcph vc30, 0, nullconst, f 
+
+        vmudl nullconst, vc13, vc31, e0 // Calculate DuDy = (DuDxe - DuDxme) / (DyHDx - DyMDx)
+        vmadm nullconst, vc12, vc31, e0
+        vmadn vc31, vc13, vc30, e0
+        vmadh vc30, vc12, vc30, e0
+        
+.UDone:
+
+        vxor nullconst, nullconst, nullconst, f // nullconst = 0
+ 
+    addiu r22, 0x20 // Add to command pointer     
+    
     andi r24, rsp_mode, PSM3D_MODE_SHADE
     beq r24, r0, .NoShade
     nop
 
 .Shade:
-
-    ori r21, 0x4 // Z-Buffering command
-
-    addiu r23, 0x40 // Command size
-
-        // We must unpack the shade color for each vertex
-
-        slv vc16, 8, 0, r22 // Store vertex formatted Blue/flags/red/green
-        slv vc18, 8, 4, r22 
-        luv vc22, 0, 0, r22 // Load bytes
-        vmudm vc22, vc22, v2nconst2, v2n2_512 // Shift right 7 to get correct color
-
-        vmov vc16, 3, vc22, e0 // Store vtx0
-        vmov vc16, 4, vc22, e2 
-        vmov vc16, 5, vc22, e3 
-        
-        vmov vc18, 3, vc22, e4 // Store vtx1
-        vmov vc18, 4, vc22, e6 
-        vmov vc18, 5, vc22, e7 
-        
-        slv vc20, 8, 0, r22 // Store vertex formatted Blue/flags/red/green
-        luv vc22, 0, 0, r22 // Load bytes
-        vmudm vc22, vc22, v2nconst2, v2n2_512 // Shift right 7 to get correct color
-
-        vmov vc20, 3, vc22, e0 // Store vtx2
-        vmov vc20, 4, vc22, e2 
-        vmov vc20, 5, vc22, e3 
-
-        slv vc16, 8, 0, r22 // Store r, g int 
-        ssv vc16, 6, 4, r22 // Store b int 
-        ssv v2nconst, v2n_128 * 2, 6, r22 // Store a int (256)
-
-        sdv nullconst, 0, 8, r22 // Store rgba frac (0)
-
-        sqv nullconst, 0, 16, r22 // Store rgba frac (0)
-        sqv nullconst, 0, 32, r22 // Store rgba frac (0)
-        sqv nullconst, 0, 48, r22 // Store rgba frac (0)
-        
-    // Possibly combinable? This is such a mess at this point I need to get my registers straight
-
-        vsubc vc9, vc17, vc21, f // Calculate v3-v1
-        vsub vc8, vc16, vc20, f
-        
-        vrcph vc24, 1, vc8, 1 // Get 1/(y3-y1) 
-        vrcpl vc25, 1, vc9, 1
-        vrcph vc24, 1, nullconst, 0
-        
-        vmudn vc25, vc25, v2nconst, v2n_2 // Shift left 1 for correct point position 
-        vmadh vc24, vc24, v2nconst, v2n_2        
-        vmadn vc25, nullconst, nullconst, f 
-        
-        vmudl vc26, vc9, vc25, e1 // Calculate DrgbDe = (c3-c1)/(y3-y1)
-        vmadm vc26, vc8, vc25, e1
-        vmadn vc27, vc9, vc24, e1
-        vmadh vc26, vc8, vc24, e1
-        
-        slv vc26, 8, 0x20, r22 // Store Dr/gDe
-        slv vc27, 8, 0x30, r22
-        
-        ssv vc26, 6, 0x24, r22 // Store DbDe
-        ssv vc27, 6, 0x34, r22
-
-        vsubc vc9, vc17, vc21, f // Calculate v1-v3
-        vsub vc8, vc16, vc20, f
-        
-        vsubc vc11, vc19, vc17, f // Calculate v2-v1
-        vsub vc10, vc18, vc16, f 
-        
-        vmov vc9, 2, vc9, e4  // Move r into z 
-        vmov vc8, 2, vc8, e4 
-        
-        vmov vc11, 2, vc11, e4 
-        vmov vc10, 2, vc10, e4 
-
-        ori r24, r0, 1 // Divide by -z(-s/-t)
-
-    jal CrossProduct
-    nop
-        
-        ssv vc12, 2, 0x08, r22 // Store DrDx
-        ssv vc13, 2, 0x18, r22
-        
-        ssv vc12, 6, 0x28, r22 // Store DrDy
-        ssv vc13, 6, 0x38, r22
-
-        vmov vc9, 2, vc9, e5  // Move g into z 
-        vmov vc8, 2, vc8, e5 
-        
-        vmov vc11, 2, vc11, e5 
-        vmov vc10, 2, vc10, e5 
-
-        ori r24, r0, 1 // Divide by -z(-s/-t)
-
-    jal CrossProduct
-    nop
-        
-        ssv vc12, 2, 0x0A, r22 // Store DgDx
-        ssv vc13, 2, 0x1A, r22
-        
-        ssv vc12, 6, 0x2A, r22 // Store DgDy
-        ssv vc13, 6, 0x3A, r22
-        
-        vmov vc9, 2, vc9, e3  // Move b into z 
-        vmov vc8, 2, vc8, e3 
-        
-        vmov vc11, 2, vc11, e3 
-        vmov vc10, 2, vc10, e3
-
-        ori r24, r0, 1 // Divide by -z(-s/-t)
-
-    jal CrossProduct
-    nop
-        
-        ssv vc12, 2, 0x0C, r22 // Store DbDx
-        ssv vc13, 2, 0x1C, r22
-        
-        ssv vc12, 6, 0x2C, r22 // Store DbDy
-        ssv vc13, 6, 0x3C, r22
- 
-    addiu r22, 0x40 // Add to command pointer
-
-.NoShade:
     
     andi r24, rsp_mode, PSM3D_MODE_TEXTURING
     beq r24, r0, .NoTex
     nop
 
+    ori r21, 0x4 // Shading command
+
+    addiu r23, 0x40 // Add to command length
+ 
+        slv vc28, 8, 0x08, r22 // Store Dr/gDx
+        slv vc29, 8, 0x18, r22
+        
+        slv vc30, 8, 0x28, r22 // Store Dr/gDy
+        slv vc31, 8, 0x38, r22
+
+        slv vc8, 8, 0x20, r22 // Store Dr/gDe
+        slv vc9, 8, 0x30, r22  
+        
+        slv vc16, 8, 0x00, r22 // Store r/g
+        slv vc17, 8, 0x10, r22 
+    
+        ssv vc28, 6, 0x0C, r22 // Store DbDx
+        ssv vc29, 6, 0x1C, r22
+        
+        ssv vc30, 6, 0x2C, r22 // Store DbDy
+        ssv vc31, 6, 0x3C, r22
+        
+        ssv vc8, 6, 0x24, r22 // Store DbDe
+        ssv vc9, 6, 0x34, r22
+        
+        ssv vc16, 6, 0x04, r22 // Store b
+        ssv vc17, 6, 0x14, r22
+
+    addiu r22, 0x40 // Add to command pointer     
+
+.NoShade:
+
 .Tex:
     ori r21, 0x2 // Texturing command
 
-    addiu r23, 0x40
+    addiu r23, 0x40 // Add to command length
 
-        slv vc16, 12, 0, r22 // Store s, t int
-        slv nullconst, 0, 0x10, r22 // Store s, t frac (0)
+        slv vc28, 12, 0x08, r22 // Store Ds/tDx
+        slv vc29, 12, 0x18, r22
+        
+        slv vc30, 12, 0x28, r22 // Store Ds/tDy
+        slv vc31, 12, 0x38, r22
 
-        vsubc vc9, vc17, vc21, f // Calculate v3-v1
-        vsub vc8, vc16, vc20, f
+        slv vc8, 12, 0x20, r22 // Store Ds/tDe
+        slv vc9, 12, 0x30, r22  
         
-        vrcph vc24, 1, vc8, 1 // Get 1/(y3-y1) 
-        vrcpl vc25, 1, vc9, 1
-        vrcph vc24, 1, nullconst, 0
-        
-        vmudn vc25, vc25, v2nconst, v2n_2 // Shift left 1 for correct point position 
-        vmadh vc24, vc24, v2nconst, v2n_2        
-        vmadn vc25, nullconst, nullconst, f 
-        
-        vmudl vc26, vc9, vc25, e1 // Calculate Ds/tDe = (t3-t1)/(y3-y1)
-        vmadm vc26, vc8, vc25, e1
-        vmadn vc27, vc9, vc24, e1
-        vmadh vc26, vc8, vc24, e1
-        
-        slv vc26, 12, 0x20, r22 // Store
-        slv vc27, 12, 0x30, r22 
-        
-        vsubc vc9, vc17, vc21, f // Calculate v1-v3
-        vsub vc8, vc16, vc20, f
-        
-        vsubc vc11, vc19, vc17, f // Calculate v2-v1
-        vsub vc10, vc18, vc16, f 
-        
-        vmudm vc8, vc8, v2nconst2, v2n2_256 // >> 8
-        vmadn vc9, nullconst, nullconst, f
-        
-        vmudm vc10, vc10, v2nconst2, v2n2_256 // >> 8
-        vmadn vc11, nullconst, nullconst, f
-        
-        vmov vc9, 2, vc9, e6  // Move s into z 
-        vmov vc8, 2, vc8, e6 
-        
-        vmov vc11, 2, vc11, e6 
-        vmov vc10, 2, vc10, e6 
-
-        ori r24, r0, 1 // Divide by -z(-s/-t)
-
-    jal CrossProduct
-    nop
-        
-        ssv vc12, 2, 0x08, r22 // Store DsDx
-        ssv vc13, 2, 0x18, r22
-        
-        ssv vc12, 6, 0x28, r22 // Store DsDy
-        ssv vc13, 6, 0x38, r22
+        slv vc16, 12, 0x00, r22 // Store s/t
+        slv vc17, 12, 0x10, r22 
     
-        vmov vc9, 2, vc9, e7 // Move t into z 
-        vmov vc8, 2, vc8, e7
-        
-        vmov vc11, 2, vc11, e7 
-        vmov vc10, 2, vc10, e7 
-
-    jal CrossProduct
+    andi r24, rsp_mode, PSM3D_MODE_PERSP // First conditional perspective correction code
+    beq r24, r0, .NoPersp2
     nop
+
+.Persp2:
         
-        ssv vc12, 2, 0x0A, r22 // Store DtDx
-        ssv vc13, 2, 0x1A, r22
+        ssv vc16, 2, 0x04, r22 // Store w
+        ssv vc17, 2, 0x14, r22
         
-        ssv vc12, 6, 0x2A, r22 // Store DtDy
-        ssv vc13, 6, 0x3A, r22
-      
-        ssv vc30, 0, 0x04, r22
-        ssv vc30, 1, 0x14, r22
-        ssv vc30, 2, 0x0C, r22
-        ssv vc30, 3, 0x1C, r22
-        ssv vc30, 4, 0x24, r22
-        ssv vc30, 5, 0x34, r22
-        ssv vc30, 6, 0x2C, r22
-        ssv vc30, 7, 0x3C, r22
-    
-    addiu r22, 0x40 // Add to command pointer
+        ssv vc28, 2, 0x0C, r22 // Store DwDx
+        ssv vc29, 2, 0x1C, r22
+        
+        ssv vc30, 2, 0x2C, r22 // Store DwDy
+        ssv vc31, 2, 0x3C, r22
+        
+        ssv vc8, 2, 0x24, r22 // Store DwDe
+        ssv vc9, 2, 0x34, r22
+
+.NoPersp2:
+
+    addiu r22, 0x40 // Add to command pointer     
 
 .NoTex:
+
     andi r24, rsp_mode, PSM3D_MODE_ZBUF
     beq r24, r0, .NoZBuffer
     nop
@@ -514,11 +529,22 @@ OPTri:
 
     addiu r23, 0x10 // Command size
 
-        sqv vc30, 0, 0, r22 // Store calculated Z coeffs        
-
+        ssv vc16, 4, 0x00, r22 // Store Z
+        ssv vc17, 4, 0x02, r22 
+        
+        ssv vc28, 4, 0x04, r22 // Store DzDx
+        ssv vc29, 4, 0x06, r22
+        
+        ssv vc30, 4, 0x0C, r22 // Store DzDy
+        ssv vc31, 4, 0x0E, r22
+        
+        ssv vc8, 4, 0x08, r22 // Store DzDe
+        ssv vc9, 4, 0x0A, r22
+        
     addiu r22, 0x10 // Add to command pointer
 
 .NoZBuffer:
+
         lw r17, (%lo(cmd) + 0x14)($zero) // Load DxHDy
         lw r18, (%lo(cmd) + 0x1c)($zero) // Load DxMDy
 
@@ -538,22 +564,4 @@ OPTri:
     move r25, r23 // Get length
 
     op_ret // Return operation
-    nop
-
-// Little subroutine to calculate Dx/Dy
-
-CalcTriDxDy:
-        vrcph vc24, 1, vc22, 1
-        vrcpl vc25, 1, nullconst, 1 // Calculate 1 / dy (dx stays in this register)
-        vrcph vc24, 1, nullconst, 0 
-
-        vmudn vc29, vc25, v2nconst, v2n_2 // Shift left 1 for correct point position 
-        vmadh vc28, vc24, v2nconst, v2n_2        
-        vmadn vc29, nullconst, nullconst, f 
-
-        vmudm vc26, vc22, vc29, h1 // Calculate DxLDy
-        vmadh vc26, vc22, vc28, h1 
-        vmadn vc27, nullconst, nullconst, f
-
-    jr $ra
     nop

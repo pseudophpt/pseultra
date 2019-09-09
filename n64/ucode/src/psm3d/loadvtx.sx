@@ -24,7 +24,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 // Stored vertex format:
-// X, Y, Zi, Zf, F, RG, S, T
+// X, Y, Z, W, F, RG, S, T
 // F: Flags
 // BBBBBBBB --xyzXYZ 
 // x: outside of negative x clip space
@@ -86,6 +86,10 @@ OPLoadVtx:
         sdv vc17, 0, cmd + 32, $zero
         ldv vc17, 8, cmd + 32, $zero
 
+        vmudl vc17, vc17, wscale, e0 // Multiply by w scale value 
+        vmadm vc16, vc16, wscale, e0
+        vmadn vc17, nullconst, nullconst, f
+
     // Eye coordinates for this vertex have been calculated, now they can be used in the lighting proces (if necessary)
 
     andi r24, rsp_mode, PSM3D_MODE_LIGHT
@@ -118,6 +122,8 @@ OPLoadVtx:
 
     or r19, r0, r0 // Current light
     ori r20, r0, %lo(point_lights) // Current light pointer
+
+
 
 .DiffuseLightLoop:
 
@@ -218,6 +224,11 @@ OPLoadVtx:
         vrcph vc18, 3, vc14, 3 // Get 1/w 
         vrcpl vc19, 3, vc15, 3
         vrcph vc18, 3, vc14, 3
+        
+        vmudn vc17, vc19, v2nconst2, v2n2_16384 // Shift 1/w left 8 for stored s1.15 1/w value
+        vmadh vc16, vc18, v2nconst2, v2n2_16384
+        
+        ssv vc16, 6, 6, r17 // Store w into vertex cache
 
         vmudn vc17, vc19, v2nconst, v2n_2 // Shift left 1 for correct 1/w value
         vmadh vc16, vc18, v2nconst, v2n_2
@@ -230,12 +241,10 @@ OPLoadVtx:
       
         vadd vc22, vc18, v2nconst, v2n_1 // Add 1 to z integer part, range is now [0, 2]
 
-        vmudn vc23, vc19, v2nconst2, v2n2_256 // Shift z left 1 byte for max precision with floating point 
-        vmadh vc22, vc22, v2nconst2, v2n2_256        
-        vmadn vc23, nullconst, nullconst, f 
+        vmudn vc23, vc19, v2nconst2, v2n2_16384 // Change range to [0, 32768]
+        vmadh vc22, vc22, v2nconst2, v2n2_16384        
         
-        ssv vc22, 4, 4, r17 // Store (zi, zf) into vertex cache
-        ssv vc23, 4, 6, r17
+        ssv vc22, 4, 4, r17 // Store Z into vertex cache
         
         vmudn vc17, vc19, vpsize, f // Calculate device coordinates by apply viewport transformations
         vmadh vc16, vc18, vpsize, f 

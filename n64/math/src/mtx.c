@@ -159,13 +159,14 @@ mathMtxRot
  * @param[in] invasp Inverse aspect ratio (height / width) of screen
  * @param[in] n Distance from camera to near clipping plane
  * @param[in] f Distance from camera to far clipping plane
+ * @return W scale value
  * @date 2 Jul 2019
  * @author pseudophpt
  *
  * This function constructs a fixed point perspective projection matrix from given values. It is automatically non-transposed, as all projection matrices are at the base 
  *
  */
-void
+u16
 mathMtxPersp
 (MMtx *mtx, float yfov, float invasp, float n, float f) {
     // Clear matrix
@@ -184,5 +185,8 @@ mathMtxPersp
     mathMtxWrite(mtx, 2, 2, mathFtoS((n + f) / (n - f)));
     mathMtxWrite(mtx, 2, 3, mathFtoS((2 * n * f) / (n - f)));    
     mathMtxWrite(mtx, 3, 2, mathFtoS(-1));
-    
+
+    u16 w_scale = mathFtoS(2 / (n + f)) & 0xFFFF; // W scale value to normalize W = 1.0 halfway between near and far planes
+
+    return w_scale;
 }

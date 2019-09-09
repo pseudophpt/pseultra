@@ -44,7 +44,7 @@ extern void mathMtxRot (MMtx *mtx, float x, float y, float z, float theta, int t
 #ifdef __asm__
 .extern mathMtxPersp
 #else
-extern void mathMtxPersp (MMtx *mtx, float yfov, float invasp, float n, float f);
+extern u16 mathMtxPersp (MMtx *mtx, float yfov, float invasp, float n, float f);
 #endif
 
 #endif

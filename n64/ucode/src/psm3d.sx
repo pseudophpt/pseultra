@@ -44,6 +44,7 @@
 #define nullconst vc2 // Contains 0 
 #define vpsize vc3 // Contains width/2, height/2, 1
 #define vpoff vc4 // Contains x, y, 0
+#define wscale vc5 // Contains W scale value as unsigned fraction in element 0
 
 #define v2n_1 e0
 #define v2n_2 e1
@@ -73,6 +74,7 @@
 #define PSM3D_MODE_ZBUF 0x400 // Z buffering tri calculations enabled 
 #define PSM3D_MODE_LIGHT 0x800 // Lighting enabled (Uses shading values as normals, not colors) 
 #define PSM3D_MODE_SHADE 0x1000 // Shading enabled 
+#define PSM3D_MODE_PERSP 0x2000 // Perspective correction enabled 
 
 #define rsp_mode r4
 
@@ -228,6 +230,7 @@ uPSM3DTextStart:
 #include "psm3d/setvp.sx"
 #include "psm3d/popmtx.sx"
 #include "psm3d/loadlights.sx"
+#include "psm3d/setwscale.sx"
 
 #undef dl_dram_ptr
 
@@ -286,6 +289,7 @@ jump_tbl:
 .word OPSetVp
 .word OPPopMtx
 .word OPLoadLights
+.word OPSetWScale
 
 .align 4
 
